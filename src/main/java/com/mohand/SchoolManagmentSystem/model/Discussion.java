@@ -7,15 +7,11 @@ import java.util.List;
 
 @NoArgsConstructor
 @Entity
-public class Teacher {
+public class Discussion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String first_name;
-    private String last_name;
-    private String email;
-    
-    @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Course> courses;
+    @OneToMany(mappedBy = "discussion", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments;
 }
