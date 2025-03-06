@@ -2,10 +2,12 @@ package com.mohand.SchoolManagmentSystem.service.student;
 
 import com.mohand.SchoolManagmentSystem.exception.student.account.AccountNotFoundException;
 import com.mohand.SchoolManagmentSystem.exception.student.password.ChangePasswordException;
+import com.mohand.SchoolManagmentSystem.exception.student.password.WeakPasswordException;
 import com.mohand.SchoolManagmentSystem.exception.student.password.WrongPasswordException;
 import com.mohand.SchoolManagmentSystem.model.Student;
 import com.mohand.SchoolManagmentSystem.repository.StudentRepository;
 import com.mohand.SchoolManagmentSystem.request.ChangePasswordRequest;
+import com.mohand.SchoolManagmentSystem.util.Util;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -52,6 +54,10 @@ public class StudentService implements IStudentService {
 
         if (!request.newPassword().equals(request.repeatPassword())) {
             throw new ChangePasswordException("Passwords are not the same");
+        }
+
+        if (!Util.isValidPassword(request.newPassword())) {
+            throw new WeakPasswordException("Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.");
         }
 
         student.setPassword(passwordEncoder.encode(request.newPassword()));

@@ -3,6 +3,7 @@ package com.mohand.SchoolManagmentSystem.service;
 import com.mohand.SchoolManagmentSystem.exception.student.account.AccountAlreadyExistException;
 import com.mohand.SchoolManagmentSystem.exception.student.account.AccountNotEnabledException;
 import com.mohand.SchoolManagmentSystem.exception.student.account.AccountNotFoundException;
+import com.mohand.SchoolManagmentSystem.exception.student.password.WeakPasswordException;
 import com.mohand.SchoolManagmentSystem.exception.student.verificationCode.StudentAlreadyVerifiedException;
 import com.mohand.SchoolManagmentSystem.exception.student.verificationCode.VerificationCodeExpiredException;
 import com.mohand.SchoolManagmentSystem.exception.student.verificationCode.VerificationCodeInvalidException;
@@ -11,6 +12,7 @@ import com.mohand.SchoolManagmentSystem.request.LogInStudentRequest;
 import com.mohand.SchoolManagmentSystem.request.RegisterStudentRequest;
 import com.mohand.SchoolManagmentSystem.request.VerifyStudentRequest;
 import com.mohand.SchoolManagmentSystem.service.student.IStudentService;
+import com.mohand.SchoolManagmentSystem.util.Util;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,6 +41,10 @@ public class AuthenticationService {
 
         if (studentService.checkIfStudentExist(input.getEmail())) {
             throw new AccountAlreadyExistException("The is already an account with the email " + input.getEmail());
+        }
+
+        if (!Util.isValidPassword(input.getPassword())) {
+            throw new WeakPasswordException("Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.");
         }
 
         Student student = new Student(input.getFirstName(), input.getLastName(), input.getEmail(), passwordEncoder.encode(input.getPassword()));

@@ -6,6 +6,7 @@ import com.mohand.SchoolManagmentSystem.exception.student.account.AccountNotEnab
 import com.mohand.SchoolManagmentSystem.exception.student.account.AccountNotFoundException;
 import com.mohand.SchoolManagmentSystem.exception.student.password.ChangePasswordException;
 import com.mohand.SchoolManagmentSystem.exception.student.password.PasswordException;
+import com.mohand.SchoolManagmentSystem.exception.student.password.WeakPasswordException;
 import com.mohand.SchoolManagmentSystem.exception.student.password.WrongPasswordException;
 import com.mohand.SchoolManagmentSystem.exception.student.verificationCode.StudentAlreadyVerifiedException;
 import com.mohand.SchoolManagmentSystem.exception.student.verificationCode.VerificationCodeException;
@@ -71,6 +72,10 @@ public class GlobalExceptionHandler {
         }
 
         if (exception instanceof ChangePasswordException) {
+            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+        }
+
+        if (exception instanceof WeakPasswordException) {
             errorDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
         }
 
