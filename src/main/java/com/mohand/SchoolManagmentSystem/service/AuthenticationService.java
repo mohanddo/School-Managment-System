@@ -1,8 +1,8 @@
 package com.mohand.SchoolManagmentSystem.service;
 
-import com.mohand.SchoolManagmentSystem.exception.student.AccountAlreadyExistException;
-import com.mohand.SchoolManagmentSystem.exception.student.StudentNotEnabledException;
-import com.mohand.SchoolManagmentSystem.exception.student.StudentNotFoundException;
+import com.mohand.SchoolManagmentSystem.exception.student.account.AccountAlreadyExistException;
+import com.mohand.SchoolManagmentSystem.exception.student.account.AccountNotEnabledException;
+import com.mohand.SchoolManagmentSystem.exception.student.account.AccountNotFoundException;
 import com.mohand.SchoolManagmentSystem.exception.student.verificationCode.StudentAlreadyVerifiedException;
 import com.mohand.SchoolManagmentSystem.exception.student.verificationCode.VerificationCodeExpiredException;
 import com.mohand.SchoolManagmentSystem.exception.student.verificationCode.VerificationCodeInvalidException;
@@ -13,7 +13,6 @@ import com.mohand.SchoolManagmentSystem.request.VerifyStudentRequest;
 import com.mohand.SchoolManagmentSystem.service.student.IStudentService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,7 +21,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Random;
-import java.util.logging.Logger;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +34,7 @@ public class AuthenticationService {
     @Value("${verification.code.expiration-time}")
     private Long verificationCodeExpirationTime;
 
-    public Student signup(RegisterStudentRequest input) throws AccountAlreadyExistException {
+    public Student signup(RegisterStudentRequest input) {
 
 
         if (studentService.checkIfStudentExist(input.getEmail())) {
@@ -51,11 +49,11 @@ public class AuthenticationService {
         return studentService.saveStudent(student);
     }
 
-    public Student authenticate(LogInStudentRequest request) throws StudentNotFoundException, StudentNotEnabledException {
+    public Student authenticate(LogInStudentRequest request) {
         Student student = studentService.getStudentByEmail(request.getEmail());
 
         if (!student.isEnabled()) {
-            throw new StudentNotEnabledException("Student with email: " + request.getEmail() + " is not enabled");
+            throw new AccountNotEnabledException("Student with email: " + request.getEmail() + " is not enabled");
         }
 
         authenticationManager.authenticate(
@@ -68,7 +66,7 @@ public class AuthenticationService {
         return student;
     }
 
-    public void verifyStudent(VerifyStudentRequest request) throws StudentNotFoundException, VerificationCodeExpiredException, VerificationCodeInvalidException {
+    public void verifyStudent(VerifyStudentRequest request) {
         Student student = studentService.getStudentByEmail(request.getEmail());
         if (student.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
             throw new VerificationCodeExpiredException("Verification code has expired");
@@ -84,7 +82,7 @@ public class AuthenticationService {
         }
     }
 
-    public void resendVerificationCode(String email) throws StudentNotFoundException, StudentAlreadyVerifiedException {
+    public void resendVerificationCode(String email) {
         Student student = studentService.getStudentByEmail(email);
         if (student.isEnabled()) {
             throw new StudentAlreadyVerifiedException("Student with email " + email + " is already verified");
@@ -112,7 +110,7 @@ public class AuthenticationService {
                 + "</html>";
 
         try {
-            emailService.sendVerificationEmail(student.getEmail(), subject, htmlMessage);
+            emailService.sendEmail(student.getEmail(), subject, htmlMessage);
         } catch (MessagingException e) {
             e.printStackTrace();
         }

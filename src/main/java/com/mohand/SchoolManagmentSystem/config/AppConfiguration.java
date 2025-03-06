@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 @RequiredArgsConstructor
@@ -24,10 +25,23 @@ public class AppConfiguration {
         @Value("${base.url}")
         private String baseUrl;
 
+        @Value("${chargily.pay.test.mode.secret.key}")
+        private String chargilyPayTestModeSecretKey;
+
         @Bean
         public ModelMapper modelMapper() {
             return new ModelMapper();
         }
+
+
+    @Bean
+    public WebClient webClient() {
+        return WebClient.builder()
+                .baseUrl("https://pay.chargily.net/test/api/v2/checkouts")
+                .defaultHeader("Content-Type", "application/json")
+                .defaultHeader("Authorization", "Bearer " + chargilyPayTestModeSecretKey)
+                .build();
+    }
 
     private final StudentRepository studentRepository;
 

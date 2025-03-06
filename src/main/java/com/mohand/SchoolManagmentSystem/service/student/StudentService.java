@@ -1,22 +1,29 @@
 package com.mohand.SchoolManagmentSystem.service.student;
 
-import com.mohand.SchoolManagmentSystem.exception.student.StudentNotFoundException;
+import com.mohand.SchoolManagmentSystem.exception.student.account.AccountNotFoundException;
+import com.mohand.SchoolManagmentSystem.exception.student.password.ChangePasswordException;
+import com.mohand.SchoolManagmentSystem.exception.student.password.WrongPasswordException;
 import com.mohand.SchoolManagmentSystem.model.Student;
 import com.mohand.SchoolManagmentSystem.repository.StudentRepository;
+import com.mohand.SchoolManagmentSystem.request.ChangePasswordRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class StudentService implements IStudentService {
     private final StudentRepository studentRepository;
-
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @Override
-    public Student getStudentByEmail(String email) throws StudentNotFoundException {
-        return studentRepository.findByEmail(email).orElseThrow(() -> new StudentNotFoundException("No student with this email: " + email));
+    public Student getStudentByEmail(String email) {
+        return studentRepository.findByEmail(email).orElseThrow(() -> new AccountNotFoundException("No student with this email: " + email));
     }
 
     @Override
@@ -32,5 +39,23 @@ public class StudentService implements IStudentService {
     @Override
     public List<Student> getAllStudents() {
         return studentRepository.findAll();
+    }
+
+    @Override
+    public void changePassword(ChangePasswordRequest request, Principal connectedStudent) {
+        var principal = ((UsernamePasswordAuthenticationToken) connectedStudent).getPrincipal();
+        var student = ( Student ) principal;
+
+        if (!passwordEncoder.matches(request.currentPassword(), student.getPassword())) {
+            throw new WrongPasswordException("Wrong Password");
+        }
+
+        if (!request.newPassword().equals(request.repeatPassword())) {
+            throw new ChangePasswordException("Passwords are not the same");
+        }
+
+        student.setPassword(passwordEncoder.encode(request.newPassword()));
+
+        studentRepository.save(student);
     }
 }

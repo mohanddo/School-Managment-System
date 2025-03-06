@@ -23,7 +23,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @RequiredArgsConstructor
 public class SecurityConfiguration {
     private final AuthenticationProvider authenticationProvider;
-//    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtFilterConfig jwtFilterConfig;
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
@@ -33,7 +32,7 @@ public class SecurityConfiguration {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize ->
-                        authorize.requestMatchers("/api/v1/auth/**", "/api/v1/blob/**").permitAll()
+                        authorize.requestMatchers("/api/v1/auth/**", "/api/v1/forgotPassword/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

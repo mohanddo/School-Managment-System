@@ -73,6 +73,9 @@ public class Student implements UserDetails {
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FinishedResource> finishedResources;
 
+    @OneToOne(mappedBy = "student")
+    private ForgotPassword forgotPassword;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();
