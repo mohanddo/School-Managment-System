@@ -44,7 +44,7 @@ public class AuthenticationService {
         }
 
         if (!Util.isValidPassword(input.getPassword())) {
-            throw new WeakPasswordException("Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.");
+            throw new WeakPasswordException();
         }
 
         Student student = new Student(input.getFirstName(), input.getLastName(), input.getEmail(), passwordEncoder.encode(input.getPassword()));
