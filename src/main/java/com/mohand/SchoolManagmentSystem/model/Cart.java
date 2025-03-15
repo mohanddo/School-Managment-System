@@ -1,15 +1,12 @@
 package com.mohand.SchoolManagmentSystem.model;
 
-import com.mohand.SchoolManagmentSystem.enums.Review;
 import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-
 @NoArgsConstructor
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"student_id", "comment_id"}))
-public class UpVote {
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = {"student_id", "course_id"}) } )
+public class Cart {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -19,6 +16,6 @@ public class UpVote {
     private Student student;
 
     @ManyToOne
-    @JoinColumn(name = "comment_id")
-    private Comment comment;
+    @JoinColumn(name = "course_id")
+    private Course course;
 }

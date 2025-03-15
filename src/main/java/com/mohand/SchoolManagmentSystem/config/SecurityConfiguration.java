@@ -41,7 +41,8 @@ public class SecurityConfiguration {
                                         "/invalidLink.html",
                                         "/linkExpired.html",
                                         "/passwordChangedSuccessfully.html",
-                                        "/api/v1/password/updatePassword"
+                                        "/api/v1/password/updatePassword",
+                                        "/api/v1/payments/checkout"
                                 ).permitAll()
                                 .anyRequest().authenticated()
                 )

@@ -23,7 +23,7 @@ public class Resource {
     @OneToMany(mappedBy = "resource", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FinishedResource> finishedResources;
 
-    @OneToOne
-    @JoinColumn(name = "discussion_id")
-    private Discussion discussion;
+
+    @OneToMany(mappedBy = "resource", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments;
 }

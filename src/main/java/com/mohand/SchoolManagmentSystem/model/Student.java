@@ -32,6 +32,8 @@ public class Student implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    private String profilePicDownloadUrl;
+
     public Student(String first_name, String last_name, String email, String password) {
         this.first_name = first_name;
         this.last_name = last_name;
@@ -66,14 +68,30 @@ public class Student implements UserDetails {
 
     @JsonIgnore
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UpVote> upVotes;
+    private List<UpVoteComment> upVoteComments;
 
     @JsonIgnore
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FinishedResource> finishedResources;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FavoriteCourse> favoriteCourses;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "student")
+    private List<Order> orders;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "student")
+    private List<Purchase> purchases;
+
     @OneToOne(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private PasswordResetToken passwordResetToken;
+
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AnnouncementComment> announcementComments;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
