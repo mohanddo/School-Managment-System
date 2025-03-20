@@ -1,14 +1,20 @@
 package com.mohand.SchoolManagmentSystem.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.mohand.SchoolManagmentSystem.enums.PricingModel;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.List;
 
-@NoArgsConstructor
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder(builderMethodName = "hiddenBuilder")
 public class Course {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -19,12 +25,24 @@ public class Course {
     @Column(nullable = false)
     private String description;
 
-    @Column(nullable = false)
     private String imageUrl;
 
     private String introductionVideoUrl;
 
-    private long numberOfParticipants;
+    @Column(nullable = false)
+    private long numberOfStudents;
+
+    @Column(nullable = false)
+    private double price;
+
+    @Column(nullable = false)
+    private int discountPercentage;
+
+    private LocalDate discountExpirationDate;
+
+    @Column(nullable = false)
+    private PricingModel pricingModel;
+
 
     @ManyToOne
     @JoinColumn(name = "teacher_id")
@@ -46,6 +64,17 @@ public class Course {
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FavoriteCourse> favoriteCourses;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "course")
     private List<OrderItem> orderItems;
+
+    public static CourseBuilder builder(String title, String description, double price, PricingModel pricingModel, Teacher teacher) {
+        return hiddenBuilder()
+                .title(title)
+                .description(description)
+                .teacher(teacher)
+                .numberOfStudents(0)
+                .price(price)
+                .pricingModel(pricingModel)
+                .discountPercentage(0);
+    }
 }

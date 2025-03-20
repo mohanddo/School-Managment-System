@@ -1,8 +1,7 @@
 package com.mohand.SchoolManagmentSystem.controller;
 
-import com.mohand.SchoolManagmentSystem.model.Student;
-import com.mohand.SchoolManagmentSystem.request.ChangePasswordRequest;
-import com.mohand.SchoolManagmentSystem.request.ResetPasswordRequest;
+import com.mohand.SchoolManagmentSystem.request.password.ChangePasswordRequest;
+import com.mohand.SchoolManagmentSystem.request.password.ResetPasswordRequest;
 import com.mohand.SchoolManagmentSystem.service.password.PasswordService;
 import com.mohand.SchoolManagmentSystem.service.student.IStudentService;
 import lombok.RequiredArgsConstructor;

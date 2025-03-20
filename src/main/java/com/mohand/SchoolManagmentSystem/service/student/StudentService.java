@@ -1,20 +1,19 @@
 package com.mohand.SchoolManagmentSystem.service.student;
 
-import com.mohand.SchoolManagmentSystem.exception.student.account.AccountNotFoundException;
-import com.mohand.SchoolManagmentSystem.exception.student.password.ChangePasswordException;
-import com.mohand.SchoolManagmentSystem.exception.student.password.WeakPasswordException;
-import com.mohand.SchoolManagmentSystem.exception.student.password.WrongPasswordException;
+import com.mohand.SchoolManagmentSystem.exception.user.account.AccountNotFoundException;
+import com.mohand.SchoolManagmentSystem.exception.user.password.ChangePasswordException;
+import com.mohand.SchoolManagmentSystem.exception.user.password.WeakPasswordException;
+import com.mohand.SchoolManagmentSystem.exception.user.password.WrongPasswordException;
 import com.mohand.SchoolManagmentSystem.model.PasswordResetToken;
 import com.mohand.SchoolManagmentSystem.model.Student;
 import com.mohand.SchoolManagmentSystem.repository.PasswordResetTokenRepository;
 import com.mohand.SchoolManagmentSystem.repository.StudentRepository;
-import com.mohand.SchoolManagmentSystem.request.ChangePasswordRequest;
+import com.mohand.SchoolManagmentSystem.request.password.ChangePasswordRequest;
 import com.mohand.SchoolManagmentSystem.util.Util;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;

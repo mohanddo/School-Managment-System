@@ -1,11 +1,13 @@
 package com.mohand.SchoolManagmentSystem.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.mohand.SchoolManagmentSystem.enums.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -15,39 +17,11 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-public class Student implements UserDetails {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Student extends User {
 
-    @Column(nullable = false)
-    private String first_name;
-
-    @Column(nullable = false)
-    private String last_name;
-
-    @Column(nullable = false, unique = true)
-    private String email;
-
-    @Column(nullable = false)
-    private String password;
-
-    private String profilePicDownloadUrl;
-
-    public Student(String first_name, String last_name, String email, String password) {
-        this.first_name = first_name;
-        this.last_name = last_name;
-        this.email = email;
-        this.password = password;
+    public Student(String firstName, String lastName, String email, String password, String verificationCode, LocalDateTime verificationCodeExpiresAt) {
+        super(firstName, lastName, email, password, verificationCode, verificationCodeExpiresAt);
     }
-
-
-    @Column(nullable = false)
-    private boolean enabled;
-
-    private String verificationCode;
-
-    private LocalDateTime verificationCodeExpiresAt;
 
     @JsonIgnore
     @ManyToMany
@@ -95,36 +69,8 @@ public class Student implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    @Override
-    public String getUsername() {
-        return email;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
+        return List.of(
+                new SimpleGrantedAuthority(Role.ROLE_STUDENT.getValue())
+        );
     }
 }

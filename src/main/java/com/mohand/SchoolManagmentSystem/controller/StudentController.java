@@ -23,11 +23,11 @@ public class StudentController {
     private final StudentService studentService;
 
     @GetMapping("/me")
-    public ResponseEntity<?> authenticatedUser() {
+    public ResponseEntity<?> authenticatedUser(Authentication authentication) {
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            Student student = (Student) authentication.getPrincipal();
-            return ResponseEntity.ok(student);
+            System.out.println(authentication);
+//            Student student = (Student) authentication.getPrincipal();
+            return ResponseEntity.ok(null);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }

@@ -1,6 +1,7 @@
 package com.mohand.SchoolManagmentSystem.config;
 
 import com.mohand.SchoolManagmentSystem.repository.StudentRepository;
+import com.mohand.SchoolManagmentSystem.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.modelmapper.ModelMapper;
@@ -43,12 +44,12 @@ public class AppConfiguration {
                 .build();
     }
 
-    private final StudentRepository studentRepository;
+    private final UserRepository userRepository;
 
     @Bean
     UserDetailsService userDetailsService() {
-        return username -> studentRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User with email " + username + "not found"));
+        return username -> userRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
     @Bean

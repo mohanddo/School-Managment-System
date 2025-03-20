@@ -1,17 +1,17 @@
 package com.mohand.SchoolManagmentSystem.controller;
 
-import com.mohand.SchoolManagmentSystem.exception.student.account.AccountAlreadyExistException;
-import com.mohand.SchoolManagmentSystem.exception.student.account.AccountException;
-import com.mohand.SchoolManagmentSystem.exception.student.account.AccountNotEnabledException;
-import com.mohand.SchoolManagmentSystem.exception.student.account.AccountNotFoundException;
-import com.mohand.SchoolManagmentSystem.exception.student.password.ChangePasswordException;
-import com.mohand.SchoolManagmentSystem.exception.student.password.PasswordException;
-import com.mohand.SchoolManagmentSystem.exception.student.password.WeakPasswordException;
-import com.mohand.SchoolManagmentSystem.exception.student.password.WrongPasswordException;
-import com.mohand.SchoolManagmentSystem.exception.student.verificationCode.StudentAlreadyVerifiedException;
-import com.mohand.SchoolManagmentSystem.exception.student.verificationCode.VerificationCodeException;
-import com.mohand.SchoolManagmentSystem.exception.student.verificationCode.VerificationCodeExpiredException;
-import com.mohand.SchoolManagmentSystem.exception.student.verificationCode.VerificationCodeInvalidException;
+import com.mohand.SchoolManagmentSystem.exception.user.account.AccountAlreadyExistException;
+import com.mohand.SchoolManagmentSystem.exception.user.account.AccountException;
+import com.mohand.SchoolManagmentSystem.exception.user.account.AccountNotEnabledException;
+import com.mohand.SchoolManagmentSystem.exception.user.account.AccountNotFoundException;
+import com.mohand.SchoolManagmentSystem.exception.user.password.ChangePasswordException;
+import com.mohand.SchoolManagmentSystem.exception.user.password.PasswordException;
+import com.mohand.SchoolManagmentSystem.exception.user.password.WeakPasswordException;
+import com.mohand.SchoolManagmentSystem.exception.user.password.WrongPasswordException;
+import com.mohand.SchoolManagmentSystem.exception.user.verificationCode.AccountAlreadyVerifiedException;
+import com.mohand.SchoolManagmentSystem.exception.user.verificationCode.VerificationCodeException;
+import com.mohand.SchoolManagmentSystem.exception.user.verificationCode.VerificationCodeExpiredException;
+import com.mohand.SchoolManagmentSystem.exception.user.verificationCode.VerificationCodeInvalidException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
 
         exception.printStackTrace();
 
-        if (exception instanceof StudentAlreadyVerifiedException || exception instanceof VerificationCodeInvalidException) {
+        if (exception instanceof AccountAlreadyVerifiedException || exception instanceof VerificationCodeInvalidException) {
             errorDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
         }
 

@@ -1,11 +1,11 @@
 package com.mohand.SchoolManagmentSystem.service.password;
 
-import com.mohand.SchoolManagmentSystem.exception.student.password.ChangePasswordException;
-import com.mohand.SchoolManagmentSystem.exception.student.password.WeakPasswordException;
+import com.mohand.SchoolManagmentSystem.exception.user.password.ChangePasswordException;
+import com.mohand.SchoolManagmentSystem.exception.user.password.WeakPasswordException;
 import com.mohand.SchoolManagmentSystem.model.PasswordResetToken;
 import com.mohand.SchoolManagmentSystem.model.Student;
 import com.mohand.SchoolManagmentSystem.repository.PasswordResetTokenRepository;
-import com.mohand.SchoolManagmentSystem.request.ResetPasswordRequest;
+import com.mohand.SchoolManagmentSystem.request.password.ResetPasswordRequest;
 import com.mohand.SchoolManagmentSystem.service.EmailService;
 import com.mohand.SchoolManagmentSystem.service.student.IStudentService;
 import com.mohand.SchoolManagmentSystem.util.Util;
