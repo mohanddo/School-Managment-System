@@ -28,12 +28,13 @@ public class StudentService implements IStudentService {
     private final PasswordResetTokenRepository passwordResetTokenRepository;
 
     @Override
-    public Student getStudentByEmail(String email) {
-        return studentRepository.findByEmail(email).orElseThrow(() -> new AccountNotFoundException("No student with this email: " + email));
+    public Student getByEmail(String email) {
+        return studentRepository.findByEmail(email).orElseThrow(AccountNotFoundException::new);
     }
 
+
     @Override
-    public Student saveStudent(Student student) {
+    public Student save(Student student) {
         return studentRepository.save(student);
     }
 
@@ -47,34 +48,14 @@ public class StudentService implements IStudentService {
         return studentRepository.findAll();
     }
 
-    @Override
-    public void changePassword(ChangePasswordRequest request, Principal connectedStudent) {
-        var principal = ((UsernamePasswordAuthenticationToken) connectedStudent).getPrincipal();
-        var student = ( Student ) principal;
 
-        if (!passwordEncoder.matches(request.currentPassword(), student.getPassword())) {
-            throw new WrongPasswordException("Wrong Password");
-        }
-
-        if (!request.newPassword().equals(request.repeatPassword())) {
-            throw new ChangePasswordException("Passwords are not the same");
-        }
-
-        if (!Util.isValidPassword(request.newPassword())) {
-            throw new WeakPasswordException("Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.");
-        }
-
-        student.setPassword(passwordEncoder.encode(request.newPassword()));
-
-        studentRepository.save(student);
-    }
 
     @Value("${password.reset.token.expiration-time}")
     private Long passwordResetTokenExpirationTime;
 
     @Override
     public void createPasswordResetTokenForStudent(String email, String token) {
-        Student student = getStudentByEmail(email);
+        Student student = getByEmail(email);
 
         PasswordResetToken existingToken = student.getPasswordResetToken();
 
@@ -91,7 +72,12 @@ public class StudentService implements IStudentService {
     @Override
     public Student getStudentByToken(String token) {
         PasswordResetToken passwordResetToken = passwordResetTokenRepository.findByToken(token);
-        return studentRepository.findByPasswordResetToken(passwordResetToken).orElseThrow(() -> new AccountNotFoundException("No student with this token"));
+        return studentRepository.findByPasswordResetToken(passwordResetToken).orElseThrow(AccountNotFoundException::new);
+    }
+
+    @Override
+    public boolean checkIfExistByEmail(String email) {
+        return studentRepository.existsByEmail(email);
     }
 
 

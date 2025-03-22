@@ -20,7 +20,7 @@ import java.util.List;
 public class Student extends User {
 
     public Student(String firstName, String lastName, String email, String password, String verificationCode, LocalDateTime verificationCodeExpiresAt) {
-        super(firstName, lastName, email, password, verificationCode, verificationCodeExpiresAt);
+        super(firstName, lastName, email, password, verificationCode, verificationCodeExpiresAt, Role.ROLE_STUDENT);
     }
 
     @JsonIgnore

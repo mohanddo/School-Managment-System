@@ -4,6 +4,9 @@ import com.mohand.SchoolManagmentSystem.model.Teacher;
 
 public interface ITeacherService {
 
-    Teacher readTeacherById(Long id);
+    Teacher readById(Long id);
     Teacher save(Teacher teacher);
+    Teacher getByEmail(String email);
+
+    boolean checkIfExist(String email);
 }

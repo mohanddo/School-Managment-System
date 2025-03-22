@@ -6,20 +6,16 @@ import com.mohand.SchoolManagmentSystem.exception.user.password.WeakPasswordExce
 import com.mohand.SchoolManagmentSystem.exception.user.verificationCode.AccountAlreadyVerifiedException;
 import com.mohand.SchoolManagmentSystem.exception.user.verificationCode.VerificationCodeExpiredException;
 import com.mohand.SchoolManagmentSystem.exception.user.verificationCode.VerificationCodeInvalidException;
-import com.mohand.SchoolManagmentSystem.model.Teacher;
-import com.mohand.SchoolManagmentSystem.model.Teacher;
-import com.mohand.SchoolManagmentSystem.model.User;
+import com.mohand.SchoolManagmentSystem.model.Admin;
 import com.mohand.SchoolManagmentSystem.request.authentication.LogInUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.RegisterUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.VerifyUserRequest;
 import com.mohand.SchoolManagmentSystem.response.LoginResponse;
 import com.mohand.SchoolManagmentSystem.service.EmailService;
 import com.mohand.SchoolManagmentSystem.service.JwtService;
-import com.mohand.SchoolManagmentSystem.service.teacher.ITeacherService;
-import com.mohand.SchoolManagmentSystem.service.teacher.ITeacherService;
+import com.mohand.SchoolManagmentSystem.service.admin.IAdminService;
 import com.mohand.SchoolManagmentSystem.service.user.IUserService;
 import com.mohand.SchoolManagmentSystem.util.Util;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,21 +24,18 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
 @Service
-public class TeacherAuthenticationService extends AuthenticationService {
+public class AdminAuthenticationService extends AuthenticationService {
 
-    @Value("${verification.code.expiration-time}")
-    private Long verificationCodeExpirationTime;
+    private final IAdminService adminService;
 
-    private final ITeacherService teacherService;
-
-    public TeacherAuthenticationService(IUserService userService, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, EmailService emailService, ITeacherService teacherService, JwtService jwtService) {
+    public AdminAuthenticationService(IUserService userService, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, EmailService emailService, IAdminService adminService, JwtService jwtService) {
         super(userService, passwordEncoder, authenticationManager, emailService, jwtService);
-        this.teacherService = teacherService;
+        this.adminService = adminService;
     }
 
 
     @Override
-    public Teacher signup(RegisterUserRequest input) {
+    public Admin signup(RegisterUserRequest input) {
 
         if (userService.checkIfExist(input.getEmail())) {
             throw new AccountAlreadyExistException();
@@ -52,19 +45,19 @@ public class TeacherAuthenticationService extends AuthenticationService {
             throw new WeakPasswordException();
         }
 
-        Teacher teacher = new Teacher(input.getFirstName(), input.getLastName(), input.getEmail(),
+        Admin admin = new Admin(input.getFirstName(), input.getLastName(), input.getEmail(),
                 passwordEncoder.encode(input.getPassword()),
                 generateVerificationCode(),
                 LocalDateTime.now().plusSeconds(verificationCodeExpirationTime / 1000));
-        sendVerificationEmail(teacher.getEmail(), teacher.getVerificationCode());
-        return teacherService.save(teacher);
+        sendVerificationEmail(admin.getEmail(), admin.getVerificationCode());
+        return adminService.save(admin);
     }
 
     @Override
     public LoginResponse authenticate(LogInUserRequest request) {
-        Teacher teacher = teacherService.getByEmail(request.getEmail());
+        Admin admin = adminService.getByEmail(request.getEmail());
 
-        if (!teacher.isEnabled()) {
+        if (!admin.isEnabled()) {
             throw new AccountNotEnabledException();
         }
 
@@ -75,27 +68,27 @@ public class TeacherAuthenticationService extends AuthenticationService {
                 )
         );
 
-        String jwtToken = jwtService.generateToken(teacher);
+        String jwtToken = jwtService.generateToken(admin);
         return new LoginResponse(jwtToken, jwtService.getJwtExpirationTime());
     }
 
     @Override
     public void verifyUser(VerifyUserRequest request) {
-        Teacher teacher = teacherService.getByEmail(request.getEmail());
+        Admin admin = adminService.getByEmail(request.getEmail());
 
-        if (teacher.isEnabled()) {
+        if (admin.isEnabled()) {
             throw new AccountAlreadyVerifiedException();
         }
 
-        if (teacher.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
+        if (admin.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
             throw new VerificationCodeExpiredException("Verification code has expired");
         }
 
-        if (teacher.getVerificationCode().equals(request.getVerificationCode())) {
-            teacher.setEnabled(true);
-            teacher.setVerificationCode(null);
-            teacher.setVerificationCodeExpiresAt(null);
-            teacherService.save(teacher);
+        if (admin.getVerificationCode().equals(request.getVerificationCode())) {
+            admin.setEnabled(true);
+            admin.setVerificationCode(null);
+            admin.setVerificationCodeExpiresAt(null);
+            adminService.save(admin);
         } else {
             throw new VerificationCodeInvalidException("Verification code is invalid");
         }
@@ -103,13 +96,14 @@ public class TeacherAuthenticationService extends AuthenticationService {
 
     @Override
     public void resendVerificationCode(String email) {
-        Teacher teacher = teacherService.getByEmail(email);
-        if (teacher.isEnabled()) {
+        Admin admin = adminService.getByEmail(email);
+        if (admin.isEnabled()) {
             throw new AccountAlreadyVerifiedException();
         }
-        teacher.setVerificationCode(generateVerificationCode());
-        teacher.setVerificationCodeExpiresAt(LocalDateTime.now().plusSeconds(verificationCodeExpirationTime / 1000));
-        sendVerificationEmail(teacher.getEmail(), teacher.getVerificationCode());
-        teacherService.save(teacher);
+        admin.setVerificationCode(generateVerificationCode());
+        admin.setVerificationCodeExpiresAt(LocalDateTime.now().plusSeconds(verificationCodeExpirationTime / 1000));
+        sendVerificationEmail(admin.getEmail(), admin.getVerificationCode());
+        adminService.save(admin);
     }
+
 }

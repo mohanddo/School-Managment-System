@@ -1,5 +1,6 @@
 package com.mohand.SchoolManagmentSystem.config;
 
+import com.mohand.SchoolManagmentSystem.enums.Role;
 import com.mohand.SchoolManagmentSystem.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,7 +35,13 @@ public class SecurityConfiguration {
               .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize ->
                         authorize
-                                .requestMatchers("/api/v1/auth/**",
+                                .requestMatchers("/api/v1/auth/student/**",
+                                        "/api/v1/auth/teacher/login",
+                                        "/api/v1/auth/teacher/verify",
+                                        "/api/v1/auth/admin/resend",
+                                        "/api/v1/auth/admin/login",
+                                        "/api/v1/auth/admin/verify",
+                                        "/api/v1/auth/teacher/resend",
                                         "/api/v1/password/verifyEmail/**",
                                         "/api/v1/password/savePassword",
                                         "/api/v1/password/resetPassword",
@@ -44,6 +51,9 @@ public class SecurityConfiguration {
                                         "/api/v1/password/updatePassword",
                                         "/api/v1/payments/checkout"
                                 ).permitAll()
+                                .requestMatchers("/api/v1/auth/teacher/signup",
+                                        "/api/v1/auth/admin/signup")
+                                .hasAuthority(Role.ROLE_ADMIN.getValue())
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

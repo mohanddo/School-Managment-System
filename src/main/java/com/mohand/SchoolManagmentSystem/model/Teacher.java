@@ -17,7 +17,7 @@ import java.util.List;
 public class Teacher extends User {
 
     public Teacher(String firstName, String lastName, String email, String password, String verificationCode, LocalDateTime verificationCodeExpiresAt) {
-        super(firstName, lastName, email, password, verificationCode, verificationCodeExpiresAt);
+        super(firstName, lastName, email, password, verificationCode, verificationCodeExpiresAt, Role.ROLE_TEACHER);
     }
 
     @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true)

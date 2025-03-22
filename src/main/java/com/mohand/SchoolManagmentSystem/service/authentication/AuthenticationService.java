@@ -1,10 +1,5 @@
 package com.mohand.SchoolManagmentSystem.service.authentication;
 
-import com.mohand.SchoolManagmentSystem.exception.user.account.AccountNotEnabledException;
-import com.mohand.SchoolManagmentSystem.exception.user.verificationCode.AccountAlreadyVerifiedException;
-import com.mohand.SchoolManagmentSystem.exception.user.verificationCode.VerificationCodeExpiredException;
-import com.mohand.SchoolManagmentSystem.exception.user.verificationCode.VerificationCodeInvalidException;
-import com.mohand.SchoolManagmentSystem.model.Student;
 import com.mohand.SchoolManagmentSystem.model.User;
 import com.mohand.SchoolManagmentSystem.request.authentication.LogInUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.RegisterUserRequest;
@@ -14,75 +9,32 @@ import com.mohand.SchoolManagmentSystem.service.EmailService;
 import com.mohand.SchoolManagmentSystem.service.JwtService;
 import com.mohand.SchoolManagmentSystem.service.user.IUserService;
 import jakarta.mail.MessagingException;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.LocalDateTime;
 import java.util.Random;
 
 @RequiredArgsConstructor
 public abstract class AuthenticationService {
 
     @Value("${verification.code.expiration-time}")
-    private Long verificationCodeExpirationTime;
+    protected Long verificationCodeExpirationTime;
 
     protected final IUserService userService;
     protected final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
+    protected final AuthenticationManager authenticationManager;
     private final EmailService emailService;
-    private final JwtService jwtService;
+    protected final JwtService jwtService;
 
     abstract User signup(RegisterUserRequest request);
 
-    public LoginResponse authenticate(LogInUserRequest request) {
-        User user = userService.getByEmail(request.getEmail());
+    abstract LoginResponse authenticate(LogInUserRequest request);
 
-        if (!user.isEnabled()) {
-            throw new AccountNotEnabledException();
-        }
+    abstract void verifyUser(VerifyUserRequest request);
 
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
-
-        String jwtToken = jwtService.generateToken(user);
-        return new LoginResponse(jwtToken, jwtService.getJwtExpirationTime());
-    }
-
-    public void verifyUser(VerifyUserRequest request) {
-        User user = userService.getByEmail(request.getEmail());
-        if (user.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new VerificationCodeExpiredException("Verification code has expired");
-        }
-
-        if (user.getVerificationCode().equals(request.getVerificationCode())) {
-            user.setEnabled(true);
-            user.setVerificationCode(null);
-            user.setVerificationCodeExpiresAt(null);
-            userService.saveUser(user);
-        } else {
-            throw new VerificationCodeInvalidException("Verification code is invalid");
-        }
-    }
-
-    public void resendVerificationCode(String email) {
-        User user = userService.getByEmail(email);
-        if (user.isEnabled()) {
-            throw new AccountAlreadyVerifiedException();
-        }
-        user.setVerificationCode(generateVerificationCode());
-        user.setVerificationCodeExpiresAt(LocalDateTime.now().plusSeconds(verificationCodeExpirationTime / 1000));
-        sendVerificationEmail(user.getEmail(), user.getVerificationCode());
-        userService.saveUser(user);
-    }
+    abstract void resendVerificationCode(String email);
 
     protected String generateVerificationCode() {
         Random random = new Random();

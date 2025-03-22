@@ -1,5 +1,6 @@
 package com.mohand.SchoolManagmentSystem.model;
 
+import com.mohand.SchoolManagmentSystem.enums.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,7 +20,7 @@ import java.util.List;
 public abstract class User implements UserDetails {
 
 
-    public User(String firstName, String lastName, String email, String password, String verificationCode, LocalDateTime verificationCodeExpiresAt) {
+    public User(String firstName, String lastName, String email, String password, String verificationCode, LocalDateTime verificationCodeExpiresAt, Role role) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -27,6 +28,7 @@ public abstract class User implements UserDetails {
         this.enabled = false;
         this.verificationCode = verificationCode;
         this.verificationCodeExpiresAt = verificationCodeExpiresAt;
+        this.role = role;
     }
 
     @Id
@@ -53,6 +55,10 @@ public abstract class User implements UserDetails {
     private String verificationCode;
 
     private LocalDateTime verificationCodeExpiresAt;
+
+    @Column(nullable = false)
+//    @Enumerated(EnumType.STRING)
+    private Role role;
 
     @Override
     public String getUsername() {

@@ -69,7 +69,7 @@ public class PasswordService {
             throw new WeakPasswordException();
         } else {
             student.setPassword(passwordEncoder.encode(request.newPassword()));
-            studentService.saveStudent(student);
+            studentService.save(student);
             passwordResetTokenRepository.deletePasswordResetTokenByToken(request.token());
         }
     }
