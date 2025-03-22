@@ -15,11 +15,5 @@ public interface IStudentService {
 
     List<Student> getAllStudents();
 
-//    void changePassword(ChangePasswordRequest request, Principal connectedStudent);
-
-    void createPasswordResetTokenForStudent(String email, String token);
-
-    Student getStudentByToken(String token);
-
     boolean checkIfExistByEmail(String email);
 }

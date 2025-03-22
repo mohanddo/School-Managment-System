@@ -24,7 +24,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StudentService implements IStudentService {
     private final StudentRepository studentRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
 
     @Override
@@ -46,33 +45,6 @@ public class StudentService implements IStudentService {
     @Override
     public List<Student> getAllStudents() {
         return studentRepository.findAll();
-    }
-
-
-
-    @Value("${password.reset.token.expiration-time}")
-    private Long passwordResetTokenExpirationTime;
-
-    @Override
-    public void createPasswordResetTokenForStudent(String email, String token) {
-        Student student = getByEmail(email);
-
-        PasswordResetToken existingToken = student.getPasswordResetToken();
-
-        if (existingToken != null) {
-            existingToken.setToken(token);
-            existingToken.setExpiryDate(LocalDateTime.now().plusSeconds(passwordResetTokenExpirationTime / 1000));
-        } else {
-            existingToken = new PasswordResetToken(token, student, LocalDateTime.now().plusSeconds(passwordResetTokenExpirationTime / 1000));
-        }
-
-        passwordResetTokenRepository.save(existingToken);
-    }
-
-    @Override
-    public Student getStudentByToken(String token) {
-        PasswordResetToken passwordResetToken = passwordResetTokenRepository.findByToken(token);
-        return studentRepository.findByPasswordResetToken(passwordResetToken).orElseThrow(AccountNotFoundException::new);
     }
 
     @Override

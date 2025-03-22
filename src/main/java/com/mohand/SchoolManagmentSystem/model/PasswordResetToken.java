@@ -23,14 +23,14 @@ public class PasswordResetToken {
     private String token;
 
     @OneToOne
-    @JoinColumn(name = "student_id")
-    private Student student;
+    @JoinColumn(name = "user_id")
+    private User user;
 
     private LocalDateTime expiryDate;
 
-    public PasswordResetToken(String token, Student student, LocalDateTime expiryDate) {
+    public PasswordResetToken(String token, User user, LocalDateTime expiryDate) {
         this.token = token;
-        this.student = student;
+        this.user = user;
         this.expiryDate = expiryDate;
     }
 

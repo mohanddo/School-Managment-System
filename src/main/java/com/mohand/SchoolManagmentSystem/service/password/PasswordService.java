@@ -4,10 +4,12 @@ import com.mohand.SchoolManagmentSystem.exception.user.password.ChangePasswordEx
 import com.mohand.SchoolManagmentSystem.exception.user.password.WeakPasswordException;
 import com.mohand.SchoolManagmentSystem.model.PasswordResetToken;
 import com.mohand.SchoolManagmentSystem.model.Student;
+import com.mohand.SchoolManagmentSystem.model.User;
 import com.mohand.SchoolManagmentSystem.repository.PasswordResetTokenRepository;
 import com.mohand.SchoolManagmentSystem.request.password.ResetPasswordRequest;
 import com.mohand.SchoolManagmentSystem.service.EmailService;
 import com.mohand.SchoolManagmentSystem.service.student.IStudentService;
+import com.mohand.SchoolManagmentSystem.service.user.IUserService;
 import com.mohand.SchoolManagmentSystem.util.Util;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +24,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PasswordService {
 
-    private final IStudentService studentService;
+    private final IUserService userService;
     private final EmailService emailService;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final BCryptPasswordEncoder passwordEncoder;
@@ -30,7 +32,7 @@ public class PasswordService {
     public void sendResetPasswordLink(String email) {
         try {
             String uuid = UUID.randomUUID().toString();
-            studentService.createPasswordResetTokenForStudent(email, uuid);
+            userService.createPasswordResetTokenForStudent(email, uuid);
             emailService.sendRestPasswordMail(email, uuid);
         } catch (MessagingException e) {
             e.printStackTrace();
@@ -61,15 +63,15 @@ public class PasswordService {
 
     @Transactional
     public void savePasswordAfterResetting(ResetPasswordRequest request) {
-        Student student = studentService.getStudentByToken(request.token());
+        User user = userService.getUserByToken(request.token());
 
         if (!request.matchPassword().equals(request.newPassword())) {
             throw new ChangePasswordException("Passwords are not the same");
         } else if (!Util.isValidPassword(request.newPassword())) {
             throw new WeakPasswordException();
         } else {
-            student.setPassword(passwordEncoder.encode(request.newPassword()));
-            studentService.save(student);
+            user.setPassword(passwordEncoder.encode(request.newPassword()));
+            userService.save(user);
             passwordResetTokenRepository.deletePasswordResetTokenByToken(request.token());
         }
     }

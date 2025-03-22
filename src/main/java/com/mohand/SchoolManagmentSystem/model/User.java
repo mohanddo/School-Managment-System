@@ -60,6 +60,9 @@ public abstract class User implements UserDetails {
 //    @Enumerated(EnumType.STRING)
     private Role role;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private PasswordResetToken passwordResetToken;
+
     @Override
     public String getUsername() {
         return email;

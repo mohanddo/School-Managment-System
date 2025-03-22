@@ -60,10 +60,6 @@ public class Student extends User {
     @OneToMany(mappedBy = "student")
     private List<Purchase> purchases;
 
-    @OneToOne(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    private PasswordResetToken passwordResetToken;
-
-
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AnnouncementComment> announcementComments;
 

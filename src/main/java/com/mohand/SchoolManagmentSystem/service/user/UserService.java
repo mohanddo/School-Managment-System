@@ -4,17 +4,21 @@ import com.mohand.SchoolManagmentSystem.exception.user.account.AccountNotFoundEx
 import com.mohand.SchoolManagmentSystem.exception.user.password.ChangePasswordException;
 import com.mohand.SchoolManagmentSystem.exception.user.password.WeakPasswordException;
 import com.mohand.SchoolManagmentSystem.exception.user.password.WrongPasswordException;
+import com.mohand.SchoolManagmentSystem.model.PasswordResetToken;
 import com.mohand.SchoolManagmentSystem.model.Student;
 import com.mohand.SchoolManagmentSystem.model.User;
+import com.mohand.SchoolManagmentSystem.repository.PasswordResetTokenRepository;
 import com.mohand.SchoolManagmentSystem.repository.UserRepository;
 import com.mohand.SchoolManagmentSystem.request.password.ChangePasswordRequest;
 import com.mohand.SchoolManagmentSystem.util.Util;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +26,7 @@ public class UserService implements IUserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
 
     @Override
     public boolean checkIfExist(String email) {
@@ -34,7 +39,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public User saveUser(User user) {
+    public User save(User user) {
         return userRepository.save(user);
     }
 
@@ -58,6 +63,32 @@ public class UserService implements IUserService {
         user.setPassword(passwordEncoder.encode(request.newPassword()));
 
         userRepository.save(user);
+    }
+
+    @Value("${password.reset.token.expiration-time}")
+    private Long passwordResetTokenExpirationTime;
+
+    @Override
+    public void createPasswordResetTokenForStudent(String email, String token) {
+        User user = getByEmail(email);
+
+        PasswordResetToken existingToken = user.getPasswordResetToken();
+
+        if (existingToken != null) {
+            existingToken.setToken(token);
+            existingToken.setExpiryDate(LocalDateTime.now().plusSeconds(passwordResetTokenExpirationTime / 1000));
+        } else {
+            existingToken = new PasswordResetToken(token, user, LocalDateTime.now().plusSeconds(passwordResetTokenExpirationTime / 1000));
+        }
+
+        passwordResetTokenRepository.save(existingToken);
+    }
+
+
+    @Override
+    public User getUserByToken(String token) {
+        PasswordResetToken passwordResetToken = passwordResetTokenRepository.findByToken(token);
+        return userRepository.findByPasswordResetToken(passwordResetToken).orElseThrow(AccountNotFoundException::new);
     }
 
 }

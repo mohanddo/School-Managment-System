@@ -8,6 +8,8 @@ import java.security.Principal;
 public interface IUserService {
     boolean checkIfExist(String email);
     User getByEmail(String email);
-    User saveUser(User user);
+    User save(User user);
     void changePassword(ChangePasswordRequest request, Principal connectedUser);
+    void createPasswordResetTokenForStudent(String email, String token);
+    User getUserByToken(String token);
 }

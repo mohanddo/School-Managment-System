@@ -18,7 +18,6 @@ import java.security.Principal;
 @RequiredArgsConstructor
 public class PasswordController {
 
-    private final IStudentService studentService;
     private final PasswordService passwordService;
     private final IUserService userService;
 
