@@ -1,5 +1,6 @@
 package com.mohand.SchoolManagmentSystem.service.course;
 
+import com.mohand.SchoolManagmentSystem.exception.course.CourseNotFoundException;
 import com.mohand.SchoolManagmentSystem.model.Course;
 import com.mohand.SchoolManagmentSystem.model.Teacher;
 import com.mohand.SchoolManagmentSystem.repository.CourseRepository;
@@ -20,45 +21,59 @@ public class CourseService implements ICourseService {
     private final TeacherService teacherService;
 
     @Override
-    public Course createCourse(CreateCourseRequest request) {
-//        Teacher teacher = teacherService.readTeacherById(request.teacherId());
-//        Course course = Course.builder(request.title(), request.description(), request.price(), request.pricingModel(), teacher)
-//                .;
-        return null;
+    public Course create(CreateCourseRequest request) {
+        Teacher teacher = teacherService.readById(request.teacherId());
+        Course course = Course.builder(request.title(), request.description(), request.price(), request.pricingModel(), teacher)
+                .build();
+        return courseRepository.save(course);
+    }
+    @Override
+    public void delete(Long courseId) {
+        courseRepository.deleteById(courseId);
     }
 
     @Override
-    public void deleteCourse(Long courseId) {
-
+    public Course updateTitle(Long courseId, String newTitle) {
+        Course course = getById(courseId);
+        course.setTitle(newTitle);
+        return courseRepository.save(course);
     }
 
     @Override
-    public Course updateCourseTitle(Long courseId, String newTitle) {
-        return null;
-    }
-
-    @Override
-    public Course updateCourseDescription(Long courseId, String newDescription) {
-        return null;
+    public Course updateDescription(Long courseId, String newDescription) {
+        Course course = getById(courseId);
+        course.setDescription(newDescription);
+        return courseRepository.save(course);
     }
 
     @Override
     public Course updatePrice(Long courseId, double price) {
-        return null;
+        Course course = getById(courseId);
+        course.setPrice(price);
+        return courseRepository.save(course);
     }
 
     @Override
     public Course updateDiscountPercentage(Long courseId, int discountPercentage) {
-        return null;
+        Course course = getById(courseId);
+        course.setDiscountPercentage(discountPercentage);
+        return courseRepository.save(course);
     }
 
     @Override
     public Course updateDiscountExpirationTime(Long courseId, LocalDate discountExpirationDate) {
-        return null;
+        Course course = getById(courseId);
+        course.setDiscountExpirationDate(discountExpirationDate);
+        return courseRepository.save(course);
     }
 
     @Override
-    public List<Course> readAllCourses() {
-        return List.of();
+    public List<Course> getAll() {
+        return courseRepository.findAll();
+    }
+
+    @Override
+    public Course getById(Long id) {
+        return courseRepository.findById(id).orElseThrow(CourseNotFoundException::new);
     }
 }

@@ -2,9 +2,14 @@ package com.mohand.SchoolManagmentSystem.model;
 
 import com.mohand.SchoolManagmentSystem.enums.PricingModel;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.Check;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -12,16 +17,20 @@ import java.util.List;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Setter
 @Builder(builderMethodName = "hiddenBuilder")
+@Check(constraints = "(discount_percentage IS NOT NULL AND discount_expiration_date IS NOT NULL) OR (discount_percentage IS NULL AND discount_expiration_date IS NULL)")
 public class Course {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
     @Column(nullable = false)
     private String title;
 
+    @NotBlank
     @Column(nullable = false)
     private String description;
 
@@ -35,7 +44,8 @@ public class Course {
     @Column(nullable = false)
     private double price;
 
-    @Column(nullable = false)
+    @Min(1)
+    @Max(100)
     private int discountPercentage;
 
     private LocalDate discountExpirationDate;
@@ -74,7 +84,6 @@ public class Course {
                 .teacher(teacher)
                 .numberOfStudents(0)
                 .price(price)
-                .pricingModel(pricingModel)
-                .discountPercentage(0);
+                .pricingModel(pricingModel);
     }
 }

@@ -12,7 +12,5 @@ public record CreateCourseRequest(String title,
                                   PricingModel pricingModel,
                                   double price,
                                   Optional<String> imageUrl,
-                                  Optional<String> introductionVideoUrl,
-                                  Optional<Integer> discountPercentage,
-                                  Optional<LocalDate> discountExpirationDate) {
+                                  Optional<String> introductionVideoUrl) {
 }

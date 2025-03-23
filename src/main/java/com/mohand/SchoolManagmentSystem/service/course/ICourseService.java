@@ -8,14 +8,15 @@ import java.util.List;
 
 public interface ICourseService {
 
-    Course createCourse(CreateCourseRequest request);
-    void deleteCourse(Long courseId);
+    Course create(CreateCourseRequest request);
+    void delete(Long courseId);
 
-    Course updateCourseTitle(Long courseId, String newTitle);
-    Course updateCourseDescription(Long courseId, String newDescription);
+    Course updateTitle(Long courseId, String newTitle);
+    Course updateDescription(Long courseId, String newDescription);
     Course updatePrice(Long courseId, double price);
     Course updateDiscountPercentage(Long courseId, int discountPercentage);
     Course updateDiscountExpirationTime(Long courseId, LocalDate discountExpirationDate);
 
-    List<Course> readAllCourses();
+    List<Course> getAll();
+    Course getById(Long id);
 }
