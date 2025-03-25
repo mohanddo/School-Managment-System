@@ -1,6 +1,7 @@
-package com.mohand.SchoolManagmentSystem.model;
+package com.mohand.SchoolManagmentSystem.model.course;
 
 import com.mohand.SchoolManagmentSystem.enums.PricingModel;
+import com.mohand.SchoolManagmentSystem.model.*;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -19,7 +20,8 @@ import java.util.List;
 @NoArgsConstructor
 @Setter
 @Builder(builderMethodName = "hiddenBuilder")
-@Check(constraints = "(discount_percentage IS NOT NULL AND discount_expiration_date IS NOT NULL) OR (discount_percentage IS NULL AND discount_expiration_date IS NULL)")
+@Check(constraints = "(discount_expiration_date IS NOT NULL OR (discount_percentage = 0 AND discount_expiration_date IS NULL))")
+@Check(constraints = "(pricing_model = 2 AND price = 0) OR (pricing_model <> 2 AND price > 0)")
 public class Course {
 
     @Id
@@ -39,12 +41,22 @@ public class Course {
     private String introductionVideoUrl;
 
     @Column(nullable = false)
+    private int numberOfReviews;
+
+    @Column(nullable = false)
+    private double rating;
+
+    @Column(nullable = false)
+    private double numberOfHours;
+
+    @Column(nullable = false)
     private long numberOfStudents;
 
     @Column(nullable = false)
+    @Min(0)
     private double price;
 
-    @Min(1)
+    @Min(0)
     @Max(100)
     private int discountPercentage;
 
@@ -77,13 +89,19 @@ public class Course {
     @OneToMany(mappedBy = "course")
     private List<OrderItem> orderItems;
 
-    public static CourseBuilder builder(String title, String description, double price, PricingModel pricingModel, Teacher teacher) {
+    public static CourseBuilder builder(String title, String description, double price, PricingModel pricingModel, Teacher teacher, String imageUrl, String introductionVideoUrl) {
         return hiddenBuilder()
                 .title(title)
                 .description(description)
                 .teacher(teacher)
                 .numberOfStudents(0)
                 .price(price)
-                .pricingModel(pricingModel);
+                .pricingModel(pricingModel)
+                .numberOfReviews(0)
+                .rating(0)
+                .numberOfHours(0)
+                .imageUrl(imageUrl)
+                .introductionVideoUrl(introductionVideoUrl)
+                .discountPercentage(0);
     }
 }

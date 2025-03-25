@@ -1,8 +1,11 @@
 package com.mohand.SchoolManagmentSystem.config;
 
+import com.mohand.SchoolManagmentSystem.model.course.Course;
 import com.mohand.SchoolManagmentSystem.repository.StudentRepository;
 import com.mohand.SchoolManagmentSystem.repository.UserRepository;
+import com.mohand.SchoolManagmentSystem.response.course.CoursePreview;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.Converter;
 import org.springframework.beans.factory.annotation.Value;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
@@ -15,6 +18,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import java.awt.*;
 
 @Configuration
 @RequiredArgsConstructor
@@ -31,7 +36,9 @@ public class AppConfiguration {
 
         @Bean
         public ModelMapper modelMapper() {
-            return new ModelMapper();
+            ModelMapper modelMapper = new ModelMapper();
+
+            return modelMapper;
         }
 
 

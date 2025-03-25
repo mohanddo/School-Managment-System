@@ -1,5 +1,6 @@
-package com.mohand.SchoolManagmentSystem.model;
+package com.mohand.SchoolManagmentSystem.model.course;
 
+import com.mohand.SchoolManagmentSystem.model.Student;
 import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
 
@@ -18,4 +19,9 @@ public class FavoriteCourse {
     @ManyToOne
     @JoinColumn(name = "course_id")
     private Course course;
+
+    public FavoriteCourse(Student student, Course course) {
+        this.student = student;
+        this.course = course;
+    }
 }

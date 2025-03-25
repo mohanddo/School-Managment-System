@@ -1,5 +1,6 @@
 package com.mohand.SchoolManagmentSystem.model;
 
+import com.mohand.SchoolManagmentSystem.model.course.Course;
 import jakarta.persistence.*;
 
 import java.util.List;

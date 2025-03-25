@@ -1,4 +1,4 @@
-package com.mohand.SchoolManagmentSystem.model;
+package com.mohand.SchoolManagmentSystem.model.course;
 
 import jakarta.persistence.*;
 import lombok.NoArgsConstructor;

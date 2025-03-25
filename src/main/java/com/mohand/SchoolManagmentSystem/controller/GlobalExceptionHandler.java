@@ -1,5 +1,8 @@
 package com.mohand.SchoolManagmentSystem.controller;
 
+import com.mohand.SchoolManagmentSystem.exception.course.CourseException;
+import com.mohand.SchoolManagmentSystem.exception.course.CourseNotFoundException;
+import com.mohand.SchoolManagmentSystem.exception.pricingModel.InvalidPricingModelException;
 import com.mohand.SchoolManagmentSystem.exception.user.account.AccountAlreadyExistException;
 import com.mohand.SchoolManagmentSystem.exception.user.account.AccountException;
 import com.mohand.SchoolManagmentSystem.exception.user.account.AccountNotEnabledException;
@@ -79,6 +82,28 @@ public class GlobalExceptionHandler {
         if (exception instanceof WeakPasswordException) {
             errorDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
         }
+
+        return errorDetail;
+    }
+
+    @ExceptionHandler(CourseException.class)
+    public ProblemDetail handleCourseException(CourseException exception) {
+        exception.printStackTrace();
+        ProblemDetail errorDetail = null;
+
+        if (exception instanceof CourseNotFoundException) {
+            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+        }
+
+        return errorDetail;
+    }
+
+    @ExceptionHandler(InvalidPricingModelException.class)
+    public ProblemDetail handleInvalidPricingModelException(InvalidPricingModelException exception) {
+        exception.printStackTrace();
+        ProblemDetail errorDetail = null;
+
+        errorDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
 
         return errorDetail;
     }

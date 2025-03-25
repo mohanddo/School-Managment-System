@@ -1,13 +1,19 @@
 package com.mohand.SchoolManagmentSystem.service.course;
 
+import com.mohand.SchoolManagmentSystem.enums.PricingModel;
 import com.mohand.SchoolManagmentSystem.exception.course.CourseNotFoundException;
-import com.mohand.SchoolManagmentSystem.model.Course;
+import com.mohand.SchoolManagmentSystem.model.Student;
+import com.mohand.SchoolManagmentSystem.model.course.Course;
 import com.mohand.SchoolManagmentSystem.model.Teacher;
+import com.mohand.SchoolManagmentSystem.model.course.FavoriteCourse;
 import com.mohand.SchoolManagmentSystem.repository.CourseRepository;
-import com.mohand.SchoolManagmentSystem.repository.TeacherRepository;
+import com.mohand.SchoolManagmentSystem.repository.FavoriteCourseRepository;
 import com.mohand.SchoolManagmentSystem.request.course.CreateCourseRequest;
+import com.mohand.SchoolManagmentSystem.response.course.CoursePreview;
+import com.mohand.SchoolManagmentSystem.service.student.StudentService;
 import com.mohand.SchoolManagmentSystem.service.teacher.TeacherService;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -19,17 +25,25 @@ public class CourseService implements ICourseService {
 
     private final CourseRepository courseRepository;
     private final TeacherService teacherService;
+    private final StudentService studentService;
+    private final FavoriteCourseRepository favoriteCourseRepository;
+    private final ModelMapper modelMapper;
 
     @Override
-    public Course create(CreateCourseRequest request) {
-        Teacher teacher = teacherService.readById(request.teacherId());
-        Course course = Course.builder(request.title(), request.description(), request.price(), request.pricingModel(), teacher)
+    public void create(CreateCourseRequest request, Long teacherId) {
+        Teacher teacher = teacherService.readById(teacherId);
+        PricingModel pricingModel = PricingModel.validatePricingModel(request.pricingModel());
+        Course course = Course.builder(request.title(), request.description(), request.price(), pricingModel, teacher, request.imageUrl(), request.introductionVideoUrl())
                 .build();
-        return courseRepository.save(course);
+        courseRepository.save(course);
     }
     @Override
-    public void delete(Long courseId) {
-        courseRepository.deleteById(courseId);
+    public void delete(Long courseId, Long teacherId) {
+        if (courseRepository.existsByIdAndTeacherId(courseId, teacherId)) {
+            courseRepository.deleteById(courseId);
+        } else {
+            throw new CourseNotFoundException();
+        }
     }
 
     @Override
@@ -68,12 +82,30 @@ public class CourseService implements ICourseService {
     }
 
     @Override
-    public List<Course> getAll() {
-        return courseRepository.findAll();
+    public List<CoursePreview> getAll(Long studentId) {
+        List<Course> allCourses = courseRepository.findAll();
+
+        List<CoursePreview> allCoursesPreviews = allCourses.stream().map(course -> modelMapper.map(course, CoursePreview.class)).toList();
+
+        if (studentId == null) {
+            return allCoursesPreviews;
+        }
+
+        allCoursesPreviews = allCoursesPreviews.stream().peek(coursePreview -> coursePreview.setFavourite(favoriteCourseRepository.existsByStudentIdAndCourseId(studentId, coursePreview.getId()))).toList();
+
+        return allCoursesPreviews;
     }
 
     @Override
     public Course getById(Long id) {
         return courseRepository.findById(id).orElseThrow(CourseNotFoundException::new);
     }
+
+    @Override
+    public void addCourseToFavourite(Long studentId, Long courseId) {
+        Student student = studentService.getById(studentId);
+        Course course = getById(courseId);
+        favoriteCourseRepository.save(new FavoriteCourse(student, course));
+    }
+
 }

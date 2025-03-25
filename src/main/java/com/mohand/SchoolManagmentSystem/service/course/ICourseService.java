@@ -1,15 +1,16 @@
 package com.mohand.SchoolManagmentSystem.service.course;
 
-import com.mohand.SchoolManagmentSystem.model.Course;
+import com.mohand.SchoolManagmentSystem.model.course.Course;
 import com.mohand.SchoolManagmentSystem.request.course.CreateCourseRequest;
+import com.mohand.SchoolManagmentSystem.response.course.CoursePreview;
 
 import java.time.LocalDate;
 import java.util.List;
 
 public interface ICourseService {
 
-    Course create(CreateCourseRequest request);
-    void delete(Long courseId);
+    void create(CreateCourseRequest request, Long teacherId);
+    void delete(Long courseId, Long teacherId);
 
     Course updateTitle(Long courseId, String newTitle);
     Course updateDescription(Long courseId, String newDescription);
@@ -17,6 +18,10 @@ public interface ICourseService {
     Course updateDiscountPercentage(Long courseId, int discountPercentage);
     Course updateDiscountExpirationTime(Long courseId, LocalDate discountExpirationDate);
 
-    List<Course> getAll();
+    List<CoursePreview> getAll(Long studentId);
     Course getById(Long id);
+
+
+    void addCourseToFavourite(Long studentId, Long courseId);
+
 }

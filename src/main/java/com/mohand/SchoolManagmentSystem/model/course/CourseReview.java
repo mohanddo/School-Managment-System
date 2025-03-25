@@ -1,6 +1,7 @@
-package com.mohand.SchoolManagmentSystem.model;
+package com.mohand.SchoolManagmentSystem.model.course;
 
 import com.mohand.SchoolManagmentSystem.enums.Review;
+import com.mohand.SchoolManagmentSystem.model.Student;
 import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;

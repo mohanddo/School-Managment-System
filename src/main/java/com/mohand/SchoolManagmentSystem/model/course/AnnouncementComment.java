@@ -1,5 +1,7 @@
-package com.mohand.SchoolManagmentSystem.model;
+package com.mohand.SchoolManagmentSystem.model.course;
 
+import com.mohand.SchoolManagmentSystem.model.Student;
+import com.mohand.SchoolManagmentSystem.model.Teacher;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.AssertTrue;
 import lombok.NoArgsConstructor;

@@ -28,6 +28,7 @@ public class SecurityConfiguration {
     private final JwtFilterConfig jwtFilterConfig;
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final TeacherRequestAuthorizationManager teacherRequestAuthorizationManager;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -49,11 +50,17 @@ public class SecurityConfiguration {
                                         "/linkExpired.html",
                                         "/passwordChangedSuccessfully.html",
                                         "/api/v1/password/updatePassword",
-                                        "/api/v1/payments/checkout"
+                                        "/api/v1/payments/checkout",
+                                        "/api/v1/course/all","/api/v1/auth/teacher/signup", "/api/v1/auth/admin/signup"
                                 ).permitAll()
-                                .requestMatchers("/api/v1/auth/teacher/signup",
-                                        "/api/v1/auth/admin/signup")
-                                .hasAuthority(Role.ROLE_ADMIN.getValue())
+
+//                                .requestMatchers("/api/v1/auth/teacher/signup", "/api/v1/auth/admin/signup")
+//                                .hasAuthority(Role.ROLE_ADMIN.getValue())
+
+                                .requestMatchers("/api/v1/course/create", "/api/v1/course/delete/**")
+                                .hasAuthority(Role.ROLE_TEACHER.getValue())
+
+
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

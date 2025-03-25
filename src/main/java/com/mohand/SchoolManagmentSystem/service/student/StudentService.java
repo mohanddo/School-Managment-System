@@ -52,5 +52,10 @@ public class StudentService implements IStudentService {
         return studentRepository.existsByEmail(email);
     }
 
+    @Override
+    public Student getById(Long id) {
+        return studentRepository.findById(id).orElseThrow(AccountNotFoundException::new);
+    }
+
 
 }

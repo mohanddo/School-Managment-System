@@ -2,13 +2,17 @@ package com.mohand.SchoolManagmentSystem.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mohand.SchoolManagmentSystem.enums.Role;
+import com.mohand.SchoolManagmentSystem.model.course.AnnouncementComment;
+import com.mohand.SchoolManagmentSystem.model.course.Course;
+import com.mohand.SchoolManagmentSystem.model.course.CourseReview;
+import com.mohand.SchoolManagmentSystem.model.course.FavoriteCourse;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
