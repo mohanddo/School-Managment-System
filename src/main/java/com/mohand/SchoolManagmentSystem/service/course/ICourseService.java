@@ -23,5 +23,6 @@ public interface ICourseService {
 
 
     void addCourseToFavourite(Long studentId, Long courseId);
+    void removeCourseFromFavourite(Long studentId, Long courseId);
 
 }

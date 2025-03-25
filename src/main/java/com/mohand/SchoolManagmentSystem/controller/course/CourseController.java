@@ -30,6 +30,13 @@ public class CourseController {
         return ResponseEntity.ok("Added to favourite");
     }
 
+    @PostMapping("/removeFromFavorite/{courseId}")
+    private ResponseEntity<String> removeFromFavourite(@PathVariable Long courseId, Authentication authentication) {
+        Long studentId = ( (User) ( authentication.getPrincipal() ) ).getId();
+        courseService.removeCourseFromFavourite(studentId, courseId);
+        return ResponseEntity.ok("Removed from favourite");
+    }
+
     @PostMapping("/create")
     private ResponseEntity<String> createCourse(@RequestBody CreateCourseRequest request, Authentication authentication) {
         Long teacherId = ( (User) ( authentication.getPrincipal() ) ).getId();

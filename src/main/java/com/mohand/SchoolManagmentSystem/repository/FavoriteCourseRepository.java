@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface FavoriteCourseRepository extends JpaRepository<FavoriteCourse, Long> {
     boolean existsByStudentIdAndCourseId(Long studentId, Long courseId);
+    void deleteByStudentIdAndCourseId(Long studentId, Long courseId);
 }

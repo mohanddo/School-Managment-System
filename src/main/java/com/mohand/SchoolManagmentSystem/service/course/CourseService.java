@@ -108,4 +108,14 @@ public class CourseService implements ICourseService {
         favoriteCourseRepository.save(new FavoriteCourse(student, course));
     }
 
+    @Override
+    public void removeCourseFromFavourite(Long studentId, Long courseId) {
+        if(favoriteCourseRepository.existsByStudentIdAndCourseId(studentId, courseId)) {
+            favoriteCourseRepository.deleteByStudentIdAndCourseId(studentId, courseId);
+        } else {
+            throw new CourseNotFoundException();
+        }
+
+    }
+
 }
