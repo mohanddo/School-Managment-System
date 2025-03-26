@@ -1,12 +1,10 @@
 package com.mohand.SchoolManagmentSystem.controller.authentication;
 
-import com.mohand.SchoolManagmentSystem.model.Admin;
-import com.mohand.SchoolManagmentSystem.model.Student;
+import com.mohand.SchoolManagmentSystem.model.user.Admin;
 import com.mohand.SchoolManagmentSystem.request.authentication.LogInUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.RegisterUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.VerifyUserRequest;
 import com.mohand.SchoolManagmentSystem.service.authentication.AdminAuthenticationService;
-import com.mohand.SchoolManagmentSystem.service.authentication.StudentAuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;

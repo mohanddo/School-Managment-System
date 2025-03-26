@@ -1,9 +1,7 @@
 package com.mohand.SchoolManagmentSystem.service.student;
 
-import com.mohand.SchoolManagmentSystem.model.Student;
-import com.mohand.SchoolManagmentSystem.request.password.ChangePasswordRequest;
+import com.mohand.SchoolManagmentSystem.model.user.Student;
 
-import java.security.Principal;
 import java.util.List;
 
 public interface IStudentService {

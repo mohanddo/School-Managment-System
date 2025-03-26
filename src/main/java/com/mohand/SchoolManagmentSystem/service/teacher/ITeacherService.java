@@ -1,6 +1,6 @@
 package com.mohand.SchoolManagmentSystem.service.teacher;
 
-import com.mohand.SchoolManagmentSystem.model.Teacher;
+import com.mohand.SchoolManagmentSystem.model.user.Teacher;
 
 public interface ITeacherService {
 

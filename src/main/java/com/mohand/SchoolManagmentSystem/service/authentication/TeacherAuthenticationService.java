@@ -6,16 +6,13 @@ import com.mohand.SchoolManagmentSystem.exception.user.password.WeakPasswordExce
 import com.mohand.SchoolManagmentSystem.exception.user.verificationCode.AccountAlreadyVerifiedException;
 import com.mohand.SchoolManagmentSystem.exception.user.verificationCode.VerificationCodeExpiredException;
 import com.mohand.SchoolManagmentSystem.exception.user.verificationCode.VerificationCodeInvalidException;
-import com.mohand.SchoolManagmentSystem.model.Teacher;
-import com.mohand.SchoolManagmentSystem.model.Teacher;
-import com.mohand.SchoolManagmentSystem.model.User;
+import com.mohand.SchoolManagmentSystem.model.user.Teacher;
 import com.mohand.SchoolManagmentSystem.request.authentication.LogInUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.RegisterUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.VerifyUserRequest;
 import com.mohand.SchoolManagmentSystem.response.LoginResponse;
 import com.mohand.SchoolManagmentSystem.service.EmailService;
 import com.mohand.SchoolManagmentSystem.service.JwtService;
-import com.mohand.SchoolManagmentSystem.service.teacher.ITeacherService;
 import com.mohand.SchoolManagmentSystem.service.teacher.ITeacherService;
 import com.mohand.SchoolManagmentSystem.service.user.IUserService;
 import com.mohand.SchoolManagmentSystem.util.Util;

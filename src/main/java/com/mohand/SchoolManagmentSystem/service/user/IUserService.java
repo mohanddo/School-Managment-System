@@ -1,6 +1,6 @@
 package com.mohand.SchoolManagmentSystem.service.user;
 
-import com.mohand.SchoolManagmentSystem.model.User;
+import com.mohand.SchoolManagmentSystem.model.user.User;
 import com.mohand.SchoolManagmentSystem.request.password.ChangePasswordRequest;
 
 import java.security.Principal;

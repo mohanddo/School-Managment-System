@@ -25,10 +25,14 @@ public interface ICourseService {
 
 
     void addOrRemoveCourseFromFavourite(Long studentId, Long courseId);
+    void addOrRemoveCourseFromCart(Long studentId, Long courseId);
 
     void createOrUpdateCourseReview(CreateOrUpdateCourseReviewRequest request, Long studentId);
     void deleteCourseReview(Long courseId, Long studentId);
 
     void createOrUpdateAnnouncement(CreateOrUpdateAnnouncementRequest request, Long teacherId);
     void deleteAnnouncement(Long announcementId, Long courseId, Long teacherId);
+
+    void createOrUpdateAnnouncementComment(Long announcementId, Long commentId, Long studentId);
+    void deleteAnnouncementComment(Long announcementId, Long commentId, Long studentId);
 }

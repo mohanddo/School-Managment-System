@@ -1,5 +1,6 @@
 package com.mohand.SchoolManagmentSystem.model;
 
+import com.mohand.SchoolManagmentSystem.model.comment.Comment;
 import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
 

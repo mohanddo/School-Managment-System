@@ -1,7 +1,6 @@
 package com.mohand.SchoolManagmentSystem.repository;
 
-import com.mohand.SchoolManagmentSystem.model.Student;
-import com.mohand.SchoolManagmentSystem.model.Teacher;
+import com.mohand.SchoolManagmentSystem.model.user.Teacher;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,7 +1,10 @@
-package com.mohand.SchoolManagmentSystem.model;
+package com.mohand.SchoolManagmentSystem.model.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mohand.SchoolManagmentSystem.enums.Role;
+import com.mohand.SchoolManagmentSystem.model.*;
+import com.mohand.SchoolManagmentSystem.model.comment.Comment;
+import com.mohand.SchoolManagmentSystem.model.comment.UpVoteComment;
 import com.mohand.SchoolManagmentSystem.model.course.AnnouncementComment;
 import com.mohand.SchoolManagmentSystem.model.course.Course;
 import com.mohand.SchoolManagmentSystem.model.course.CourseReview;

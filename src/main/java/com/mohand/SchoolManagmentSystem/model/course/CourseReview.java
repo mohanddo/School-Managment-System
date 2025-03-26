@@ -1,13 +1,12 @@
 package com.mohand.SchoolManagmentSystem.model.course;
 
-import com.mohand.SchoolManagmentSystem.enums.PricingModel;
 import com.mohand.SchoolManagmentSystem.enums.Review;
-import com.mohand.SchoolManagmentSystem.model.Student;
-import com.mohand.SchoolManagmentSystem.model.Teacher;
+import com.mohand.SchoolManagmentSystem.model.user.Student;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,7 +21,7 @@ public class CourseReview {
     private Long id;
     private Review review;
     private String comment;
-    private LocalDate dateOfCreation;
+    private LocalDateTime dateOfCreation;
 
     @ManyToOne
     @JoinColumn(name = "student_id")
@@ -34,7 +33,7 @@ public class CourseReview {
 
     public static CourseReviewBuilder builder(String comment, Review review, Student student, Course course) {
         return hiddenBuilder()
-                .dateOfCreation(LocalDate.now())
+                .dateOfCreation(LocalDateTime.now())
                 .comment(comment)
                 .review(review)
                 .student(student)

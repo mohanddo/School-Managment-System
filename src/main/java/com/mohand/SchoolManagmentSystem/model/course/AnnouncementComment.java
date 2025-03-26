@@ -1,7 +1,7 @@
 package com.mohand.SchoolManagmentSystem.model.course;
 
-import com.mohand.SchoolManagmentSystem.model.Student;
-import com.mohand.SchoolManagmentSystem.model.Teacher;
+import com.mohand.SchoolManagmentSystem.model.user.Student;
+import com.mohand.SchoolManagmentSystem.model.user.Teacher;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.AssertTrue;
 import lombok.NoArgsConstructor;
@@ -16,6 +16,20 @@ public class AnnouncementComment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    public AnnouncementComment(Student student, String text, Announcement announcement) {
+        this.student = student;
+        this.text = text;
+        this.announcement = announcement;
+        this.dateOfCreation = LocalDateTime.now();
+    }
+
+    public AnnouncementComment(Teacher teacher, Announcement announcement, String text) {
+        this.teacher = teacher;
+        this.announcement = announcement;
+        this.text = text;
+        this.dateOfCreation = LocalDateTime.now();
+    }
 
     @ManyToOne
     @JoinColumn(name = "student_id")

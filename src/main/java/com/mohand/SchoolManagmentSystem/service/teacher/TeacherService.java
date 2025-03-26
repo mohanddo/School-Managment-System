@@ -1,7 +1,7 @@
 package com.mohand.SchoolManagmentSystem.service.teacher;
 
 import com.mohand.SchoolManagmentSystem.exception.user.account.AccountNotFoundException;
-import com.mohand.SchoolManagmentSystem.model.Teacher;
+import com.mohand.SchoolManagmentSystem.model.user.Teacher;
 import com.mohand.SchoolManagmentSystem.repository.TeacherRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

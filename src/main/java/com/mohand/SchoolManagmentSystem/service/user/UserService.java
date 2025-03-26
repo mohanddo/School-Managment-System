@@ -5,8 +5,7 @@ import com.mohand.SchoolManagmentSystem.exception.user.password.ChangePasswordEx
 import com.mohand.SchoolManagmentSystem.exception.user.password.WeakPasswordException;
 import com.mohand.SchoolManagmentSystem.exception.user.password.WrongPasswordException;
 import com.mohand.SchoolManagmentSystem.model.PasswordResetToken;
-import com.mohand.SchoolManagmentSystem.model.Student;
-import com.mohand.SchoolManagmentSystem.model.User;
+import com.mohand.SchoolManagmentSystem.model.user.User;
 import com.mohand.SchoolManagmentSystem.repository.PasswordResetTokenRepository;
 import com.mohand.SchoolManagmentSystem.repository.UserRepository;
 import com.mohand.SchoolManagmentSystem.request.password.ChangePasswordRequest;

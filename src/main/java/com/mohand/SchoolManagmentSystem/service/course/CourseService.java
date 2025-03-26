@@ -4,10 +4,11 @@ import com.mohand.SchoolManagmentSystem.exception.announcement.AnnouncementNotFo
 import com.mohand.SchoolManagmentSystem.exception.course.CourseNotFoundException;
 import com.mohand.SchoolManagmentSystem.exception.courseReview.CourseReviewNotFoundException;
 import com.mohand.SchoolManagmentSystem.exception.user.account.AccountNotFoundException;
-import com.mohand.SchoolManagmentSystem.model.Student;
+import com.mohand.SchoolManagmentSystem.model.Cart;
+import com.mohand.SchoolManagmentSystem.model.user.Student;
 import com.mohand.SchoolManagmentSystem.model.course.Announcement;
 import com.mohand.SchoolManagmentSystem.model.course.Course;
-import com.mohand.SchoolManagmentSystem.model.Teacher;
+import com.mohand.SchoolManagmentSystem.model.user.Teacher;
 import com.mohand.SchoolManagmentSystem.model.course.CourseReview;
 import com.mohand.SchoolManagmentSystem.model.course.FavoriteCourse;
 import com.mohand.SchoolManagmentSystem.repository.*;
@@ -36,6 +37,7 @@ public class CourseService implements ICourseService {
     private final CourseReviewRepository courseReviewRepository;
     private final AnnouncementRepository announcementRepository;
     private final AnnouncementCommentRepository announcementCommentRepository;
+    private final CartRepository cartRepository;
     private final ModelMapper modelMapper;
 
     @Override
@@ -130,6 +132,20 @@ public class CourseService implements ICourseService {
 
     @Override
     @Transactional
+    public void addOrRemoveCourseFromCart(Long studentId, Long courseId) {
+        Student student = studentService.getById(studentId);
+        Course course = getById(courseId);
+
+        if(cartRepository.existsByStudentIdAndCourseId(studentId, courseId)) {
+            cartRepository.deleteByStudentIdAndCourseId(studentId, courseId);
+            return;
+        }
+
+        cartRepository.save(new Cart(student, course));
+    }
+
+    @Override
+    @Transactional
     public void createOrUpdateCourseReview(CreateOrUpdateCourseReviewRequest request, Long studentId) {
         Student student = studentService.getById(studentId);
         Course course = getById(request.courseId());
@@ -206,6 +222,16 @@ public class CourseService implements ICourseService {
         } else {
             throw new CourseNotFoundException();
         }
+
+    }
+
+    @Override
+    public void createOrUpdateAnnouncementComment(Long announcementId, Long commentId, Long studentId) {
+
+    }
+
+    @Override
+    public void deleteAnnouncementComment(Long announcementId, Long commentId, Long studentId) {
 
     }
 

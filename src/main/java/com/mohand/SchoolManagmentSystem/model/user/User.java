@@ -1,6 +1,7 @@
-package com.mohand.SchoolManagmentSystem.model;
+package com.mohand.SchoolManagmentSystem.model.user;
 
 import com.mohand.SchoolManagmentSystem.enums.Role;
+import com.mohand.SchoolManagmentSystem.model.PasswordResetToken;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

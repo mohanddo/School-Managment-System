@@ -1,7 +1,7 @@
 package com.mohand.SchoolManagmentSystem.repository;
 
 import com.mohand.SchoolManagmentSystem.model.PasswordResetToken;
-import com.mohand.SchoolManagmentSystem.model.Student;
+import com.mohand.SchoolManagmentSystem.model.user.Student;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

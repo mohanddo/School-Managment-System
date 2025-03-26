@@ -1,4 +1,4 @@
-package com.mohand.SchoolManagmentSystem.model;
+package com.mohand.SchoolManagmentSystem.model.user;
 
 import com.mohand.SchoolManagmentSystem.enums.Role;
 import jakarta.persistence.Entity;

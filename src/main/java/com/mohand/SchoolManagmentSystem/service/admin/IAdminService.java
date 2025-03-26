@@ -1,6 +1,6 @@
 package com.mohand.SchoolManagmentSystem.service.admin;
 
-import com.mohand.SchoolManagmentSystem.model.Admin;
+import com.mohand.SchoolManagmentSystem.model.user.Admin;
 
 public interface IAdminService {
     Admin readAdminById(Long id);

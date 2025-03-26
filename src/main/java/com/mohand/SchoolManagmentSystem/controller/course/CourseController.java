@@ -1,7 +1,6 @@
 package com.mohand.SchoolManagmentSystem.controller.course;
 
-import com.mohand.SchoolManagmentSystem.model.User;
-import com.mohand.SchoolManagmentSystem.model.course.CourseReview;
+import com.mohand.SchoolManagmentSystem.model.user.User;
 import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnouncementRequest;
 import com.mohand.SchoolManagmentSystem.request.course.CreateCourseRequest;
 import com.mohand.SchoolManagmentSystem.request.course.CreateOrUpdateCourseReviewRequest;
@@ -9,7 +8,6 @@ import com.mohand.SchoolManagmentSystem.response.course.CoursePreview;
 import com.mohand.SchoolManagmentSystem.service.course.ICourseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -32,6 +30,13 @@ public class CourseController {
     private ResponseEntity<String> addOrRemoveCourseFromFavourite(@PathVariable Long courseId, Authentication authentication) {
         Long studentId = ( (User) ( authentication.getPrincipal() ) ).getId();
         courseService.addOrRemoveCourseFromFavourite(studentId, courseId);
+        return ResponseEntity.ok("Success");
+    }
+
+    @PutMapping("/addOrRemoveCourseFromCart/{courseId}")
+    private ResponseEntity<String> addOrRemoveCourseFromCart(@PathVariable Long courseId, Authentication authentication) {
+        Long studentId = ( (User) ( authentication.getPrincipal() ) ).getId();
+        courseService.addOrRemoveCourseFromCart(studentId, courseId);
         return ResponseEntity.ok("Success");
     }
 

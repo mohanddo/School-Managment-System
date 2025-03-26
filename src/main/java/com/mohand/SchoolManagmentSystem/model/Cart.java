@@ -1,6 +1,7 @@
 package com.mohand.SchoolManagmentSystem.model;
 
 import com.mohand.SchoolManagmentSystem.model.course.Course;
+import com.mohand.SchoolManagmentSystem.model.user.Student;
 import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
 
@@ -8,6 +9,12 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = {"student_id", "course_id"}) } )
 public class Cart {
+
+    public Cart(Student student, Course course) {
+        this.student = student;
+        this.course = course;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

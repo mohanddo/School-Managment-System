@@ -2,6 +2,7 @@ package com.mohand.SchoolManagmentSystem.model;
 
 
 import com.mohand.SchoolManagmentSystem.enums.OrderStatus;
+import com.mohand.SchoolManagmentSystem.model.user.Student;
 import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
 
