@@ -1,6 +1,8 @@
 package com.mohand.SchoolManagmentSystem.controller;
 
 import com.mohand.SchoolManagmentSystem.exception.InvalidEnumValueException;
+import com.mohand.SchoolManagmentSystem.exception.announcement.AnnouncementException;
+import com.mohand.SchoolManagmentSystem.exception.announcement.AnnouncementNotFoundException;
 import com.mohand.SchoolManagmentSystem.exception.course.CourseException;
 import com.mohand.SchoolManagmentSystem.exception.course.CourseNotFoundException;
 import com.mohand.SchoolManagmentSystem.exception.courseReview.CourseReviewException;
@@ -117,6 +119,19 @@ public class GlobalExceptionHandler {
 
 
         if (exception instanceof CourseReviewNotFoundException) {
+            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+        }
+
+        return errorDetail;
+    }
+
+    @ExceptionHandler(AnnouncementException.class)
+    public ProblemDetail handleAnnouncementExceptionException(AnnouncementException exception) {
+        exception.printStackTrace();
+        ProblemDetail errorDetail = null;
+
+
+        if (exception instanceof AnnouncementNotFoundException) {
             errorDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
         }
 

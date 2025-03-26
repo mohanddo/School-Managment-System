@@ -1,16 +1,17 @@
 package com.mohand.SchoolManagmentSystem.service.course;
 
+import com.mohand.SchoolManagmentSystem.exception.announcement.AnnouncementNotFoundException;
 import com.mohand.SchoolManagmentSystem.exception.course.CourseNotFoundException;
 import com.mohand.SchoolManagmentSystem.exception.courseReview.CourseReviewNotFoundException;
 import com.mohand.SchoolManagmentSystem.exception.user.account.AccountNotFoundException;
 import com.mohand.SchoolManagmentSystem.model.Student;
+import com.mohand.SchoolManagmentSystem.model.course.Announcement;
 import com.mohand.SchoolManagmentSystem.model.course.Course;
 import com.mohand.SchoolManagmentSystem.model.Teacher;
 import com.mohand.SchoolManagmentSystem.model.course.CourseReview;
 import com.mohand.SchoolManagmentSystem.model.course.FavoriteCourse;
-import com.mohand.SchoolManagmentSystem.repository.CourseRepository;
-import com.mohand.SchoolManagmentSystem.repository.CourseReviewRepository;
-import com.mohand.SchoolManagmentSystem.repository.FavoriteCourseRepository;
+import com.mohand.SchoolManagmentSystem.repository.*;
+import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnouncementRequest;
 import com.mohand.SchoolManagmentSystem.request.course.CreateCourseRequest;
 import com.mohand.SchoolManagmentSystem.request.course.CreateOrUpdateCourseReviewRequest;
 import com.mohand.SchoolManagmentSystem.response.course.CoursePreview;
@@ -33,6 +34,8 @@ public class CourseService implements ICourseService {
     private final StudentService studentService;
     private final FavoriteCourseRepository favoriteCourseRepository;
     private final CourseReviewRepository courseReviewRepository;
+    private final AnnouncementRepository announcementRepository;
+    private final AnnouncementCommentRepository announcementCommentRepository;
     private final ModelMapper modelMapper;
 
     @Override
@@ -159,6 +162,51 @@ public class CourseService implements ICourseService {
         } else {
             throw new CourseReviewNotFoundException(courseId.toString(), studentId.toString());
         }
+    }
+
+    @Override
+    public void createOrUpdateAnnouncement(CreateOrUpdateAnnouncementRequest request, Long teacherId) {
+
+        if (!teacherService.checkIfExistById(teacherId)) {
+            throw new AccountNotFoundException();
+        }
+
+        if (courseRepository.existsByIdAndTeacherId(request.courseId(), teacherId)) {
+            if (request.announcementId() == null) {
+                Course course = getById(request.courseId());
+                Announcement announcement = new Announcement(request.text(), course);
+                announcementRepository.save(announcement);
+            } else {
+                announcementRepository.findByIdAndCourseId(request.announcementId(), request.courseId()).ifPresentOrElse((announcement) -> {
+                    announcement.setText(request.text());
+                    announcementRepository.save(announcement);
+                }, () -> {
+                    throw new AnnouncementNotFoundException(request.announcementId().toString(), request.courseId().toString());
+                });
+            }
+        } else {
+            throw new CourseNotFoundException();
+        }
+    }
+
+
+    @Override
+    public void deleteAnnouncement(Long announcementId, Long courseId, Long teacherId) {
+
+        if (!teacherService.checkIfExistById(teacherId)) {
+            throw new AccountNotFoundException();
+        }
+
+        if (courseRepository.existsByIdAndTeacherId(courseId, teacherId)) {
+            if(announcementRepository.existsByIdAndCourseId(announcementId, courseId)) {
+                announcementRepository.deleteById(announcementId);
+            } else {
+                throw new AnnouncementNotFoundException(announcementId.toString(), courseId.toString());
+            }
+        } else {
+            throw new CourseNotFoundException();
+        }
+
     }
 
 }

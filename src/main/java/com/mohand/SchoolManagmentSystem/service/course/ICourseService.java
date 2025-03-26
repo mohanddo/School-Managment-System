@@ -1,6 +1,7 @@
 package com.mohand.SchoolManagmentSystem.service.course;
 
 import com.mohand.SchoolManagmentSystem.model.course.Course;
+import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnouncementRequest;
 import com.mohand.SchoolManagmentSystem.request.course.CreateCourseRequest;
 import com.mohand.SchoolManagmentSystem.request.course.CreateOrUpdateCourseReviewRequest;
 import com.mohand.SchoolManagmentSystem.response.course.CoursePreview;
@@ -27,4 +28,7 @@ public interface ICourseService {
 
     void createOrUpdateCourseReview(CreateOrUpdateCourseReviewRequest request, Long studentId);
     void deleteCourseReview(Long courseId, Long studentId);
+
+    void createOrUpdateAnnouncement(CreateOrUpdateAnnouncementRequest request, Long teacherId);
+    void deleteAnnouncement(Long announcementId, Long courseId, Long teacherId);
 }

@@ -1,17 +1,27 @@
 package com.mohand.SchoolManagmentSystem.model.course;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @NoArgsConstructor
+@Getter
+@Setter
 public class Announcement {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    public Announcement(String text, Course course) {
+        this.text = text;
+        this.course = course;
+        this.dateOfCreation = LocalDateTime.now();
+    }
 
     @Column(nullable = false)
     private String text;

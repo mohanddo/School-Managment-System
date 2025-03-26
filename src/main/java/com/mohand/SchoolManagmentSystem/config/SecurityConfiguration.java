@@ -57,7 +57,8 @@ public class SecurityConfiguration {
 //                                .requestMatchers("/api/v1/auth/teacher/signup", "/api/v1/auth/admin/signup")
 //                                .hasAuthority(Role.ROLE_ADMIN.getValue())
 
-                                .requestMatchers("/api/v1/course/create", "/api/v1/course/delete/**")
+                                .requestMatchers("/api/v1/course/create", "/api/v1/course/delete/**",
+                                        "/api/v1/course/announcement/createOrUpdate", "/api/v1/course/announcement/delete/**")
                                 .hasAuthority(Role.ROLE_TEACHER.getValue())
 
                                 .requestMatchers("/api/v1/course/addOrRemoveCourseFromFavorite/**",
