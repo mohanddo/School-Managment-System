@@ -11,11 +11,11 @@ public interface IStudentService {
 
     Student save(Student student);
 
-    boolean checkIfStudentExist(String email);
-
     List<Student> getAllStudents();
 
     boolean checkIfExistByEmail(String email);
+
+    boolean checkIfExistById(Long id);
 
     Student getById(Long id);
 }

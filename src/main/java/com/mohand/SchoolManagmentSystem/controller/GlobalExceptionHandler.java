@@ -1,8 +1,10 @@
 package com.mohand.SchoolManagmentSystem.controller;
 
+import com.mohand.SchoolManagmentSystem.exception.InvalidEnumValueException;
 import com.mohand.SchoolManagmentSystem.exception.course.CourseException;
 import com.mohand.SchoolManagmentSystem.exception.course.CourseNotFoundException;
-import com.mohand.SchoolManagmentSystem.exception.pricingModel.InvalidPricingModelException;
+import com.mohand.SchoolManagmentSystem.exception.courseReview.CourseReviewException;
+import com.mohand.SchoolManagmentSystem.exception.courseReview.CourseReviewNotFoundException;
 import com.mohand.SchoolManagmentSystem.exception.user.account.AccountAlreadyExistException;
 import com.mohand.SchoolManagmentSystem.exception.user.account.AccountException;
 import com.mohand.SchoolManagmentSystem.exception.user.account.AccountNotEnabledException;
@@ -98,12 +100,25 @@ public class GlobalExceptionHandler {
         return errorDetail;
     }
 
-    @ExceptionHandler(InvalidPricingModelException.class)
-    public ProblemDetail handleInvalidPricingModelException(InvalidPricingModelException exception) {
+    @ExceptionHandler(InvalidEnumValueException.class)
+    public ProblemDetail handleInvalidPricingModelException(InvalidEnumValueException exception) {
         exception.printStackTrace();
         ProblemDetail errorDetail = null;
 
         errorDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+
+        return errorDetail;
+    }
+
+    @ExceptionHandler(CourseReviewException.class)
+    public ProblemDetail handleCourseReviewException(CourseReviewException exception) {
+        exception.printStackTrace();
+        ProblemDetail errorDetail = null;
+
+
+        if (exception instanceof CourseReviewNotFoundException) {
+            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+        }
 
         return errorDetail;
     }

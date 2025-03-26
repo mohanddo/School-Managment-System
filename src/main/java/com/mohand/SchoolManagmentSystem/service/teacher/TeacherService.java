@@ -31,7 +31,12 @@ public class TeacherService implements ITeacherService {
     }
 
     @Override
-    public boolean checkIfExist(String email) {
+    public boolean checkIfExistById(Long id) {
+        return teacherRepository.existsById(id);
+    }
+
+    @Override
+    public boolean checkIfExistByEmail(String email) {
         return teacherRepository.existsByEmail(email);
     }
 }

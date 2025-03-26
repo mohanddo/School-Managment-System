@@ -2,6 +2,7 @@ package com.mohand.SchoolManagmentSystem.service.course;
 
 import com.mohand.SchoolManagmentSystem.model.course.Course;
 import com.mohand.SchoolManagmentSystem.request.course.CreateCourseRequest;
+import com.mohand.SchoolManagmentSystem.request.course.CreateOrUpdateCourseReviewRequest;
 import com.mohand.SchoolManagmentSystem.response.course.CoursePreview;
 
 import java.time.LocalDate;
@@ -22,7 +23,8 @@ public interface ICourseService {
     Course getById(Long id);
 
 
-    void addCourseToFavourite(Long studentId, Long courseId);
-    void removeCourseFromFavourite(Long studentId, Long courseId);
+    void addOrRemoveCourseFromFavourite(Long studentId, Long courseId);
 
+    void createOrUpdateCourseReview(CreateOrUpdateCourseReviewRequest request, Long studentId);
+    void deleteCourseReview(Long courseId, Long studentId);
 }

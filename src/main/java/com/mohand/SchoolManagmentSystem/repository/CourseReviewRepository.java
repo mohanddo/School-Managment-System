@@ -1,13 +1,13 @@
 package com.mohand.SchoolManagmentSystem.repository;
 
-import com.mohand.SchoolManagmentSystem.model.course.FavoriteCourse;
+import com.mohand.SchoolManagmentSystem.model.course.CourseReview;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.Optional;
 
-public interface FavoriteCourseRepository extends JpaRepository<FavoriteCourse, Long> {
+public interface CourseReviewRepository extends JpaRepository<CourseReview, Long> {
     boolean existsByStudentIdAndCourseId(Long studentId, Long courseId);
-    @Transactional
+    Optional<CourseReview> findByStudentIdAndCourseId(Long studentId, Long courseId);
     void deleteByStudentIdAndCourseId(Long studentId, Long courseId);
 }

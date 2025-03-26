@@ -1,10 +1,14 @@
 package com.mohand.SchoolManagmentSystem.controller.course;
 
 import com.mohand.SchoolManagmentSystem.model.User;
+import com.mohand.SchoolManagmentSystem.model.course.CourseReview;
 import com.mohand.SchoolManagmentSystem.request.course.CreateCourseRequest;
+import com.mohand.SchoolManagmentSystem.request.course.CreateOrUpdateCourseReviewRequest;
 import com.mohand.SchoolManagmentSystem.response.course.CoursePreview;
 import com.mohand.SchoolManagmentSystem.service.course.ICourseService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -23,22 +27,15 @@ public class CourseController {
         return ResponseEntity.ok(courseService.getAll(studentId));
     }
 
-    @PostMapping("/addToFavorite/{courseId}")
-    private ResponseEntity<String> addToFavourite(@PathVariable Long courseId, Authentication authentication) {
+    @PutMapping("/addOrRemoveCourseFromFavorite/{courseId}")
+    private ResponseEntity<String> addOrRemoveCourseFromFavourite(@PathVariable Long courseId, Authentication authentication) {
         Long studentId = ( (User) ( authentication.getPrincipal() ) ).getId();
-        courseService.addCourseToFavourite(studentId, courseId);
-        return ResponseEntity.ok("Added to favourite");
-    }
-
-    @PostMapping("/removeFromFavorite/{courseId}")
-    private ResponseEntity<String> removeFromFavourite(@PathVariable Long courseId, Authentication authentication) {
-        Long studentId = ( (User) ( authentication.getPrincipal() ) ).getId();
-        courseService.removeCourseFromFavourite(studentId, courseId);
-        return ResponseEntity.ok("Removed from favourite");
+        courseService.addOrRemoveCourseFromFavourite(studentId, courseId);
+        return ResponseEntity.ok("Success");
     }
 
     @PostMapping("/create")
-    private ResponseEntity<String> createCourse(@RequestBody CreateCourseRequest request, Authentication authentication) {
+    private ResponseEntity<String> createCourse(@Valid @RequestBody CreateCourseRequest request, Authentication authentication) {
         Long teacherId = ( (User) ( authentication.getPrincipal() ) ).getId();
         courseService.create(request, teacherId);
         return ResponseEntity.ok("Course created successfully");
@@ -49,5 +46,19 @@ public class CourseController {
         Long teacherId = ( (User) ( authentication.getPrincipal() ) ).getId();
         courseService.delete(courseId, teacherId);
         return ResponseEntity.ok("Course deleted successfully");
+    }
+
+    @PutMapping("/courseReview/createOrUpdate")
+    private ResponseEntity<String> createCourseReview(Authentication authentication, @Valid @RequestBody CreateOrUpdateCourseReviewRequest request) {
+        Long studentId = ( (User) ( authentication.getPrincipal() ) ).getId();
+        courseService.createOrUpdateCourseReview(request, studentId);
+        return ResponseEntity.ok("Success");
+    }
+
+    @DeleteMapping("/courseReview/delete/{courseId}")
+    private ResponseEntity<String> deleteCourseReview(Authentication authentication, @PathVariable Long courseId) {
+        Long studentId = ( (User) ( authentication.getPrincipal() ) ).getId();
+        courseService.deleteCourseReview(courseId, studentId);
+        return ResponseEntity.ok("Course review deleted successfully");
     }
 }

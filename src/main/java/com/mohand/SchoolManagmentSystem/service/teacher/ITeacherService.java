@@ -8,5 +8,6 @@ public interface ITeacherService {
     Teacher save(Teacher teacher);
     Teacher getByEmail(String email);
 
-    boolean checkIfExist(String email);
+    boolean checkIfExistByEmail(String email);
+    boolean checkIfExistById(Long id);
 }

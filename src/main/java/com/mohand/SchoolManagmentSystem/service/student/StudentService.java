@@ -38,11 +38,6 @@ public class StudentService implements IStudentService {
     }
 
     @Override
-    public boolean checkIfStudentExist(String email) {
-        return studentRepository.existsByEmail(email);
-    }
-
-    @Override
     public List<Student> getAllStudents() {
         return studentRepository.findAll();
     }
@@ -50,6 +45,11 @@ public class StudentService implements IStudentService {
     @Override
     public boolean checkIfExistByEmail(String email) {
         return studentRepository.existsByEmail(email);
+    }
+
+    @Override
+    public boolean checkIfExistById(Long id) {
+        return studentRepository.existsById(id);
     }
 
     @Override

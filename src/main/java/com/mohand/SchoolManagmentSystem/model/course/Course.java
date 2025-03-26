@@ -6,10 +6,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.Check;
 
 import java.time.LocalDate;
@@ -19,6 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
+@Getter
 @Builder(builderMethodName = "hiddenBuilder")
 @Check(constraints = "(discount_expiration_date IS NOT NULL OR (discount_percentage = 0 AND discount_expiration_date IS NULL))")
 @Check(constraints = "(pricing_model = 2 AND price = 0) OR (pricing_model <> 2 AND price > 0)")
@@ -42,9 +40,6 @@ public class Course {
 
     @Column(nullable = false)
     private int numberOfReviews;
-
-    @Column(nullable = false)
-    private double rating;
 
     @Column(nullable = false)
     private double numberOfHours;
@@ -98,7 +93,6 @@ public class Course {
                 .price(price)
                 .pricingModel(pricingModel)
                 .numberOfReviews(0)
-                .rating(0)
                 .numberOfHours(0)
                 .imageUrl(imageUrl)
                 .introductionVideoUrl(introductionVideoUrl)
