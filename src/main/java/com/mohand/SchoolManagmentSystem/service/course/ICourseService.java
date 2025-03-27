@@ -1,6 +1,8 @@
 package com.mohand.SchoolManagmentSystem.service.course;
 
 import com.mohand.SchoolManagmentSystem.model.course.Course;
+import com.mohand.SchoolManagmentSystem.model.user.User;
+import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnouncementCommentRequest;
 import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnouncementRequest;
 import com.mohand.SchoolManagmentSystem.request.course.CreateCourseRequest;
 import com.mohand.SchoolManagmentSystem.request.course.CreateOrUpdateCourseReviewRequest;
@@ -33,6 +35,9 @@ public interface ICourseService {
     void createOrUpdateAnnouncement(CreateOrUpdateAnnouncementRequest request, Long teacherId);
     void deleteAnnouncement(Long announcementId, Long courseId, Long teacherId);
 
-    void createOrUpdateAnnouncementComment(Long announcementId, Long commentId, Long studentId);
-    void deleteAnnouncementComment(Long announcementId, Long commentId, Long studentId);
+    void createOrUpdateAnnouncementComment(CreateOrUpdateAnnouncementCommentRequest request, User user);
+    void deleteAnnouncementComment(Long announcementId, Long courseId, Long commentId, User user);
+
+
+    boolean existsByIdAndStudentId(Long id, Long studentId);
 }

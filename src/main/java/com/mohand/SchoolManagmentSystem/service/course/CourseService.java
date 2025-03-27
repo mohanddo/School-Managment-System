@@ -1,17 +1,16 @@
 package com.mohand.SchoolManagmentSystem.service.course;
 
+import com.mohand.SchoolManagmentSystem.exception.announcement.AnnouncementCommentNotFoundException;
 import com.mohand.SchoolManagmentSystem.exception.announcement.AnnouncementNotFoundException;
 import com.mohand.SchoolManagmentSystem.exception.course.CourseNotFoundException;
 import com.mohand.SchoolManagmentSystem.exception.courseReview.CourseReviewNotFoundException;
-import com.mohand.SchoolManagmentSystem.exception.user.account.AccountNotFoundException;
 import com.mohand.SchoolManagmentSystem.model.Cart;
+import com.mohand.SchoolManagmentSystem.model.course.*;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
-import com.mohand.SchoolManagmentSystem.model.course.Announcement;
-import com.mohand.SchoolManagmentSystem.model.course.Course;
 import com.mohand.SchoolManagmentSystem.model.user.Teacher;
-import com.mohand.SchoolManagmentSystem.model.course.CourseReview;
-import com.mohand.SchoolManagmentSystem.model.course.FavoriteCourse;
+import com.mohand.SchoolManagmentSystem.model.user.User;
 import com.mohand.SchoolManagmentSystem.repository.*;
+import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnouncementCommentRequest;
 import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnouncementRequest;
 import com.mohand.SchoolManagmentSystem.request.course.CreateCourseRequest;
 import com.mohand.SchoolManagmentSystem.request.course.CreateOrUpdateCourseReviewRequest;
@@ -49,10 +48,6 @@ public class CourseService implements ICourseService {
     }
     @Override
     public void delete(Long courseId, Long teacherId) {
-
-        if (teacherService.checkIfExistById(teacherId)) {
-            throw new AccountNotFoundException();
-        }
 
         if (courseRepository.existsByIdAndTeacherId(courseId, teacherId)) {
             courseRepository.deleteById(courseId);
@@ -169,10 +164,6 @@ public class CourseService implements ICourseService {
     @Transactional
     public void deleteCourseReview(Long courseId, Long studentId) {
 
-        if (!studentService.checkIfExistById(studentId)) {
-            throw new AccountNotFoundException();
-        }
-
         if (courseReviewRepository.existsByStudentIdAndCourseId(studentId, courseId)) {
             courseReviewRepository.deleteByStudentIdAndCourseId(studentId, courseId);
         } else {
@@ -182,10 +173,6 @@ public class CourseService implements ICourseService {
 
     @Override
     public void createOrUpdateAnnouncement(CreateOrUpdateAnnouncementRequest request, Long teacherId) {
-
-        if (!teacherService.checkIfExistById(teacherId)) {
-            throw new AccountNotFoundException();
-        }
 
         if (courseRepository.existsByIdAndTeacherId(request.courseId(), teacherId)) {
             if (request.announcementId() == null) {
@@ -209,10 +196,6 @@ public class CourseService implements ICourseService {
     @Override
     public void deleteAnnouncement(Long announcementId, Long courseId, Long teacherId) {
 
-        if (!teacherService.checkIfExistById(teacherId)) {
-            throw new AccountNotFoundException();
-        }
-
         if (courseRepository.existsByIdAndTeacherId(courseId, teacherId)) {
             if(announcementRepository.existsByIdAndCourseId(announcementId, courseId)) {
                 announcementRepository.deleteById(announcementId);
@@ -226,13 +209,54 @@ public class CourseService implements ICourseService {
     }
 
     @Override
-    public void createOrUpdateAnnouncementComment(Long announcementId, Long commentId, Long studentId) {
+    public void createOrUpdateAnnouncementComment(CreateOrUpdateAnnouncementCommentRequest request, User user) {
 
+        if (!courseRepository.existsByIdAndTeacherId(request.courseId(), user.getId()) && !existsByIdAndStudentId(request.courseId(), user.getId())) {
+            throw new CourseNotFoundException();
+        }
+
+        Announcement announcement = announcementRepository
+                .findByIdAndCourseId(request.announcementId(), request.courseId())
+                .orElseThrow(() -> new AnnouncementNotFoundException(request.announcementId().toString(), request.courseId().toString()));
+
+        if (request.commentId() == null) {
+            AnnouncementComment announcementComment = new AnnouncementComment(user, announcement, request.comment());
+            announcementCommentRepository.save(announcementComment);
+            return;
+        }
+
+        announcementCommentRepository.findByIdAndAnnouncementId(request.commentId(), request.announcementId()).ifPresentOrElse((announcementComment) -> {
+            announcementComment.setText(request.comment());
+            announcementCommentRepository.save(announcementComment);
+        }, () -> {
+            throw new AnnouncementCommentNotFoundException(request.announcementId().toString(), request.commentId().toString());
+        });
     }
 
     @Override
-    public void deleteAnnouncementComment(Long announcementId, Long commentId, Long studentId) {
+    public void deleteAnnouncementComment(Long announcementId, Long courseId, Long commentId, User user) {
+        if (!courseRepository.existsByIdAndTeacherId(courseId, user.getId()) && !existsByIdAndStudentId(courseId, user.getId())) {
+            throw new CourseNotFoundException();
+        }
 
+        if(!announcementRepository.existsByIdAndCourseId(announcementId, courseId)) {
+            throw new AnnouncementNotFoundException(announcementId.toString(), courseId.toString());
+        }
+
+        if(!announcementCommentRepository.existsByIdAndAnnouncementId(commentId, announcementId)) {
+            throw new AnnouncementCommentNotFoundException(announcementId.toString(), commentId.toString());
+        }
+
+        announcementCommentRepository.deleteById(commentId);
     }
+
+
+    @Override
+    public boolean existsByIdAndStudentId(Long id, Long studentId) {
+        Student student = studentService.getById(studentId);
+        Course course = getById(id);
+        return student.getCourses().contains(course) && course.getStudents().contains(student);
+    }
+
 
 }

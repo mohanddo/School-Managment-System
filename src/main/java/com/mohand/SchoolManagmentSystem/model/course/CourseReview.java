@@ -19,6 +19,7 @@ public class CourseReview {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Enumerated(EnumType.STRING)
     private Review review;
     private String comment;
     private LocalDateTime dateOfCreation;

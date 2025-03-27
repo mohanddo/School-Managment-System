@@ -65,7 +65,10 @@ public class SecurityConfiguration {
                                         "/api/v1/course/addOrRemoveCourseFromCart/**",
                                         "/api/v1/course/courseReview/createOrUpdate",
                                         "/api/v1/course/courseReview/delete/**")
-                                .hasAuthority(Role.ROLE_STUDENT.getValue())
+                                .hasAuthority(Role.ROLE_STUDENT.getValue()).
+
+                                requestMatchers("/api/v1/course/announcementComment/createOrUpdate", "/api/v1/course/announcementComment/delete/**")
+                                .hasAnyAuthority(Role.ROLE_TEACHER.getValue(), Role.ROLE_STUDENT.getValue())
 
                                 .anyRequest().authenticated()
                 )

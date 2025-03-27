@@ -1,6 +1,7 @@
 package com.mohand.SchoolManagmentSystem.service.student;
 
 import com.mohand.SchoolManagmentSystem.exception.user.account.AccountNotFoundException;
+import com.mohand.SchoolManagmentSystem.model.course.Course;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
 import com.mohand.SchoolManagmentSystem.repository.PasswordResetTokenRepository;
 import com.mohand.SchoolManagmentSystem.repository.StudentRepository;
@@ -45,6 +46,5 @@ public class StudentService implements IStudentService {
     public Student getById(Long id) {
         return studentRepository.findById(id).orElseThrow(AccountNotFoundException::new);
     }
-
 
 }

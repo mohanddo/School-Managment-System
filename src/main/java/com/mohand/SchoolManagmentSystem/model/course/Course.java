@@ -21,7 +21,7 @@ import java.util.List;
 @Getter
 @Builder(builderMethodName = "hiddenBuilder")
 @Check(constraints = "(discount_expiration_date IS NOT NULL OR (discount_percentage = 0 AND discount_expiration_date IS NULL))")
-@Check(constraints = "(pricing_model = 2 AND price = 0) OR (pricing_model <> 2 AND price > 0)")
+@Check(constraints = "(pricing_model = 'FREE' AND price = 0) OR (pricing_model <> 'FREE' AND price > 0)")
 public class Course {
 
     @Id
@@ -60,6 +60,7 @@ public class Course {
     private LocalDate discountExpirationDate;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private PricingModel pricingModel;
 
 

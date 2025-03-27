@@ -67,9 +67,6 @@ public class Student extends User {
     @OneToMany(mappedBy = "student")
     private List<Purchase> purchases;
 
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AnnouncementComment> announcementComments;
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(

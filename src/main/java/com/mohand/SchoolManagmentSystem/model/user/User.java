@@ -2,6 +2,7 @@ package com.mohand.SchoolManagmentSystem.model.user;
 
 import com.mohand.SchoolManagmentSystem.enums.Role;
 import com.mohand.SchoolManagmentSystem.model.PasswordResetToken;
+import com.mohand.SchoolManagmentSystem.model.course.AnnouncementComment;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -58,11 +59,14 @@ public abstract class User implements UserDetails {
     private LocalDateTime verificationCodeExpiresAt;
 
     @Column(nullable = false)
-//    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.STRING)
     private Role role;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private PasswordResetToken passwordResetToken;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AnnouncementComment> announcementComments;
 
     @Override
     public String getUsername() {

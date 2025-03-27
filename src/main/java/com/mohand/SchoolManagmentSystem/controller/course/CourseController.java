@@ -1,6 +1,7 @@
 package com.mohand.SchoolManagmentSystem.controller.course;
 
 import com.mohand.SchoolManagmentSystem.model.user.User;
+import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnouncementCommentRequest;
 import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnouncementRequest;
 import com.mohand.SchoolManagmentSystem.request.course.CreateCourseRequest;
 import com.mohand.SchoolManagmentSystem.request.course.CreateOrUpdateCourseReviewRequest;
@@ -79,6 +80,18 @@ public class CourseController {
     private ResponseEntity<String> deleteAnnouncement(Authentication authentication, @PathVariable Long announcementId, @PathVariable Long courseId) {
         Long teacherId = ( (User) ( authentication.getPrincipal() ) ).getId();
         courseService.deleteAnnouncement(announcementId, courseId, teacherId);
+        return ResponseEntity.ok("Announcement deleted successfully");
+    }
+
+    @PutMapping("/announcementComment/createOrUpdate")
+    private ResponseEntity<String> createOrUpdateAnnouncement(Authentication authentication, @Valid @RequestBody CreateOrUpdateAnnouncementCommentRequest request) {
+        courseService.createOrUpdateAnnouncementComment(request, (User) authentication.getPrincipal());
+        return ResponseEntity.ok("Success");
+    }
+
+    @DeleteMapping("/announcementComment/delete/{commentId}/{announcementId}/{courseId}")
+    private ResponseEntity<String> deleteAnnouncement(Authentication authentication, @PathVariable Long announcementId, @PathVariable Long courseId, @PathVariable Long commentId) {
+        courseService.deleteAnnouncementComment(announcementId, courseId, commentId, (User) authentication.getPrincipal());
         return ResponseEntity.ok("Announcement deleted successfully");
     }
 }
