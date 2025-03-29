@@ -48,21 +48,21 @@ public class TeacherAuthenticationService extends AuthenticationService {
     @Override
     public SignUpResponse signup(RegisterUserRequest input) {
 
-        if (userService.checkIfExist(input.getEmail())) {
+        if (userService.checkIfExist(input.email())) {
             throw new AccountAlreadyExistException();
         }
 
-        if (!Util.isValidPassword(input.getPassword())) {
+        if (!Util.isValidPassword(input.password())) {
             throw new WeakPasswordException();
         }
 
-
-            String sasToken = azureBlobService.createContainer(String.valueOf(Instant.now().getEpochSecond()));
-            Teacher teacher = new Teacher(input.getFirstName(), input.getLastName(), input.getEmail(),
-                    passwordEncoder.encode(input.getPassword()),
+            String containerName = String.valueOf(Instant.now().getEpochSecond());
+            azureBlobService.createContainer(containerName);
+            Teacher teacher = new Teacher(input.firstName(), input.lastName(), input.email(),
+                    passwordEncoder.encode(input.password()),
                     generateVerificationCode(),
                     LocalDateTime.now().plusSeconds(verificationCodeExpirationTime / 1000),
-                    sasToken);
+                    containerName);
             sendVerificationEmail(teacher.getEmail(), teacher.getVerificationCode());
             teacherService.save(teacher);
             return new SignUpResponse(teacher.getVerificationCode(), teacher.getVerificationCodeExpiresAt());
@@ -71,16 +71,19 @@ public class TeacherAuthenticationService extends AuthenticationService {
 
     @Override
     public com.mohand.SchoolManagmentSystem.response.authentication.Teacher authenticate(LogInUserRequest request) {
-        Teacher teacher = teacherService.getByEmail(request.getEmail());
+        Teacher teacher = teacherService.getByEmail(request.email());
 
         if (!teacher.isEnabled()) {
             throw new AccountNotEnabledException();
         }
 
+        String sasToken = azureBlobService.generateSASTokenForContainer(teacher.getContainerName());
+        teacher.setSasToken(sasToken);
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
+                        request.email(),
+                        request.password()
                 )
         );
 
@@ -92,7 +95,7 @@ public class TeacherAuthenticationService extends AuthenticationService {
 
     @Override
     public com.mohand.SchoolManagmentSystem.response.authentication.Teacher verifyUser(VerifyUserRequest request) {
-        Teacher teacher = teacherService.getByEmail(request.getEmail());
+        Teacher teacher = teacherService.getByEmail(request.email());
 
         if (teacher.isEnabled()) {
             throw new AccountAlreadyVerifiedException();
@@ -102,15 +105,15 @@ public class TeacherAuthenticationService extends AuthenticationService {
             throw new VerificationCodeExpiredException("Verification code has expired");
         }
 
-        if (teacher.getVerificationCode().equals(request.getVerificationCode())) {
+        String sasToken = azureBlobService.generateSASTokenForContainer(teacher.getContainerName());
+        teacher.setSasToken(sasToken);
+
+        if (teacher.getVerificationCode().equals(request.verificationCode())) {
             teacher.setEnabled(true);
             teacher.setVerificationCode(null);
             teacher.setVerificationCodeExpiresAt(null);
 
-            System.out.println("Before Mapping: " + teacher.getSasToken());
             com.mohand.SchoolManagmentSystem.response.authentication.Teacher teacherResponse = modelMapper.map(teacher, com.mohand.SchoolManagmentSystem.response.authentication.Teacher.class);
-            System.out.println("After Mapping: " + teacherResponse.getSasToken());
-
 
             String jwtToken = jwtService.generateToken(teacher);
             teacherResponse.setJwtToken(jwtToken);

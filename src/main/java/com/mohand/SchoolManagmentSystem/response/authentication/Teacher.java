@@ -30,4 +30,5 @@ public class Teacher extends User {
     private String instagramLink;
     private String description;
     private String sasToken;
+    private String baseUrl;
 }

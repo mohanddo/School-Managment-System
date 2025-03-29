@@ -6,6 +6,7 @@ import com.mohand.SchoolManagmentSystem.request.authentication.VerifyUserRequest
 import com.mohand.SchoolManagmentSystem.response.authentication.SignUpResponse;
 import com.mohand.SchoolManagmentSystem.response.authentication.Student;
 import com.mohand.SchoolManagmentSystem.service.authentication.StudentAuthenticationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -18,17 +19,17 @@ public class StudentAuthenticationController {
     private final StudentAuthenticationService studentAuthenticationService;
 
     @PostMapping("/signup")
-    public ResponseEntity<SignUpResponse> register(@RequestBody RegisterUserRequest request) {
+    public ResponseEntity<SignUpResponse> register(@Valid @RequestBody RegisterUserRequest request) {
             return ResponseEntity.ok(studentAuthenticationService.signup(request));
     }
 
         @PostMapping("/login")
-        public ResponseEntity<Student> authenticate(@RequestBody LogInUserRequest request) {
+        public ResponseEntity<Student> authenticate(@Valid @RequestBody LogInUserRequest request) {
                 return ResponseEntity.ok(studentAuthenticationService.authenticate(request));
         }
 
         @PostMapping("/verify")
-        public ResponseEntity<Student> verifyStudent(@RequestBody VerifyUserRequest request) {
+        public ResponseEntity<Student> verifyStudent(@Valid @RequestBody VerifyUserRequest request) {
             return ResponseEntity.ok(studentAuthenticationService.verifyUser(request));
         }
 

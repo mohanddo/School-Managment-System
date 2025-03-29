@@ -14,6 +14,9 @@ import com.azure.storage.common.sas.SasProtocol;
 import lombok.Getter;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
+
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 
 @Service
@@ -43,6 +46,8 @@ public class AzureBlobService {
                 .credential(credential)
                 .buildClient();
 
+        System.out.println(containerName);
+
         // Get the container client
         BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(containerName);
 
@@ -59,10 +64,11 @@ public class AzureBlobService {
                 .setProtocol(SasProtocol.HTTPS_ONLY)
                 .setStartTime(OffsetDateTime.now());
 
-        return containerClient.generateSas(sasValues);
+        String encodedSasToken = containerClient.generateSas(sasValues);
+        return URLDecoder.decode(encodedSasToken, StandardCharsets.UTF_8);
     }
 
-    public String createContainer(String containerName) {
+    public void createContainer(String containerName) {
         StorageSharedKeyCredential credential = new StorageSharedKeyCredential(accountName, accountKey);
 
         // Build the Blob Service Client
@@ -76,7 +82,6 @@ public class AzureBlobService {
 
         try {
             containerClient.create();
-            return generateSASTokenForContainer(containerName);
         } catch (BlobStorageException e) {
             e.printStackTrace();
             throw new RuntimeException(e);

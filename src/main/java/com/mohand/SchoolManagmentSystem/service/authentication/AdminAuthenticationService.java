@@ -38,16 +38,16 @@ public class AdminAuthenticationService extends AuthenticationService {
     @Override
     public SignUpResponse signup(RegisterUserRequest input) {
 
-        if (userService.checkIfExist(input.getEmail())) {
+        if (userService.checkIfExist(input.email())) {
             throw new AccountAlreadyExistException();
         }
 
-        if (!Util.isValidPassword(input.getPassword())) {
+        if (!Util.isValidPassword(input.password())) {
             throw new WeakPasswordException();
         }
 
-        Admin admin = new Admin(input.getFirstName(), input.getLastName(), input.getEmail(),
-                passwordEncoder.encode(input.getPassword()),
+        Admin admin = new Admin(input.firstName(), input.lastName(), input.email(),
+                passwordEncoder.encode(input.password()),
                 generateVerificationCode(),
                 LocalDateTime.now().plusSeconds(verificationCodeExpirationTime / 1000));
         sendVerificationEmail(admin.getEmail(), admin.getVerificationCode());
@@ -58,7 +58,7 @@ public class AdminAuthenticationService extends AuthenticationService {
 
     @Override
     public com.mohand.SchoolManagmentSystem.response.authentication.Admin authenticate(LogInUserRequest request) {
-        Admin admin = adminService.getByEmail(request.getEmail());
+        Admin admin = adminService.getByEmail(request.email());
 
         if (!admin.isEnabled()) {
             throw new AccountNotEnabledException();
@@ -66,8 +66,8 @@ public class AdminAuthenticationService extends AuthenticationService {
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
+                        request.email(),
+                        request.password()
                 )
         );
 
@@ -81,7 +81,7 @@ public class AdminAuthenticationService extends AuthenticationService {
 
     @Override
     public com.mohand.SchoolManagmentSystem.response.authentication.Admin verifyUser(VerifyUserRequest request) {
-        Admin admin = adminService.getByEmail(request.getEmail());
+        Admin admin = adminService.getByEmail(request.email());
 
         if (admin.isEnabled()) {
             throw new AccountAlreadyVerifiedException();
@@ -91,7 +91,7 @@ public class AdminAuthenticationService extends AuthenticationService {
             throw new VerificationCodeExpiredException("Verification code has expired");
         }
 
-        if (admin.getVerificationCode().equals(request.getVerificationCode())) {
+        if (admin.getVerificationCode().equals(request.verificationCode())) {
             admin.setEnabled(true);
             admin.setVerificationCode(null);
             admin.setVerificationCodeExpiresAt(null);

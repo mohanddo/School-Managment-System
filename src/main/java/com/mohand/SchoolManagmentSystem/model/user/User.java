@@ -4,6 +4,7 @@ import com.mohand.SchoolManagmentSystem.enums.Role;
 import com.mohand.SchoolManagmentSystem.model.PasswordResetToken;
 import com.mohand.SchoolManagmentSystem.model.course.AnnouncementComment;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

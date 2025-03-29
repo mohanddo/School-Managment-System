@@ -42,16 +42,16 @@ public class StudentAuthenticationService extends AuthenticationService {
     @Override
     public SignUpResponse signup(RegisterUserRequest input) {
 
-        if (userService.checkIfExist(input.getEmail())) {
+        if (userService.checkIfExist(input.email())) {
             throw new AccountAlreadyExistException();
         }
 
-        if (!Util.isValidPassword(input.getPassword())) {
+        if (!Util.isValidPassword(input.password())) {
             throw new WeakPasswordException();
         }
 
-        Student student = new Student(input.getFirstName(), input.getLastName(), input.getEmail(),
-                passwordEncoder.encode(input.getPassword()),
+        Student student = new Student(input.firstName(), input.lastName(), input.email(),
+                passwordEncoder.encode(input.password()),
                 generateVerificationCode(),
                 LocalDateTime.now().plusSeconds(verificationCodeExpirationTime / 1000));
         sendVerificationEmail(student.getEmail(), student.getVerificationCode());
@@ -62,7 +62,7 @@ public class StudentAuthenticationService extends AuthenticationService {
 
     @Override
     public com.mohand.SchoolManagmentSystem.response.authentication.Student authenticate(LogInUserRequest request) {
-        Student student = studentService.getByEmail(request.getEmail());
+        Student student = studentService.getByEmail(request.email());
 
         if (!student.isEnabled()) {
             throw new AccountNotEnabledException();
@@ -70,8 +70,8 @@ public class StudentAuthenticationService extends AuthenticationService {
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
+                        request.email(),
+                        request.password()
                 )
         );
 
@@ -86,7 +86,7 @@ public class StudentAuthenticationService extends AuthenticationService {
 
     @Override
     public com.mohand.SchoolManagmentSystem.response.authentication.Student verifyUser(VerifyUserRequest request) {
-        Student student = studentService.getByEmail(request.getEmail());
+        Student student = studentService.getByEmail(request.email());
 
         if (student.isEnabled()) {
             throw new AccountAlreadyVerifiedException();
@@ -96,7 +96,7 @@ public class StudentAuthenticationService extends AuthenticationService {
             throw new VerificationCodeExpiredException("Verification code has expired");
         }
 
-        if (student.getVerificationCode().equals(request.getVerificationCode())) {
+        if (student.getVerificationCode().equals(request.verificationCode())) {
             student.setEnabled(true);
             student.setVerificationCode(null);
             student.setVerificationCodeExpiresAt(null);

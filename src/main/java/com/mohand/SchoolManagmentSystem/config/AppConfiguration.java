@@ -1,6 +1,7 @@
 package com.mohand.SchoolManagmentSystem.config;
 
 import com.mohand.SchoolManagmentSystem.model.course.Course;
+import com.mohand.SchoolManagmentSystem.model.user.Teacher;
 import com.mohand.SchoolManagmentSystem.model.user.User;
 import com.mohand.SchoolManagmentSystem.repository.StudentRepository;
 import com.mohand.SchoolManagmentSystem.repository.UserRepository;
@@ -36,18 +37,21 @@ public class AppConfiguration {
         @Value("${chargily.pay.test.mode.secret.key}")
         private String chargilyPayTestModeSecretKey;
 
+        @Value("${azure.storage.endpoint}")
+        private String azureStorageEndpoint;
+
         @Bean
         public ModelMapper modelMapper() {
             ModelMapper modelMapper = new ModelMapper();
 
-//            Converter<User, String> UserToJwtToken =
-//                    ctx -> jwtService.generateToken(ctx.getSource());
-//
-//            modelMapper.typeMap(User.class, com.mohand.SchoolManagmentSystem.response.authentication.User.class).addMappings(mapper ->
-//                    mapper.using(UserToJwtToken).map(
-//                            User::new, com.mohand.SchoolManagmentSystem.response.authentication.User::setJwtToken
-//                    )
-//            );
+            Converter<String, String> containerNameBaseUrl =
+                    ctx -> azureStorageEndpoint + "/" + ctx.getSource();
+
+            modelMapper.typeMap(Teacher.class, com.mohand.SchoolManagmentSystem.response.authentication.Teacher.class).addMappings(mapper ->
+                    mapper.using(containerNameBaseUrl).map(
+                            Teacher::getContainerName, com.mohand.SchoolManagmentSystem.response.authentication.Teacher::setBaseUrl
+                    )
+            );
 
             return modelMapper;
         }

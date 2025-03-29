@@ -1,13 +1,13 @@
 package com.mohand.SchoolManagmentSystem.request.authentication;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
-public class RegisterUserRequest {
-    private String email;
-    private String password;
-    private String firstName;
-    private String lastName;
-}
+public record RegisterUserRequest (
+    @Email String email,
+    @NotBlank(message = "Password must not be empty") String password,
+    @NotBlank(message = "Request must contain first name") String firstName,
+    @NotBlank(message = "Request must contain last name") String lastName
+) {}

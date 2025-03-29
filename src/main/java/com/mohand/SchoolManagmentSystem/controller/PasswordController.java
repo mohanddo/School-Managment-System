@@ -5,6 +5,7 @@ import com.mohand.SchoolManagmentSystem.request.password.ResetPasswordRequest;
 import com.mohand.SchoolManagmentSystem.service.password.PasswordService;
 import com.mohand.SchoolManagmentSystem.service.student.IStudentService;
 import com.mohand.SchoolManagmentSystem.service.user.IUserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -22,7 +23,7 @@ public class PasswordController {
     private final IUserService userService;
 
     @PatchMapping("/changePassword")
-    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest request, Principal connectedStudent) {
+    public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePasswordRequest request, Principal connectedStudent) {
         userService.changePassword(request, connectedStudent);
         return ResponseEntity.ok("Password changed successfully");
     }
@@ -45,7 +46,7 @@ public class PasswordController {
     }
 
     @PostMapping("/savePassword")
-    public ResponseEntity<String> savePassword(@RequestBody ResetPasswordRequest request) {
+    public ResponseEntity<String> savePassword(@Valid @RequestBody ResetPasswordRequest request) {
         passwordService.savePasswordAfterResetting(request);
         return ResponseEntity.ok("Password changed successfully");
     }

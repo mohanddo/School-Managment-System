@@ -57,41 +57,6 @@ public class CourseService implements ICourseService {
     }
 
     @Override
-    public Course updateTitle(Long courseId, String newTitle) {
-        Course course = getById(courseId);
-        course.setTitle(newTitle);
-        return courseRepository.save(course);
-    }
-
-    @Override
-    public Course updateDescription(Long courseId, String newDescription) {
-        Course course = getById(courseId);
-        course.setDescription(newDescription);
-        return courseRepository.save(course);
-    }
-
-    @Override
-    public Course updatePrice(Long courseId, double price) {
-        Course course = getById(courseId);
-        course.setPrice(price);
-        return courseRepository.save(course);
-    }
-
-    @Override
-    public Course updateDiscountPercentage(Long courseId, int discountPercentage) {
-        Course course = getById(courseId);
-        course.setDiscountPercentage(discountPercentage);
-        return courseRepository.save(course);
-    }
-
-    @Override
-    public Course updateDiscountExpirationTime(Long courseId, LocalDate discountExpirationDate) {
-        Course course = getById(courseId);
-        course.setDiscountExpirationDate(discountExpirationDate);
-        return courseRepository.save(course);
-    }
-
-    @Override
     public List<CoursePreview> getAll(Long studentId) {
         List<Course> allCourses = courseRepository.findAll();
 
@@ -257,6 +222,5 @@ public class CourseService implements ICourseService {
         Course course = getById(id);
         return student.getCourses().contains(course) && course.getStudents().contains(student);
     }
-
 
 }

@@ -9,6 +9,7 @@ import com.mohand.SchoolManagmentSystem.model.course.Course;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
@@ -19,13 +20,13 @@ import java.util.List;
 
 @NoArgsConstructor
 @Getter
+@Setter
 @Entity
 public class Teacher extends User {
 
-    public Teacher(String firstName, String lastName, String email, String password, String verificationCode, LocalDateTime verificationCodeExpiresAt, String sasToken) {
+    public Teacher(String firstName, String lastName, String email, String password, String verificationCode, LocalDateTime verificationCodeExpiresAt, String containerName) {
         super(firstName, lastName, email, password, verificationCode, verificationCodeExpiresAt, Role.ROLE_TEACHER);
-        this.sasToken = sasToken;
-        this.containerName = String.valueOf(Instant.now().getEpochSecond());
+        this.containerName = containerName;
         this.numberOfCourses = 0;
         this.numberOfStudents = 0;
     }
@@ -44,7 +45,6 @@ public class Teacher extends User {
 
     private String description;
 
-    @Column(nullable = false)
     private String sasToken;
 
     @Column(nullable = false, updatable = false)

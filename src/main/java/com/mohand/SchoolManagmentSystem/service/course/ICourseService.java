@@ -17,11 +17,6 @@ public interface ICourseService {
     void create(CreateCourseRequest request, Teacher teacher);
     void delete(Long courseId, Long teacherId);
 
-    Course updateTitle(Long courseId, String newTitle);
-    Course updateDescription(Long courseId, String newDescription);
-    Course updatePrice(Long courseId, double price);
-    Course updateDiscountPercentage(Long courseId, int discountPercentage);
-    Course updateDiscountExpirationTime(Long courseId, LocalDate discountExpirationDate);
 
     List<CoursePreview> getAll(Long studentId);
     Course getById(Long id);

@@ -19,12 +19,14 @@ public class PasswordResetToken {
     private Long id;
 
 
+    @Column(nullable = false, unique = true)
     private String token;
 
     @OneToOne
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Column(nullable = false)
     private LocalDateTime expiryDate;
 
     public PasswordResetToken(String token, User user, LocalDateTime expiryDate) {
