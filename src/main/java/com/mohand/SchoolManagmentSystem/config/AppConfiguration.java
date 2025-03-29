@@ -1,9 +1,11 @@
 package com.mohand.SchoolManagmentSystem.config;
 
 import com.mohand.SchoolManagmentSystem.model.course.Course;
+import com.mohand.SchoolManagmentSystem.model.user.User;
 import com.mohand.SchoolManagmentSystem.repository.StudentRepository;
 import com.mohand.SchoolManagmentSystem.repository.UserRepository;
 import com.mohand.SchoolManagmentSystem.response.course.CoursePreview;
+import com.mohand.SchoolManagmentSystem.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.Converter;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,6 +39,15 @@ public class AppConfiguration {
         @Bean
         public ModelMapper modelMapper() {
             ModelMapper modelMapper = new ModelMapper();
+
+//            Converter<User, String> UserToJwtToken =
+//                    ctx -> jwtService.generateToken(ctx.getSource());
+//
+//            modelMapper.typeMap(User.class, com.mohand.SchoolManagmentSystem.response.authentication.User.class).addMappings(mapper ->
+//                    mapper.using(UserToJwtToken).map(
+//                            User::new, com.mohand.SchoolManagmentSystem.response.authentication.User::setJwtToken
+//                    )
+//            );
 
             return modelMapper;
         }

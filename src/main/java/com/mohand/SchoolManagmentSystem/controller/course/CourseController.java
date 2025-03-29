@@ -1,5 +1,6 @@
 package com.mohand.SchoolManagmentSystem.controller.course;
 
+import com.mohand.SchoolManagmentSystem.model.user.Teacher;
 import com.mohand.SchoolManagmentSystem.model.user.User;
 import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnouncementCommentRequest;
 import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnouncementRequest;
@@ -43,8 +44,7 @@ public class CourseController {
 
     @PostMapping("/create")
     private ResponseEntity<String> createCourse(@Valid @RequestBody CreateCourseRequest request, Authentication authentication) {
-        Long teacherId = ( (User) ( authentication.getPrincipal() ) ).getId();
-        courseService.create(request, teacherId);
+        courseService.create(request, (Teacher) ( authentication.getPrincipal() ));
         return ResponseEntity.ok("Course created successfully");
     }
 

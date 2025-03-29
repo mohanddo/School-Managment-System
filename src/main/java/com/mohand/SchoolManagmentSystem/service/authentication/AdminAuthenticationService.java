@@ -10,12 +10,13 @@ import com.mohand.SchoolManagmentSystem.model.user.Admin;
 import com.mohand.SchoolManagmentSystem.request.authentication.LogInUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.RegisterUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.VerifyUserRequest;
-import com.mohand.SchoolManagmentSystem.response.LoginResponse;
+import com.mohand.SchoolManagmentSystem.response.authentication.SignUpResponse;
 import com.mohand.SchoolManagmentSystem.service.EmailService;
 import com.mohand.SchoolManagmentSystem.service.JwtService;
 import com.mohand.SchoolManagmentSystem.service.admin.IAdminService;
 import com.mohand.SchoolManagmentSystem.service.user.IUserService;
 import com.mohand.SchoolManagmentSystem.util.Util;
+import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,14 +29,14 @@ public class AdminAuthenticationService extends AuthenticationService {
 
     private final IAdminService adminService;
 
-    public AdminAuthenticationService(IUserService userService, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, EmailService emailService, IAdminService adminService, JwtService jwtService) {
-        super(userService, passwordEncoder, authenticationManager, emailService, jwtService);
+    public AdminAuthenticationService(IUserService userService, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, EmailService emailService, IAdminService adminService, JwtService jwtService,  ModelMapper modelMapper) {
+        super(userService, passwordEncoder, authenticationManager, emailService, jwtService, modelMapper);
         this.adminService = adminService;
     }
 
 
     @Override
-    public Admin signup(RegisterUserRequest input) {
+    public SignUpResponse signup(RegisterUserRequest input) {
 
         if (userService.checkIfExist(input.getEmail())) {
             throw new AccountAlreadyExistException();
@@ -50,11 +51,13 @@ public class AdminAuthenticationService extends AuthenticationService {
                 generateVerificationCode(),
                 LocalDateTime.now().plusSeconds(verificationCodeExpirationTime / 1000));
         sendVerificationEmail(admin.getEmail(), admin.getVerificationCode());
-        return adminService.save(admin);
+        adminService.save(admin);
+
+        return new SignUpResponse(admin.getVerificationCode(), admin.getVerificationCodeExpiresAt());
     }
 
     @Override
-    public LoginResponse authenticate(LogInUserRequest request) {
+    public com.mohand.SchoolManagmentSystem.response.authentication.Admin authenticate(LogInUserRequest request) {
         Admin admin = adminService.getByEmail(request.getEmail());
 
         if (!admin.isEnabled()) {
@@ -68,12 +71,16 @@ public class AdminAuthenticationService extends AuthenticationService {
                 )
         );
 
+        com.mohand.SchoolManagmentSystem.response.authentication.Admin adminResponse = modelMapper.map(admin, com.mohand.SchoolManagmentSystem.response.authentication.Admin.class);
+
         String jwtToken = jwtService.generateToken(admin);
-        return new LoginResponse(jwtToken, jwtService.getJwtExpirationTime());
+        adminResponse.setJwtToken(jwtToken);
+
+        return adminResponse;
     }
 
     @Override
-    public void verifyUser(VerifyUserRequest request) {
+    public com.mohand.SchoolManagmentSystem.response.authentication.Admin verifyUser(VerifyUserRequest request) {
         Admin admin = adminService.getByEmail(request.getEmail());
 
         if (admin.isEnabled()) {
@@ -88,7 +95,15 @@ public class AdminAuthenticationService extends AuthenticationService {
             admin.setEnabled(true);
             admin.setVerificationCode(null);
             admin.setVerificationCodeExpiresAt(null);
+
+            com.mohand.SchoolManagmentSystem.response.authentication.Admin adminResponse = modelMapper.map(admin, com.mohand.SchoolManagmentSystem.response.authentication.Admin.class);
+
+            String jwtToken = jwtService.generateToken(admin);
+            adminResponse.setJwtToken(jwtToken);
+
             adminService.save(admin);
+
+            return adminResponse;
         } else {
             throw new VerificationCodeInvalidException("Verification code is invalid");
         }

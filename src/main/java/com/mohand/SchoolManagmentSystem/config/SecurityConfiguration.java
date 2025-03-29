@@ -51,7 +51,8 @@ public class SecurityConfiguration {
                                         "/passwordChangedSuccessfully.html",
                                         "/api/v1/password/updatePassword",
                                         "/api/v1/payments/checkout",
-                                        "/api/v1/course/all","/api/v1/auth/teacher/signup", "/api/v1/auth/admin/signup"
+                                        "/api/v1/course/all","/api/v1/auth/teacher/signup", "/api/v1/auth/admin/signup",
+                                        "/api/v1/blob/**"
                                 ).permitAll()
 
 //                                .requestMatchers("/api/v1/auth/teacher/signup", "/api/v1/auth/admin/signup")

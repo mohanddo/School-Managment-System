@@ -1,15 +1,16 @@
 package com.mohand.SchoolManagmentSystem.service.authentication;
 
-import com.mohand.SchoolManagmentSystem.model.user.User;
 import com.mohand.SchoolManagmentSystem.request.authentication.LogInUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.RegisterUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.VerifyUserRequest;
-import com.mohand.SchoolManagmentSystem.response.LoginResponse;
+import com.mohand.SchoolManagmentSystem.response.authentication.SignUpResponse;
+import com.mohand.SchoolManagmentSystem.response.authentication.User;
 import com.mohand.SchoolManagmentSystem.service.EmailService;
 import com.mohand.SchoolManagmentSystem.service.JwtService;
 import com.mohand.SchoolManagmentSystem.service.user.IUserService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,12 +28,13 @@ public abstract class AuthenticationService {
     protected final AuthenticationManager authenticationManager;
     private final EmailService emailService;
     protected final JwtService jwtService;
+    protected final ModelMapper modelMapper;
 
-    abstract User signup(RegisterUserRequest request);
+    abstract SignUpResponse signup(RegisterUserRequest request);
 
-    abstract LoginResponse authenticate(LogInUserRequest request);
+    abstract com.mohand.SchoolManagmentSystem.response.authentication.User authenticate(LogInUserRequest request);
 
-    abstract void verifyUser(VerifyUserRequest request);
+    abstract User verifyUser(VerifyUserRequest request);
 
     abstract void resendVerificationCode(String email);
 

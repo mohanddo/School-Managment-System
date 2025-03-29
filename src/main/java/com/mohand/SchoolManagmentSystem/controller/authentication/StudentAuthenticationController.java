@@ -1,9 +1,10 @@
 package com.mohand.SchoolManagmentSystem.controller.authentication;
 
-import com.mohand.SchoolManagmentSystem.model.user.Student;
 import com.mohand.SchoolManagmentSystem.request.authentication.LogInUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.RegisterUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.VerifyUserRequest;
+import com.mohand.SchoolManagmentSystem.response.authentication.SignUpResponse;
+import com.mohand.SchoolManagmentSystem.response.authentication.Student;
 import com.mohand.SchoolManagmentSystem.service.authentication.StudentAuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,24 +18,22 @@ public class StudentAuthenticationController {
     private final StudentAuthenticationService studentAuthenticationService;
 
     @PostMapping("/signup")
-    public ResponseEntity<?> register(@RequestBody RegisterUserRequest request) {
-            Student registerdStudent = studentAuthenticationService.signup(request);
-            return ResponseEntity.ok(registerdStudent);
+    public ResponseEntity<SignUpResponse> register(@RequestBody RegisterUserRequest request) {
+            return ResponseEntity.ok(studentAuthenticationService.signup(request));
     }
 
         @PostMapping("/login")
-        public ResponseEntity<?> authenticate(@RequestBody LogInUserRequest request) {
+        public ResponseEntity<Student> authenticate(@RequestBody LogInUserRequest request) {
                 return ResponseEntity.ok(studentAuthenticationService.authenticate(request));
         }
 
         @PostMapping("/verify")
-        public ResponseEntity<?> verifyStudent(@RequestBody VerifyUserRequest request) {
-                studentAuthenticationService.verifyUser(request);
-                return ResponseEntity.ok("Student verified");
+        public ResponseEntity<Student> verifyStudent(@RequestBody VerifyUserRequest request) {
+            return ResponseEntity.ok(studentAuthenticationService.verifyUser(request));
         }
 
         @PostMapping("/resend")
-        public ResponseEntity<?> resendEmail(@RequestParam String email) {
+        public ResponseEntity<String> resendEmail(@RequestParam String email) {
                 studentAuthenticationService.resendVerificationCode(email);
                 return ResponseEntity.ok("Verification email resent successfully");
         }

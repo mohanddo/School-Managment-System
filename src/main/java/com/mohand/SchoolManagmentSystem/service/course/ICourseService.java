@@ -1,6 +1,7 @@
 package com.mohand.SchoolManagmentSystem.service.course;
 
 import com.mohand.SchoolManagmentSystem.model.course.Course;
+import com.mohand.SchoolManagmentSystem.model.user.Teacher;
 import com.mohand.SchoolManagmentSystem.model.user.User;
 import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnouncementCommentRequest;
 import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnouncementRequest;
@@ -13,7 +14,7 @@ import java.util.List;
 
 public interface ICourseService {
 
-    void create(CreateCourseRequest request, Long teacherId);
+    void create(CreateCourseRequest request, Teacher teacher);
     void delete(Long courseId, Long teacherId);
 
     Course updateTitle(Long courseId, String newTitle);

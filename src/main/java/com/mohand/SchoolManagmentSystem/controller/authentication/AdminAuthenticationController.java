@@ -1,9 +1,10 @@
 package com.mohand.SchoolManagmentSystem.controller.authentication;
 
-import com.mohand.SchoolManagmentSystem.model.user.Admin;
 import com.mohand.SchoolManagmentSystem.request.authentication.LogInUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.RegisterUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.VerifyUserRequest;
+import com.mohand.SchoolManagmentSystem.response.authentication.Admin;
+import com.mohand.SchoolManagmentSystem.response.authentication.SignUpResponse;
 import com.mohand.SchoolManagmentSystem.service.authentication.AdminAuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,20 +21,18 @@ public class AdminAuthenticationController {
     private final AdminAuthenticationService adminAuthenticationService;
 
     @PostMapping("/signup")
-    public ResponseEntity<?> register(@RequestBody RegisterUserRequest request) {
-            Admin registerdAdmin = adminAuthenticationService.signup(request);
-            return ResponseEntity.ok(registerdAdmin);
+    public ResponseEntity<SignUpResponse> register(@RequestBody RegisterUserRequest request) {
+            return ResponseEntity.ok(adminAuthenticationService.signup(request));
     }
 
         @PostMapping("/login")
-        public ResponseEntity<?> authenticate(@RequestBody LogInUserRequest request) {
+        public ResponseEntity<Admin> authenticate(@RequestBody LogInUserRequest request) {
                 return ResponseEntity.ok(adminAuthenticationService.authenticate(request));
         }
 
         @PostMapping("/verify")
-        public ResponseEntity<String> verifyStudent(@RequestBody VerifyUserRequest request) {
-                adminAuthenticationService.verifyUser(request);
-                return ResponseEntity.ok("Admin verified");
+        public ResponseEntity<Admin> verifyStudent(@RequestBody VerifyUserRequest request) {
+            return ResponseEntity.ok(adminAuthenticationService.verifyUser(request));
         }
 
         @PostMapping("/resend")

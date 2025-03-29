@@ -40,12 +40,12 @@ public class CourseService implements ICourseService {
     private final ModelMapper modelMapper;
 
     @Override
-    public void create(CreateCourseRequest request, Long teacherId) {
-        Teacher teacher = teacherService.readById(teacherId);
+    public void create(CreateCourseRequest request, Teacher teacher) {
         Course course = Course.builder(request.title(), request.description(), request.price(), request.getPricingModelEnum(), teacher, request.imageUrl(), request.introductionVideoUrl())
                 .build();
         courseRepository.save(course);
     }
+
     @Override
     public void delete(Long courseId, Long teacherId) {
 

@@ -11,11 +11,16 @@ public class AzureBlobController {
 
     private final AzureBlobService azureBlobService;
     
-    @GetMapping("/sas")
-    public String getSignedUrlForTeacher(@RequestParam Long teacherId, @RequestParam Long courseId, @RequestParam Long chapterId, @RequestParam String resourceName) {
-        String blobName = teacherId + "/" + courseId + "/" +
-                chapterId + "/" + resourceName;
-        return azureBlobService.generateSASToken(blobName);
-    }
+//    @GetMapping("/sas")
+//    public String getSignedUrlForTeacher(@RequestParam Long teacherId, @RequestParam Long courseId, @RequestParam Long chapterId, @RequestParam String resourceName) {
+//        String blobName = teacherId + "/" + courseId + "/" +
+//                chapterId + "/" + resourceName;
+//        return azureBlobService.generateSASToken(blobName);
+//    }
+
+//    @GetMapping("/sas")
+//    public String getSignedUrlForTeacher(@RequestParam String blobName) {
+//        return azureBlobService.generateSASToken(blobName);
+//    }
 }
 
