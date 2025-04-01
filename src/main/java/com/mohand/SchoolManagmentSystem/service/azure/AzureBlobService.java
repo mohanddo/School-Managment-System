@@ -1,9 +1,6 @@
 package com.mohand.SchoolManagmentSystem.service.azure;
 
-import com.azure.storage.blob.BlobClient;
-import com.azure.storage.blob.BlobContainerClient;
-import com.azure.storage.blob.BlobServiceClient;
-import com.azure.storage.blob.BlobServiceClientBuilder;
+import com.azure.storage.blob.*;
 import com.azure.storage.blob.models.BlobStorageException;
 import com.azure.storage.blob.options.BlobContainerCreateOptions;
 import com.azure.storage.blob.sas.BlobContainerSasPermission;
@@ -53,7 +50,7 @@ public class AzureBlobService {
 
         BlobSasPermission permissions = new BlobSasPermission()
                 .setReadPermission(true)
-                .setAddPermission(true)
+                .setWritePermission(true)
                 .setDeletePermission(true);
 
         // Set expiry time for the SAS token
@@ -67,6 +64,34 @@ public class AzureBlobService {
         String encodedSasToken = containerClient.generateSas(sasValues);
         return URLDecoder.decode(encodedSasToken, StandardCharsets.UTF_8);
     }
+
+    public String signBlobUrl(String blobUrl, boolean isAuthenticated) {
+
+        StorageSharedKeyCredential credential = new StorageSharedKeyCredential(accountName, accountKey);
+
+        BlobClient blobClient = new BlobClientBuilder()
+                .endpoint(blobUrl)
+                .credential(credential)
+                .buildClient();
+
+        BlobSasPermission permissions = new BlobSasPermission()
+                .setReadPermission(true);
+
+        // Set expiry time for the SAS token
+        OffsetDateTime expiryTime = isAuthenticated
+                ? OffsetDateTime.now().plusSeconds(jwtExpirationTime / 1000)
+                : OffsetDateTime.now().plusDays(1);
+
+
+        // Generate the SAS token
+        BlobServiceSasSignatureValues sasValues = new BlobServiceSasSignatureValues(expiryTime, permissions)
+                .setProtocol(SasProtocol.HTTPS_ONLY)
+                .setStartTime(OffsetDateTime.now());
+
+        String encodedSasToken = blobClient.generateSas(sasValues);
+        return blobUrl + "?" + URLDecoder.decode(encodedSasToken, StandardCharsets.UTF_8);
+    }
+
 
     public void createContainer(String containerName) {
         StorageSharedKeyCredential credential = new StorageSharedKeyCredential(accountName, accountKey);

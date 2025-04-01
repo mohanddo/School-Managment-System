@@ -1,6 +1,7 @@
 package com.mohand.SchoolManagmentSystem.model.course;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,6 +24,7 @@ public class Announcement {
         this.dateOfCreation = LocalDateTime.now();
     }
 
+    @NotBlank
     @Column(nullable = false)
     private String text;
 

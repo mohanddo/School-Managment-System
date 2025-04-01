@@ -1,6 +1,5 @@
-package com.mohand.SchoolManagmentSystem.model;
+package com.mohand.SchoolManagmentSystem.model.course;
 
-import com.mohand.SchoolManagmentSystem.model.course.Course;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
 import jakarta.persistence.*;
 import lombok.NoArgsConstructor;

@@ -6,6 +6,7 @@ import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnou
 import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnouncementRequest;
 import com.mohand.SchoolManagmentSystem.request.course.CreateCourseRequest;
 import com.mohand.SchoolManagmentSystem.request.course.CreateOrUpdateCourseReviewRequest;
+import com.mohand.SchoolManagmentSystem.request.course.UpdateCourseRequest;
 import com.mohand.SchoolManagmentSystem.response.course.CoursePreview;
 import com.mohand.SchoolManagmentSystem.service.course.ICourseService;
 import jakarta.validation.Valid;
@@ -24,8 +25,8 @@ public class CourseController {
     private final ICourseService courseService;
 
     @GetMapping("/all")
-    private ResponseEntity<List<CoursePreview>> getAllCourses(@RequestParam Long studentId) {
-        return ResponseEntity.ok(courseService.getAll(studentId));
+    private ResponseEntity<List<CoursePreview>> getAllCourses() {
+        return ResponseEntity.ok(courseService.getAll());
     }
 
     @PutMapping("/addOrRemoveCourseFromFavorite/{courseId}")
@@ -42,18 +43,26 @@ public class CourseController {
         return ResponseEntity.ok("Success");
     }
 
+
+
     @PostMapping("/create")
     private ResponseEntity<String> createCourse(@Valid @RequestBody CreateCourseRequest request, Authentication authentication) {
         courseService.create(request, (Teacher) ( authentication.getPrincipal() ));
         return ResponseEntity.ok("Course created successfully");
     }
 
-    @DeleteMapping("/delete/{courseId}")
-    private ResponseEntity<String> deleteCourse(Authentication authentication, @PathVariable Long courseId) {
-        Long teacherId = ( (User) ( authentication.getPrincipal() ) ).getId();
-        courseService.delete(courseId, teacherId);
-        return ResponseEntity.ok("Course deleted successfully");
+    @PutMapping("/update")
+    private ResponseEntity<String> updateCourse(@Valid @RequestBody UpdateCourseRequest request, Authentication authentication) {
+        courseService.update(request, (Teacher) ( authentication.getPrincipal() ));
+        return ResponseEntity.ok("Course updated successfully");
     }
+
+//    @DeleteMapping("/delete/{courseId}")
+//    private ResponseEntity<String> deleteCourse(Authentication authentication, @PathVariable Long courseId) {
+//        Teacher teacher = (Teacher) ( authentication.getPrincipal();
+//        courseService.delete(courseId, teacher);
+//        return ResponseEntity.ok("Course deleted successfully");
+//    }
 
     @PutMapping("/courseReview/createOrUpdate")
     private ResponseEntity<String> createCourseReview(Authentication authentication, @Valid @RequestBody CreateOrUpdateCourseReviewRequest request) {

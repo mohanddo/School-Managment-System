@@ -2,9 +2,11 @@ package com.mohand.SchoolManagmentSystem.model.course;
 
 import com.mohand.SchoolManagmentSystem.enums.PricingModel;
 import com.mohand.SchoolManagmentSystem.model.*;
+import com.mohand.SchoolManagmentSystem.model.chapter.Chapter;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
 import com.mohand.SchoolManagmentSystem.model.user.Teacher;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -20,7 +22,7 @@ import java.util.List;
 @Setter
 @Getter
 @Builder(builderMethodName = "hiddenBuilder")
-@Check(constraints = "(discount_expiration_date IS NOT NULL OR (discount_percentage = 0 AND discount_expiration_date IS NULL))")
+@Check(constraints = "(discount_percentage > 0 OR (discount_percentage = 0 AND discount_expiration_date IS NULL))")
 @Check(constraints = "(pricing_model = 'FREE' AND price = 0) OR (pricing_model <> 'FREE' AND price > 0)")
 public class Course {
 
@@ -50,13 +52,14 @@ public class Course {
     private long numberOfStudents;
 
     @Column(nullable = false)
-    @Min(0)
+    @Min(message = "Price must be greater than 0", value = 0)
     private double price;
 
     @Min(0)
     @Max(100)
     private int discountPercentage;
 
+    @Future(message = "Discount expiration date must be in the future")
     private LocalDate discountExpirationDate;
 
     @Column(nullable = false)

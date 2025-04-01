@@ -1,4 +1,4 @@
-package com.mohand.SchoolManagmentSystem.model;
+package com.mohand.SchoolManagmentSystem.model.chapter;
 
 import com.mohand.SchoolManagmentSystem.model.user.Student;
 import jakarta.persistence.*;

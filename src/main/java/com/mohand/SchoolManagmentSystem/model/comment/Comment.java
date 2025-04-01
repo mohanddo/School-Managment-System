@@ -1,6 +1,6 @@
 package com.mohand.SchoolManagmentSystem.model.comment;
 
-import com.mohand.SchoolManagmentSystem.model.Resource;
+import com.mohand.SchoolManagmentSystem.model.chapter.Resource;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
 import com.mohand.SchoolManagmentSystem.model.user.Teacher;
 import jakarta.persistence.*;

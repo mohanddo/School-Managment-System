@@ -1,29 +1,30 @@
 package com.mohand.SchoolManagmentSystem.response.course;
 
 import com.mohand.SchoolManagmentSystem.enums.PricingModel;
+import com.mohand.SchoolManagmentSystem.model.course.CourseReview;
 import com.mohand.SchoolManagmentSystem.response.teacher.TeacherPreview;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.util.Optional;
-import java.util.Objects;
+import java.util.List;
 
 @Setter
 @Getter
-@RequiredArgsConstructor
-public final class CoursePreview {
-    private final long id;
-    private final String title;
-    private final String description;
-    private final String imageUrl;
-    private final String introductionVideoUrl;
-    private final int numberOfStudents;
-    private final int numberOfReviews;
-    private final double rating;
-    private final Integer discountPercentage;
-    private final LocalDate discountExpirationDate;
-    private final PricingModel pricingModel;
+@NoArgsConstructor
+public class CoursePreview {
+    private long id;
+    private String title;
+    private String description;
+    private String imageUrl;
+    private String introductionVideoUrl;
+    private int numberOfStudents;
+    private int numberOfReviews;
+    private double numberOfHours;
+    private Integer discountPercentage;
+    private LocalDate discountExpirationDate;
+    private PricingModel pricingModel;
+    private Double rating;
+    private TeacherPreview teacher;
+    private List<com.mohand.SchoolManagmentSystem.response.course.CourseReview> courseReviews;
     private Boolean favourite;
-    private final double numberOfHours;
-    private final TeacherPreview teacher;
 }

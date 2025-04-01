@@ -51,14 +51,13 @@ public class SecurityConfiguration {
                                         "/passwordChangedSuccessfully.html",
                                         "/api/v1/password/updatePassword",
                                         "/api/v1/payments/checkout",
-                                        "/api/v1/course/all","/api/v1/auth/teacher/signup", "/api/v1/auth/admin/signup",
-                                        "/api/v1/blob/**"
+                                        "/api/v1/course/all","/api/v1/auth/teacher/signup", "/api/v1/auth/admin/signup"
                                 ).permitAll()
 
 //                                .requestMatchers("/api/v1/auth/teacher/signup", "/api/v1/auth/admin/signup")
 //                                .hasAuthority(Role.ROLE_ADMIN.getValue())
 
-                                .requestMatchers("/api/v1/course/create", "/api/v1/course/delete/**",
+                                .requestMatchers("/api/v1/course/create", "/api/v1/course/delete/**", "/api/v1/course/update",
                                         "/api/v1/course/announcement/createOrUpdate", "/api/v1/course/announcement/delete/**")
                                 .hasAuthority(Role.ROLE_TEACHER.getValue())
 

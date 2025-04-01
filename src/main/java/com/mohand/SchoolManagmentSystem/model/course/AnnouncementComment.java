@@ -3,6 +3,7 @@ package com.mohand.SchoolManagmentSystem.model.course;
 
 import com.mohand.SchoolManagmentSystem.model.user.User;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -37,6 +38,7 @@ public class AnnouncementComment {
     @Column(nullable = false)
     private LocalDateTime dateOfCreation;
 
+    @NotBlank
     @Column(nullable = false)
     private String text;
 }

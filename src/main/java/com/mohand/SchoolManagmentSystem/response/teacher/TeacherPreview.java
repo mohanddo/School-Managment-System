@@ -1,12 +1,21 @@
 package com.mohand.SchoolManagmentSystem.response.teacher;
 
-import java.util.Optional;
+import com.azure.core.annotation.Get;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
-public record TeacherPreview(String firstName,
-                             String lastName,
-                             int numberOfCourses,
-                             int numberOfStudents,
-                             Optional<String> profilePicDownloadUrl,
-                             Optional<String> description
-) {
+@Getter
+@Setter
+public class TeacherPreview {
+    private String firstName;
+    private String lastName;
+    private int numberOfCourses;
+    private int numberOfStudents;
+    private String profilePicDownloadUrl;
+    private String description;
+    private String youtubeLink;
+    private String facebookLink;
+    private String instagramLink;
+
 }

@@ -43,6 +43,7 @@ public class Teacher extends User {
 
     private String instagramLink;
 
+    @Column(nullable = false)
     private String description;
 
     private String sasToken;

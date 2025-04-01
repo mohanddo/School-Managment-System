@@ -6,7 +6,9 @@ import com.mohand.SchoolManagmentSystem.model.user.User;
 import com.mohand.SchoolManagmentSystem.repository.StudentRepository;
 import com.mohand.SchoolManagmentSystem.repository.UserRepository;
 import com.mohand.SchoolManagmentSystem.response.course.CoursePreview;
+import com.mohand.SchoolManagmentSystem.response.teacher.TeacherPreview;
 import com.mohand.SchoolManagmentSystem.service.JwtService;
+import com.mohand.SchoolManagmentSystem.service.azure.AzureBlobService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.Converter;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,15 +42,35 @@ public class AppConfiguration {
         @Value("${azure.storage.endpoint}")
         private String azureStorageEndpoint;
 
+        private final AzureBlobService azureBlobService;
+
         @Bean
         public ModelMapper modelMapper() {
             ModelMapper modelMapper = new ModelMapper();
 
-            Converter<String, String> containerNameBaseUrl =
+            Converter<String, String > urlToSignedUrl = context -> {
+
+                if (context.getSource() != null) {
+                    return azureBlobService.signBlobUrl(context.getSource(), false);
+                } else {
+                    return null;
+                }
+            };
+
+            modelMapper.typeMap(Course.class, CoursePreview.class).addMappings(mapper -> {
+                mapper.using(urlToSignedUrl).map(Course::getImageUrl, CoursePreview::setImageUrl);
+                mapper.using(urlToSignedUrl).map(Course::getIntroductionVideoUrl, CoursePreview::setIntroductionVideoUrl);
+            });
+
+            modelMapper.typeMap(Teacher.class, TeacherPreview.class).addMappings(mapper -> {
+                mapper.using(urlToSignedUrl).map(Teacher::getProfilePicDownloadUrl, TeacherPreview::setProfilePicDownloadUrl);
+            });
+
+            Converter<String, String> containerNameToBaseUrl =
                     ctx -> azureStorageEndpoint + "/" + ctx.getSource();
 
             modelMapper.typeMap(Teacher.class, com.mohand.SchoolManagmentSystem.response.authentication.Teacher.class).addMappings(mapper ->
-                    mapper.using(containerNameBaseUrl).map(
+                    mapper.using(containerNameToBaseUrl).map(
                             Teacher::getContainerName, com.mohand.SchoolManagmentSystem.response.authentication.Teacher::setBaseUrl
                     )
             );

@@ -4,6 +4,7 @@ import com.mohand.SchoolManagmentSystem.enums.Role;
 import com.mohand.SchoolManagmentSystem.model.PasswordResetToken;
 import com.mohand.SchoolManagmentSystem.model.course.AnnouncementComment;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -44,6 +45,7 @@ public abstract class User implements UserDetails {
     @Column(nullable = false)
     private String lastName;
 
+    @Email
     @Column(nullable = false, unique = true)
     private String email;
 

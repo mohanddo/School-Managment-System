@@ -4,7 +4,7 @@ import com.mohand.SchoolManagmentSystem.exception.announcement.AnnouncementComme
 import com.mohand.SchoolManagmentSystem.exception.announcement.AnnouncementNotFoundException;
 import com.mohand.SchoolManagmentSystem.exception.course.CourseNotFoundException;
 import com.mohand.SchoolManagmentSystem.exception.courseReview.CourseReviewNotFoundException;
-import com.mohand.SchoolManagmentSystem.model.Cart;
+import com.mohand.SchoolManagmentSystem.model.course.Cart;
 import com.mohand.SchoolManagmentSystem.model.course.*;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
 import com.mohand.SchoolManagmentSystem.model.user.Teacher;
@@ -14,7 +14,9 @@ import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnou
 import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnouncementRequest;
 import com.mohand.SchoolManagmentSystem.request.course.CreateCourseRequest;
 import com.mohand.SchoolManagmentSystem.request.course.CreateOrUpdateCourseReviewRequest;
+import com.mohand.SchoolManagmentSystem.request.course.UpdateCourseRequest;
 import com.mohand.SchoolManagmentSystem.response.course.CoursePreview;
+import com.mohand.SchoolManagmentSystem.service.azure.AzureBlobService;
 import com.mohand.SchoolManagmentSystem.service.student.StudentService;
 import com.mohand.SchoolManagmentSystem.service.teacher.TeacherService;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +24,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -40,35 +42,58 @@ public class CourseService implements ICourseService {
     private final ModelMapper modelMapper;
 
     @Override
+    @Transactional
     public void create(CreateCourseRequest request, Teacher teacher) {
-        Course course = Course.builder(request.title(), request.description(), request.price(), request.getPricingModelEnum(), teacher, request.imageUrl(), request.introductionVideoUrl())
+        Course course = Course.builder(request.getTitle(), request.getDescription(), request.getPrice(), request.getPricingModelEnum(), teacher, request.getImageUrl(), request.getIntroductionVideoUrl())
                 .build();
+        teacher.setNumberOfCourses(teacher.getNumberOfCourses() + 1);
         courseRepository.save(course);
+        teacherService.save(teacher);
+    }
+
+//    @Override
+//    public void delete(Long courseId, Teacher teacher) {
+//
+//        courseRepository.findByIdAndTeacherId(courseId, teacher.getId()).ifPresentOrElse((course) -> {
+//            teacher.getCourses().remove(course);
+//            teacher.setNumberOfCourses();
+//        }, () -> {
+//            throw new CourseNotFoundException();
+//        });
+//    }
+
+    @Override
+    public void update(UpdateCourseRequest request, Teacher teacher) {
+
+
+        courseRepository.findByIdAndTeacherId(request.getCourseId(), teacher.getId()).ifPresentOrElse((course) -> {
+
+            course.setTitle(request.getTitle());
+            course.setDescription(request.getDescription());
+            course.setImageUrl(request.getImageUrl());
+            course.setIntroductionVideoUrl(request.getIntroductionVideoUrl());
+
+            Optional.ofNullable(request.getPricingModelEnum()).ifPresent(course::setPricingModel);
+            course.setPrice(request.getPrice());
+
+            course.setDiscountPercentage(request.getDiscountPercentage());
+            course.setDiscountExpirationDate(request.getDiscountExpirationDate());
+
+                    courseRepository.save(course);
+                }, () -> {
+                    throw new CourseNotFoundException();
+                }
+        );
     }
 
     @Override
-    public void delete(Long courseId, Long teacherId) {
-
-        if (courseRepository.existsByIdAndTeacherId(courseId, teacherId)) {
-            courseRepository.deleteById(courseId);
-        } else {
-            throw new CourseNotFoundException();
-        }
-    }
-
-    @Override
-    public List<CoursePreview> getAll(Long studentId) {
+    public List<CoursePreview> getAll() {
         List<Course> allCourses = courseRepository.findAll();
 
-        List<CoursePreview> allCoursesPreviews = allCourses.stream().map(course -> modelMapper.map(course, CoursePreview.class)).toList();
-
-        if (studentId == null) {
-            return allCoursesPreviews;
-        }
-
-        allCoursesPreviews = allCoursesPreviews.stream().peek(coursePreview -> coursePreview.setFavourite(favoriteCourseRepository.existsByStudentIdAndCourseId(studentId, coursePreview.getId()))).toList();
-
-        return allCoursesPreviews;
+        return allCourses.stream().map(course -> { CoursePreview coursePreview = modelMapper.map(course, CoursePreview.class);
+            coursePreview.setRating(calculateRating(course.getId()));
+            return coursePreview;
+        }).toList();
     }
 
     @Override
@@ -109,6 +134,7 @@ public class CourseService implements ICourseService {
     public void createOrUpdateCourseReview(CreateOrUpdateCourseReviewRequest request, Long studentId) {
         Student student = studentService.getById(studentId);
         Course course = getById(request.courseId());
+
 
 
         courseReviewRepository.findByStudentIdAndCourseId(studentId, request.courseId()).ifPresentOrElse((courseReview) -> {
@@ -221,6 +247,17 @@ public class CourseService implements ICourseService {
         Student student = studentService.getById(studentId);
         Course course = getById(id);
         return student.getCourses().contains(course) && course.getStudents().contains(student);
+    }
+
+    @Override
+    public double calculateRating(Long courseId) {
+        List<CourseReview> courseReviews = courseReviewRepository.findAllByCourseId(courseId);
+        if(courseReviews.isEmpty()) {
+            return 0;
+        } else {
+            double reviewsSum = courseReviews.stream().map((courseReview -> courseReview.getReview().getValue())).reduce(0.0, Double::sum);
+            return reviewsSum / courseReviews.size();
+        }
     }
 
 }

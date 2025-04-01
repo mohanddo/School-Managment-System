@@ -7,18 +7,18 @@ import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnou
 import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnouncementRequest;
 import com.mohand.SchoolManagmentSystem.request.course.CreateCourseRequest;
 import com.mohand.SchoolManagmentSystem.request.course.CreateOrUpdateCourseReviewRequest;
+import com.mohand.SchoolManagmentSystem.request.course.UpdateCourseRequest;
 import com.mohand.SchoolManagmentSystem.response.course.CoursePreview;
 
-import java.time.LocalDate;
 import java.util.List;
 
 public interface ICourseService {
 
     void create(CreateCourseRequest request, Teacher teacher);
-    void delete(Long courseId, Long teacherId);
+//    void delete(Long courseId, Teacher teacher);
+    void update(UpdateCourseRequest request, Teacher teacher);
 
-
-    List<CoursePreview> getAll(Long studentId);
+    List<CoursePreview> getAll();
     Course getById(Long id);
 
 
@@ -36,4 +36,6 @@ public interface ICourseService {
 
 
     boolean existsByIdAndStudentId(Long id, Long studentId);
+
+    double calculateRating(Long courseId);
 }
