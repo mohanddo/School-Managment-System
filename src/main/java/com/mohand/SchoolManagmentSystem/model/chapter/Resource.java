@@ -2,20 +2,41 @@ package com.mohand.SchoolManagmentSystem.model.chapter;
 
 import com.mohand.SchoolManagmentSystem.model.comment.Comment;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @NoArgsConstructor
 @Entity
-public class Resource {
+@Setter
+@Getter
+@Inheritance(strategy = InheritanceType.JOINED)
+public abstract class Resource {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    public Resource(String title, String downloadUrl, Chapter chapter) {
+        this.title = title;
+        this.downloadUrl = downloadUrl;
+        this.chapter = chapter;
+        this.dateOfCreation = LocalDateTime.now();
+    }
+
+    @NotBlank
+    @Column(nullable = false)
     private String title;
-    private String description;
+
+    @NotBlank
+    @Column(nullable = false)
     private String downloadUrl;
+
+    @Column(nullable = false)
+    private LocalDateTime dateOfCreation;
 
     @ManyToOne
     @JoinColumn(name = "chapter_id")

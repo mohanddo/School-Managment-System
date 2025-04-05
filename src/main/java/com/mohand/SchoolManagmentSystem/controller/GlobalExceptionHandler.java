@@ -1,12 +1,7 @@
 package com.mohand.SchoolManagmentSystem.controller;
 
 import com.mohand.SchoolManagmentSystem.exception.InvalidEnumValueException;
-import com.mohand.SchoolManagmentSystem.exception.announcement.AnnouncementException;
-import com.mohand.SchoolManagmentSystem.exception.announcement.AnnouncementNotFoundException;
-import com.mohand.SchoolManagmentSystem.exception.course.CourseException;
-import com.mohand.SchoolManagmentSystem.exception.course.CourseNotFoundException;
-import com.mohand.SchoolManagmentSystem.exception.courseReview.CourseReviewException;
-import com.mohand.SchoolManagmentSystem.exception.courseReview.CourseReviewNotFoundException;
+import com.mohand.SchoolManagmentSystem.exception.ResourceNotFoundException;
 import com.mohand.SchoolManagmentSystem.exception.user.account.AccountAlreadyExistException;
 import com.mohand.SchoolManagmentSystem.exception.user.account.AccountException;
 import com.mohand.SchoolManagmentSystem.exception.user.account.AccountNotEnabledException;
@@ -99,18 +94,6 @@ public class GlobalExceptionHandler {
         return errorDetail;
     }
 
-    @ExceptionHandler(CourseException.class)
-    public ProblemDetail handleCourseException(CourseException exception) {
-        exception.printStackTrace();
-        ProblemDetail errorDetail = null;
-
-        if (exception instanceof CourseNotFoundException) {
-            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
-        }
-
-        return errorDetail;
-    }
-
     @ExceptionHandler(InvalidEnumValueException.class)
     public ProblemDetail handleInvalidPricingModelException(InvalidEnumValueException exception) {
         exception.printStackTrace();
@@ -121,35 +104,9 @@ public class GlobalExceptionHandler {
         return errorDetail;
     }
 
-    @ExceptionHandler(CourseReviewException.class)
-    public ProblemDetail handleCourseReviewException(CourseReviewException exception) {
-        exception.printStackTrace();
-        ProblemDetail errorDetail = null;
-
-
-        if (exception instanceof CourseReviewNotFoundException) {
-            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
-        }
-
-        return errorDetail;
-    }
-
-    @ExceptionHandler(AnnouncementException.class)
-    public ProblemDetail handleAnnouncementExceptionException(AnnouncementException exception) {
-        exception.printStackTrace();
-        ProblemDetail errorDetail = null;
-
-
-        if (exception instanceof AnnouncementNotFoundException) {
-            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
-        }
-
-        return errorDetail;
-    }
-
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Map<String, String> handleGlobalException(MethodArgumentNotValidException exception) {
+    public Map<String, String> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
         exception.printStackTrace();
 
         Map<String, String> errors = new HashMap<>();
@@ -161,6 +118,13 @@ public class GlobalExceptionHandler {
         });
 
         return errors;
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ProblemDetail handleResourceNotFoundException(ResourceNotFoundException ex) {
+        ex.printStackTrace();
+
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)

@@ -43,21 +43,21 @@ public class Course {
     private String introductionVideoUrl;
 
     @Column(nullable = false)
-    private int numberOfReviews;
+    private Integer numberOfReviews;
 
     @Column(nullable = false)
-    private double numberOfHours;
+    private Integer numberOfHours;
 
     @Column(nullable = false)
-    private long numberOfStudents;
+    private Integer numberOfStudents;
 
     @Column(nullable = false)
     @Min(message = "Price must be greater than 0", value = 0)
-    private double price;
+    private Double price;
 
     @Min(0)
     @Max(100)
-    private int discountPercentage;
+    private Integer discountPercentage;
 
     @Future(message = "Discount expiration date must be in the future")
     private LocalDate discountExpirationDate;

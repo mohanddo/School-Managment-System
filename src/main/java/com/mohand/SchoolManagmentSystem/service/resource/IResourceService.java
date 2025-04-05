@@ -1,0 +1,36 @@
+package com.mohand.SchoolManagmentSystem.service.resource;
+
+import com.mohand.SchoolManagmentSystem.model.chapter.Document;
+import com.mohand.SchoolManagmentSystem.model.chapter.Resource;
+import com.mohand.SchoolManagmentSystem.model.chapter.Video;
+import com.mohand.SchoolManagmentSystem.model.user.Student;
+import com.mohand.SchoolManagmentSystem.model.user.Teacher;
+import com.mohand.SchoolManagmentSystem.request.chapter.AddDocumentRequest;
+import com.mohand.SchoolManagmentSystem.request.chapter.AddVideoRequest;
+import com.mohand.SchoolManagmentSystem.request.chapter.UpdateDocumentRequest;
+import com.mohand.SchoolManagmentSystem.request.chapter.UpdateVideoRequest;
+import org.springframework.data.repository.query.Param;
+
+import java.util.Optional;
+
+public interface IResourceService {
+    void addVideo(AddVideoRequest request, Teacher teacher);
+    void addDocument(AddDocumentRequest request, Teacher teacher);
+
+    void updateVideo(UpdateVideoRequest request, Teacher teacher);
+    void updateDocument(UpdateDocumentRequest request, Teacher teacher);
+
+    void addOrDeleteFinishedResource(Long resourceId, Long chapterId, Long courseId , Student student);
+
+    Video findVideoByIdAndChapterIdAndCourseIdAndTeacherId(Long videoId,
+                                                           Long chapterId,
+                                                           Long courseId,
+                                                           Long teacherId);
+
+    Document findDocumentByIdAndChapterIdAndCourseIdAndTeacherId(Long documentId,
+                                                         Long chapterId,
+                                                         Long courseId,
+                                                         Long teacherId);
+
+    Resource findByIdAndChapterIdAndCourseId(Long resourceId, Long chapterId, Long courseId);
+}

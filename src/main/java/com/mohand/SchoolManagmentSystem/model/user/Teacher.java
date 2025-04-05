@@ -32,10 +32,10 @@ public class Teacher extends User {
     }
 
     @Column(nullable = false)
-    Integer numberOfCourses;
+    private Integer numberOfCourses;
 
     @Column(nullable = false)
-    Integer numberOfStudents;
+    private Integer numberOfStudents;
 
     private String facebookLink;
 

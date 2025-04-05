@@ -55,7 +55,7 @@ public abstract class User implements UserDetails {
     private String profilePicDownloadUrl;
 
     @Column(nullable = false)
-    private boolean enabled;
+    private Boolean enabled;
 
     private String verificationCode;
 

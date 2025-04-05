@@ -36,6 +36,8 @@ public interface ICourseService {
 
 
     boolean existsByIdAndStudentId(Long id, Long studentId);
+    boolean existsByIdAndTeacherId(Long id, Long teacherId);
+    Course findByIdAndTeacherId(Long id, Long teacherId);
 
     double calculateRating(Long courseId);
 }

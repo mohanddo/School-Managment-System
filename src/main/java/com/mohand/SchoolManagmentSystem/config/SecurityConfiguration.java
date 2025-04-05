@@ -58,13 +58,17 @@ public class SecurityConfiguration {
 //                                .hasAuthority(Role.ROLE_ADMIN.getValue())
 
                                 .requestMatchers("/api/v1/course/create", "/api/v1/course/delete/**", "/api/v1/course/update",
-                                        "/api/v1/course/announcement/createOrUpdate", "/api/v1/course/announcement/delete/**")
+                                        "/api/v1/course/announcement/createOrUpdate", "/api/v1/course/announcement/delete/**",
+                                        "/api/v1/chapter/addOrUpdate",
+                                        "/api/v1/resource/addVideo", "/api/v1/resource/addDocument",
+                                        "/api/v1/resource/updateVideo", "/api/v1/resource/updateDocument")
                                 .hasAuthority(Role.ROLE_TEACHER.getValue())
 
                                 .requestMatchers("/api/v1/course/addOrRemoveCourseFromFavorite/**",
                                         "/api/v1/course/addOrRemoveCourseFromCart/**",
                                         "/api/v1/course/courseReview/createOrUpdate",
-                                        "/api/v1/course/courseReview/delete/**")
+                                        "/api/v1/course/courseReview/delete/**",
+                                        "/api/v1/resource/addOrDeleteFinishedResource/**")
                                 .hasAuthority(Role.ROLE_STUDENT.getValue()).
 
                                 requestMatchers("/api/v1/course/announcementComment/createOrUpdate", "/api/v1/course/announcementComment/delete/**")

@@ -12,6 +12,11 @@ public class FinishedResource {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    public FinishedResource(Student student, Resource resource) {
+        this.student = student;
+        this.resource = resource;
+    }
+
     @ManyToOne
     @JoinColumn(name = "student_id")
     private Student student;

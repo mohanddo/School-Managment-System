@@ -1,9 +1,6 @@
 package com.mohand.SchoolManagmentSystem.service.course;
 
-import com.mohand.SchoolManagmentSystem.exception.announcement.AnnouncementCommentNotFoundException;
-import com.mohand.SchoolManagmentSystem.exception.announcement.AnnouncementNotFoundException;
-import com.mohand.SchoolManagmentSystem.exception.course.CourseNotFoundException;
-import com.mohand.SchoolManagmentSystem.exception.courseReview.CourseReviewNotFoundException;
+import com.mohand.SchoolManagmentSystem.exception.ResourceNotFoundException;
 import com.mohand.SchoolManagmentSystem.model.course.Cart;
 import com.mohand.SchoolManagmentSystem.model.course.*;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
@@ -81,7 +78,7 @@ public class CourseService implements ICourseService {
 
                     courseRepository.save(course);
                 }, () -> {
-                    throw new CourseNotFoundException();
+                    throw new ResourceNotFoundException("Course not found");
                 }
         );
     }
@@ -98,7 +95,7 @@ public class CourseService implements ICourseService {
 
     @Override
     public Course getById(Long id) {
-        return courseRepository.findById(id).orElseThrow(CourseNotFoundException::new);
+        return courseRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Course not found"));
     }
 
     @Override
@@ -158,16 +155,16 @@ public class CourseService implements ICourseService {
         if (courseReviewRepository.existsByStudentIdAndCourseId(studentId, courseId)) {
             courseReviewRepository.deleteByStudentIdAndCourseId(studentId, courseId);
         } else {
-            throw new CourseReviewNotFoundException(courseId.toString(), studentId.toString());
+            throw new ResourceNotFoundException("Course review not found");
         }
     }
 
     @Override
     public void createOrUpdateAnnouncement(CreateOrUpdateAnnouncementRequest request, Long teacherId) {
 
-        if (courseRepository.existsByIdAndTeacherId(request.courseId(), teacherId)) {
+        Course course = findByIdAndTeacherId(request.courseId(), teacherId);
+
             if (request.announcementId() == null) {
-                Course course = getById(request.courseId());
                 Announcement announcement = new Announcement(request.text(), course);
                 announcementRepository.save(announcement);
             } else {
@@ -175,40 +172,37 @@ public class CourseService implements ICourseService {
                     announcement.setText(request.text());
                     announcementRepository.save(announcement);
                 }, () -> {
-                    throw new AnnouncementNotFoundException(request.announcementId().toString(), request.courseId().toString());
+                    throw new ResourceNotFoundException("Announcement not found");
                 });
             }
-        } else {
-            throw new CourseNotFoundException();
-        }
+
     }
 
 
     @Override
     public void deleteAnnouncement(Long announcementId, Long courseId, Long teacherId) {
 
-        if (courseRepository.existsByIdAndTeacherId(courseId, teacherId)) {
-            if(announcementRepository.existsByIdAndCourseId(announcementId, courseId)) {
-                announcementRepository.deleteById(announcementId);
-            } else {
-                throw new AnnouncementNotFoundException(announcementId.toString(), courseId.toString());
-            }
-        } else {
-            throw new CourseNotFoundException();
+        if (!courseRepository.existsByIdAndTeacherId(courseId, teacherId)) {
+            throw new ResourceNotFoundException("Course not found");
         }
 
+        if(!announcementRepository.existsByIdAndCourseId(announcementId, courseId)) {
+            throw new ResourceNotFoundException("Announcement not found");
+        }
+
+        announcementRepository.deleteById(announcementId);
     }
 
     @Override
     public void createOrUpdateAnnouncementComment(CreateOrUpdateAnnouncementCommentRequest request, User user) {
 
         if (!courseRepository.existsByIdAndTeacherId(request.courseId(), user.getId()) && !existsByIdAndStudentId(request.courseId(), user.getId())) {
-            throw new CourseNotFoundException();
+            throw new ResourceNotFoundException("Course not found");
         }
 
         Announcement announcement = announcementRepository
                 .findByIdAndCourseId(request.announcementId(), request.courseId())
-                .orElseThrow(() -> new AnnouncementNotFoundException(request.announcementId().toString(), request.courseId().toString()));
+                .orElseThrow(() -> new ResourceNotFoundException("Announcement not found"));
 
         if (request.commentId() == null) {
             AnnouncementComment announcementComment = new AnnouncementComment(user, announcement, request.comment());
@@ -220,22 +214,22 @@ public class CourseService implements ICourseService {
             announcementComment.setText(request.comment());
             announcementCommentRepository.save(announcementComment);
         }, () -> {
-            throw new AnnouncementCommentNotFoundException(request.announcementId().toString(), request.commentId().toString());
+            throw new ResourceNotFoundException("Announcement comment not found");
         });
     }
 
     @Override
     public void deleteAnnouncementComment(Long announcementId, Long courseId, Long commentId, User user) {
         if (!courseRepository.existsByIdAndTeacherId(courseId, user.getId()) && !existsByIdAndStudentId(courseId, user.getId())) {
-            throw new CourseNotFoundException();
+            throw new ResourceNotFoundException("Course not found");
         }
 
         if(!announcementRepository.existsByIdAndCourseId(announcementId, courseId)) {
-            throw new AnnouncementNotFoundException(announcementId.toString(), courseId.toString());
+            throw new ResourceNotFoundException("Announcement not found");
         }
 
         if(!announcementCommentRepository.existsByIdAndAnnouncementId(commentId, announcementId)) {
-            throw new AnnouncementCommentNotFoundException(announcementId.toString(), commentId.toString());
+            throw new ResourceNotFoundException("Announcement comment not found");
         }
 
         announcementCommentRepository.deleteById(commentId);
@@ -247,6 +241,16 @@ public class CourseService implements ICourseService {
         Student student = studentService.getById(studentId);
         Course course = getById(id);
         return student.getCourses().contains(course) && course.getStudents().contains(student);
+    }
+
+    @Override
+    public boolean existsByIdAndTeacherId(Long id, Long teacherId) {
+        return courseRepository.existsByIdAndTeacherId(id, teacherId);
+    }
+
+    @Override
+    public Course findByIdAndTeacherId(Long id, Long teacherId) {
+        return courseRepository.findByIdAndTeacherId(id, teacherId).orElseThrow(() -> new ResourceNotFoundException("Course not found"));
     }
 
     @Override
