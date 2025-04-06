@@ -54,14 +54,6 @@ public class Teacher extends User {
     @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Course> courses;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Comment> comments;
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UpVoteComment> upVoteComments;
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(

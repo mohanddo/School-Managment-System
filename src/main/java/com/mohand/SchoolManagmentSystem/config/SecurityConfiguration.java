@@ -28,7 +28,6 @@ public class SecurityConfiguration {
     private final JwtFilterConfig jwtFilterConfig;
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
-    private final TeacherRequestAuthorizationManager teacherRequestAuthorizationManager;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

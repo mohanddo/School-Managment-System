@@ -45,14 +45,6 @@ public class Student extends User {
 
     @JsonIgnore
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Comment> comments;
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UpVoteComment> upVoteComments;
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FinishedResource> finishedResources;
 
     @JsonIgnore

@@ -1,7 +1,12 @@
 package com.mohand.SchoolManagmentSystem.model.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mohand.SchoolManagmentSystem.enums.Role;
 import com.mohand.SchoolManagmentSystem.model.PasswordResetToken;
+import com.mohand.SchoolManagmentSystem.model.comment.Comment;
+import com.mohand.SchoolManagmentSystem.model.comment.ReplyComment;
+import com.mohand.SchoolManagmentSystem.model.comment.UpVoteComment;
+import com.mohand.SchoolManagmentSystem.model.comment.UpVoteReplyComment;
 import com.mohand.SchoolManagmentSystem.model.course.AnnouncementComment;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -70,6 +75,22 @@ public abstract class User implements UserDetails {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AnnouncementComment> announcementComments;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReplyComment> replyComments;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UpVoteComment> upVoteComments;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UpVoteReplyComment> upVoteReplyComments;
 
     @Override
     public String getUsername() {

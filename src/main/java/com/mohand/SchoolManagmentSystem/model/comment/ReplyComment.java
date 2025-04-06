@@ -2,31 +2,35 @@ package com.mohand.SchoolManagmentSystem.model.comment;
 
 import com.mohand.SchoolManagmentSystem.model.user.Student;
 import com.mohand.SchoolManagmentSystem.model.user.Teacher;
+import com.mohand.SchoolManagmentSystem.model.user.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.AssertTrue;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Check;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @NoArgsConstructor
 @Entity
-@Check(constraints = "(teacher_id IS NOT NULL AND student_id IS NULL) OR (teacher_id IS NULL AND student_id IS NOT NULL)")
-
 public class ReplyComment {
+
+    public ReplyComment(String text, LocalDate dateOfCreation, User user, Comment comment) {
+        this.text = text;
+        this.dateOfCreation = LocalDateTime.now();
+        this.user = user;
+        this.comment = comment;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String text;
-    private LocalDate dateOfCreation;
+    private LocalDateTime dateOfCreation;
 
     @ManyToOne
-    @JoinColumn(name = "student_id")
-    private Student student;
-
-    @ManyToOne
-    @JoinColumn(name = "teacher_id")
-    private Teacher teacher;
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "comment_id")
@@ -34,9 +38,4 @@ public class ReplyComment {
 
     @OneToMany(mappedBy = "replyComment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UpVoteReplyComment> upVoteReplyComments;
-
-    @AssertTrue(message = "A comment must have either a teacher or a student, but not both.")
-    public boolean isTeacherOrStudent() {
-        return (teacher != null && student == null) || (teacher == null && student != null);
-    }
 }
