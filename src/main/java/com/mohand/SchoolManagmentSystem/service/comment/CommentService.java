@@ -14,6 +14,7 @@ import com.mohand.SchoolManagmentSystem.service.course.ICourseService;
 import com.mohand.SchoolManagmentSystem.service.resource.IResourceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -45,6 +46,7 @@ public class CommentService implements ICommentService {
         commentRepository.save(comment);
     }
 
+    @Transactional
     @Override
     public void deleteComment(DeleteCommentRequest request, User user) {
         if (!courseService.existsByIdAndStudentId(request.getCourseId(), user.getId())
@@ -58,6 +60,7 @@ public class CommentService implements ICommentService {
     }
 
     @Override
+    @Transactional
     public void upVoteComment(UpVoteCommentRequest request, User user) {
 
         if (upVoteCommentRepository.deleteByCommentIdAndUserId(request.getCommentId(), user.getId()) > 0) {

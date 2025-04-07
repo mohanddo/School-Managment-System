@@ -238,9 +238,7 @@ public class CourseService implements ICourseService {
 
     @Override
     public boolean existsByIdAndStudentId(Long id, Long studentId) {
-        Student student = studentService.getById(studentId);
-        Course course = getById(id);
-        return student.getCourses().contains(course) && course.getStudents().contains(student);
+        return courseRepository.isStudentEnrolledInCourse(studentId, id);
     }
 
     @Override
