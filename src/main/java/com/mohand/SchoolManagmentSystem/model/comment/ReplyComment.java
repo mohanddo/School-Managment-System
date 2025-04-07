@@ -15,7 +15,7 @@ import java.util.List;
 @Entity
 public class ReplyComment {
 
-    public ReplyComment(String text, LocalDate dateOfCreation, User user, Comment comment) {
+    public ReplyComment(String text, User user, Comment comment) {
         this.text = text;
         this.dateOfCreation = LocalDateTime.now();
         this.user = user;

@@ -71,7 +71,7 @@ public class SecurityConfiguration {
                                 .hasAuthority(Role.ROLE_STUDENT.getValue()).
 
                                 requestMatchers("/api/v1/course/announcementComment/createOrUpdate", "/api/v1/course/announcementComment/delete/**",
-                                        "/api/v1/comment/addOrUpdate", "/api/v1/comment/delete", "/api/v1/comment/upVote")
+                                        "/api/v1/comment/addOrUpdate", "/api/v1/comment/delete/**", "/api/v1/comment/upVote")
                                 .hasAnyAuthority(Role.ROLE_TEACHER.getValue(), Role.ROLE_STUDENT.getValue())
 
                                 .anyRequest().authenticated()

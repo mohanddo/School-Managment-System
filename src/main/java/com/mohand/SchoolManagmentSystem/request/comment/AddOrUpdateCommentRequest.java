@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class AddOrUpdateCommentRequest {
-    @NotBlank(message = "Comment must a text")
+    @NotBlank(message = "Comment must have a text")
     private String text;
 
     @NotNull(message = "Request must have a course id")

@@ -8,7 +8,6 @@ import com.mohand.SchoolManagmentSystem.model.user.User;
 import com.mohand.SchoolManagmentSystem.repository.CommentRepository;
 import com.mohand.SchoolManagmentSystem.repository.UpVoteCommentRepository;
 import com.mohand.SchoolManagmentSystem.request.comment.AddOrUpdateCommentRequest;
-import com.mohand.SchoolManagmentSystem.request.comment.DeleteCommentRequest;
 import com.mohand.SchoolManagmentSystem.request.comment.UpVoteCommentRequest;
 import com.mohand.SchoolManagmentSystem.service.course.ICourseService;
 import com.mohand.SchoolManagmentSystem.service.resource.IResourceService;
@@ -39,22 +38,17 @@ public class CommentService implements ICommentService {
         if (request.getCommentId() == null) {
             comment = new Comment(request.getText(), user, resource);
         } else {
-            comment = findByIdAndResourceId(request.getCommentId(), request.getResourceId());
+            comment = findByIdAndUserId(request.getCommentId(), user.getId());
             comment.setText(request.getText());
         }
 
         commentRepository.save(comment);
     }
 
-    @Transactional
     @Override
-    public void deleteComment(DeleteCommentRequest request, User user) {
-        if (!courseService.existsByIdAndStudentId(request.getCourseId(), user.getId())
-                && !courseService.existsByIdAndTeacherId(request.getCourseId(), user.getId())) {
-            throw new ResourceNotFoundException("Course not found");
-        }
-
-        if(commentRepository.deleteByIdAndResourceIdAndChapterIdAndCourseId(request.getCommentId(), request.getResourceId(), request.getChapterId(), request.getCourseId()) == 0) {
+    @Transactional
+    public void deleteComment(Long commentId, User user) {
+        if(commentRepository.deleteByIdAndUserId(commentId, user.getId()) == 0) {
             throw new ResourceNotFoundException("Comment not found");
         }
     }
@@ -78,8 +72,8 @@ public class CommentService implements ICommentService {
     }
 
     @Override
-    public Comment findByIdAndResourceId(Long commentId, Long resourceId) {
-        return commentRepository.findByIdAndResourceId(commentId, resourceId).orElseThrow(() -> new ResourceNotFoundException("Comment not found"));
+    public Comment findByIdAndUserId(Long commentId, Long userId) {
+        return commentRepository.findByIdAndUserId(commentId, userId).orElseThrow(() -> new ResourceNotFoundException("Comment not found"));
     }
 
     @Override

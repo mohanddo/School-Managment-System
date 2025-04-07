@@ -12,7 +12,8 @@ import java.util.Optional;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
-    Optional<Comment> findByIdAndResourceId(Long commentId, Long resourceId);
+    Optional<Comment> findByIdAndUserId(Long commentId, Long userId);
+    int deleteByIdAndUserId(Long commentId, Long userId);
 
     @Query("""
     SELECT COUNT(c) > 0 FROM Comment c\s
