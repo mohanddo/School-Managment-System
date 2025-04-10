@@ -53,7 +53,7 @@ public class Course {
 
     @Column(nullable = false)
     @Min(message = "Price must be greater than 0", value = 0)
-    private Double price;
+    private Integer price;
 
     @Min(0)
     @Max(100)
@@ -90,7 +90,7 @@ public class Course {
     @OneToMany(mappedBy = "course")
     private List<OrderItem> orderItems;
 
-    public static CourseBuilder builder(String title, String description, double price, PricingModel pricingModel, Teacher teacher, String imageUrl, String introductionVideoUrl) {
+    public static CourseBuilder builder(String title, String description, int price, PricingModel pricingModel, Teacher teacher, String imageUrl, String introductionVideoUrl) {
         return hiddenBuilder()
                 .title(title)
                 .description(description)

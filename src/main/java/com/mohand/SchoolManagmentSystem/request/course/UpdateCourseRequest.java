@@ -26,7 +26,7 @@ public class UpdateCourseRequest {
     private String pricingModel;
 
     @Min(value = 0, message = "Price must be greater than or equal to 0")
-    private double price;
+    private int price;
 
     @Min(value = 0, message = "Discount percentage must be at least 0")
     @Max(value = 100, message = "Discount percentage must be at most 100")

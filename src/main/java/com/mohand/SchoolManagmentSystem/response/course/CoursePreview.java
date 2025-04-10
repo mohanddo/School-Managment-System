@@ -19,6 +19,7 @@ public class CoursePreview {
     private String introductionVideoUrl;
     private int numberOfStudents;
     private int numberOfReviews;
+    private int price;
     private double numberOfHours;
     private Integer discountPercentage;
     private LocalDate discountExpirationDate;

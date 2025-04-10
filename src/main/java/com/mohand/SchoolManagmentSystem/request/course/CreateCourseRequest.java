@@ -26,7 +26,7 @@ public class CreateCourseRequest {
         return PricingModel.validatePricingModel(pricingModel);
     }
 
-    private double price;
+    private int price;
 
     private String imageUrl;
     private String introductionVideoUrl;
