@@ -1,7 +1,7 @@
 package com.mohand.SchoolManagmentSystem.service.course;
 
 import com.mohand.SchoolManagmentSystem.exception.ResourceNotFoundException;
-import com.mohand.SchoolManagmentSystem.model.course.Cart;
+import com.mohand.SchoolManagmentSystem.model.course.CartItem;
 import com.mohand.SchoolManagmentSystem.model.course.*;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
 import com.mohand.SchoolManagmentSystem.model.user.Teacher;
@@ -13,7 +13,7 @@ import com.mohand.SchoolManagmentSystem.request.course.CreateCourseRequest;
 import com.mohand.SchoolManagmentSystem.request.course.CreateOrUpdateCourseReviewRequest;
 import com.mohand.SchoolManagmentSystem.request.course.UpdateCourseRequest;
 import com.mohand.SchoolManagmentSystem.response.course.CoursePreview;
-import com.mohand.SchoolManagmentSystem.service.azure.AzureBlobService;
+import com.mohand.SchoolManagmentSystem.service.payment.ChargilyPayService;
 import com.mohand.SchoolManagmentSystem.service.student.StudentService;
 import com.mohand.SchoolManagmentSystem.service.teacher.TeacherService;
 import lombok.RequiredArgsConstructor;
@@ -35,14 +35,19 @@ public class CourseService implements ICourseService {
     private final CourseReviewRepository courseReviewRepository;
     private final AnnouncementRepository announcementRepository;
     private final AnnouncementCommentRepository announcementCommentRepository;
-    private final CartRepository cartRepository;
+    private final CartItemRepository cartItemRepository;
     private final ModelMapper modelMapper;
+    private final ChargilyPayService chargilyPayService;
 
     @Override
     @Transactional
     public void create(CreateCourseRequest request, Teacher teacher) {
+
         Course course = Course.builder(request.getTitle(), request.getDescription(), request.getPrice(), request.getPricingModelEnum(), teacher, request.getImageUrl(), request.getIntroductionVideoUrl())
                 .build();
+
+        chargilyPayService.createProduct(course);
+
         teacher.setNumberOfCourses(teacher.getNumberOfCourses() + 1);
         courseRepository.save(course);
         teacherService.save(teacher);
@@ -118,12 +123,12 @@ public class CourseService implements ICourseService {
         Student student = studentService.getById(studentId);
         Course course = getById(courseId);
 
-        if(cartRepository.existsByStudentIdAndCourseId(studentId, courseId)) {
-            cartRepository.deleteByStudentIdAndCourseId(studentId, courseId);
+        if(cartItemRepository.existsByStudentIdAndCourseId(studentId, courseId)) {
+            cartItemRepository.deleteByStudentIdAndCourseId(studentId, courseId);
             return;
         }
 
-        cartRepository.save(new Cart(student, course));
+        cartItemRepository.save(new CartItem(student, course));
     }
 
     @Override

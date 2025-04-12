@@ -1,14 +1,12 @@
 package com.mohand.SchoolManagmentSystem.service.comment;
 
+import com.mohand.SchoolManagmentSystem.model.user.User;
+
 public interface IReplyComment {
 
-    void addReplyComment(String text, Long commentId, Long userId);
+    void addOrUpdateReplyComment(String text, Long commentId, Long userId);
 
-    void deleteReplyComment(Long replyCommentId);
-
-    void updateReplyComment(Long replyCommentId, String text);
+    void deleteReplyComment(Long replyCommentId, User user);
 
     void upVoteReplyComment(Long replyCommentId, Long userId);
-
-    void downVoteReplyComment(Long replyCommentId, Long userId);
 }

@@ -2,14 +2,18 @@ package com.mohand.SchoolManagmentSystem.model.course;
 
 import com.mohand.SchoolManagmentSystem.model.user.Student;
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @NoArgsConstructor
 @Entity
+@Getter
+@Setter
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = {"student_id", "course_id"}) } )
-public class Cart {
+public class CartItem {
 
-    public Cart(Student student, Course course) {
+    public CartItem(Student student, Course course) {
         this.student = student;
         this.course = course;
     }

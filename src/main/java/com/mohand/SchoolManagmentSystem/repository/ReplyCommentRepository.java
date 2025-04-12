@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ReplyCommentRepository extends JpaRepository<ReplyComment, Long> {
 
-
+    int deleteByIdAndUserId(Long replyCommentId, Long userId);
 }

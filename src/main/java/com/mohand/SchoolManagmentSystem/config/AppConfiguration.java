@@ -5,6 +5,7 @@ import com.mohand.SchoolManagmentSystem.model.user.Teacher;
 import com.mohand.SchoolManagmentSystem.model.user.User;
 import com.mohand.SchoolManagmentSystem.repository.StudentRepository;
 import com.mohand.SchoolManagmentSystem.repository.UserRepository;
+import com.mohand.SchoolManagmentSystem.request.payment.CreateProductRequest;
 import com.mohand.SchoolManagmentSystem.response.course.CoursePreview;
 import com.mohand.SchoolManagmentSystem.response.teacher.TeacherPreview;
 import com.mohand.SchoolManagmentSystem.service.JwtService;
@@ -25,6 +26,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.awt.*;
+import java.net.http.HttpClient;
 
 @Configuration
 @RequiredArgsConstructor
@@ -35,9 +37,6 @@ public class AppConfiguration {
 
         @Value("${base.url}")
         private String baseUrl;
-
-        @Value("${chargily.pay.test.mode.secret.key}")
-        private String chargilyPayTestModeSecretKey;
 
         @Value("${azure.storage.endpoint}")
         private String azureStorageEndpoint;
@@ -75,18 +74,27 @@ public class AppConfiguration {
                     )
             );
 
+            Converter<String, String[]> courseImageUrlToArray = (context) ->  {
+                if (context.getSource() != null) {
+                    return new String[] { azureBlobService.signBlobUrl(context.getSource(), false) };
+                } else {
+                    return new String[] {};
+                }
+            } ;
+
+
+            modelMapper.typeMap(Course.class, CreateProductRequest.class).addMappings(mapping -> {
+                mapping.map(Course::getTitle, CreateProductRequest::setName);
+                mapping.using(courseImageUrlToArray).map(Course::getImageUrl, CreateProductRequest::setImages);
+            });
+
             return modelMapper;
         }
 
-
-    @Bean
-    public WebClient webClient() {
-        return WebClient.builder()
-                .baseUrl("https://pay.chargily.net/test/api/v2/checkouts")
-                .defaultHeader("Content-Type", "application/json")
-                .defaultHeader("Authorization", "Bearer " + chargilyPayTestModeSecretKey)
-                .build();
-    }
+        @Bean
+        public HttpClient httpClient() {
+            return HttpClient.newHttpClient();
+        }
 
     private final UserRepository userRepository;
 
