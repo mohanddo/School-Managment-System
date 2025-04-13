@@ -66,6 +66,10 @@ public class Course {
     @Enumerated(EnumType.STRING)
     private PricingModel pricingModel;
 
+    @NotBlank
+    @Column(nullable = false)
+    private String priceId;
+
 
     @ManyToOne
     @JoinColumn(name = "teacher_id")
@@ -103,5 +107,6 @@ public class Course {
                 .imageUrl(imageUrl)
                 .introductionVideoUrl(introductionVideoUrl)
                 .discountPercentage(0);
+
     }
 }

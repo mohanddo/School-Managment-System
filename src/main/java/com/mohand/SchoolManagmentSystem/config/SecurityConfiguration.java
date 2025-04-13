@@ -50,7 +50,8 @@ public class SecurityConfiguration {
                                         "/passwordChangedSuccessfully.html",
                                         "/api/v1/password/updatePassword",
                                         "/api/v1/payments/checkout",
-                                        "/api/v1/course/all","/api/v1/auth/teacher/signup", "/api/v1/auth/admin/signup"
+                                        "/api/v1/course/all","/api/v1/auth/teacher/signup", "/api/v1/auth/admin/signup",
+                                        "/api/v1/purchase/webhook"
                                 ).permitAll()
 
 //                                .requestMatchers("/api/v1/auth/teacher/signup", "/api/v1/auth/admin/signup")
@@ -67,7 +68,9 @@ public class SecurityConfiguration {
                                         "/api/v1/course/addOrRemoveCourseFromCart/**",
                                         "/api/v1/course/courseReview/createOrUpdate",
                                         "/api/v1/course/courseReview/delete/**",
-                                        "/api/v1/resource/addOrDeleteFinishedResource/**")
+                                        "/api/v1/resource/addOrDeleteFinishedResource/**",
+                                        "/api/v1/purchase/cart",
+                                        "/api/v1/purchase/course/**")
                                 .hasAuthority(Role.ROLE_STUDENT.getValue()).
 
                                 requestMatchers("/api/v1/course/announcementComment/createOrUpdate", "/api/v1/course/announcementComment/delete/**",

@@ -14,7 +14,7 @@ public class CreatePriceResponse {
     private String livemode;
     private Integer amount;
     private String currency;
-    private Map<String, Object> metadata;
+//    private Map<String, Object> metadata;
     private Long created_at;
     private Long updated_at;
 }

@@ -1,8 +1,10 @@
 package com.mohand.SchoolManagmentSystem.service.payment;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mohand.SchoolManagmentSystem.model.course.CartItem;
 import com.mohand.SchoolManagmentSystem.model.course.Course;
+import com.mohand.SchoolManagmentSystem.request.payment.CreateCheckoutRequest;
 import com.mohand.SchoolManagmentSystem.request.payment.CreatePriceRequest;
 import com.mohand.SchoolManagmentSystem.request.payment.CreateProductRequest;
 import com.mohand.SchoolManagmentSystem.response.payment.CreatePriceResponse;
@@ -32,21 +34,38 @@ public class ChargilyPayService {
     @Value("${chargily.pay.base.url}")
     private String chargilyPayBaseUrl;
 
-//    void createCheckout(List<CartItem> cartItems) {
-//
-//        try {
-//            for(CartItem cartItem : cartItems) {
-//                CreateProductResponse createProductResponse = createProduct(cartItem);
-//                createPrice(createProductResponse.getId(), cartItem.getCourse().getPrice());
-//            }
-//
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
+    String createCheckout(CreateCheckoutRequest createCheckoutRequest) {
 
-    private void createPrice(String productId, Integer amount) throws IOException, InterruptedException {
+        try {
+            String createPriceRequestToString = objectMapper.writeValueAsString(createCheckoutRequest);
+            System.out.println(createPriceRequestToString);
+
+            HttpRequest createCheckout = HttpRequest.newBuilder()
+                    .uri(URI.create(chargilyPayBaseUrl + "/checkouts"))
+                    .POST(HttpRequest.BodyPublishers.ofString(createPriceRequestToString))
+                    .header("Authorization", "Bearer " + chargilyPaySecretKey)
+                    .header("Content-Type", "application/json")
+                    .build();
+
+            HttpResponse<String> createCheckoutResponse = client.send(createCheckout, HttpResponse.BodyHandlers.ofString());
+            System.out.println(createCheckoutResponse);
+            System.out.println(createCheckoutResponse.body());
+            System.out.println(createCheckoutResponse.headers());
+
+            if (createCheckoutResponse.statusCode() != 200) {
+                throw new RuntimeException("Failed to create checkout");
+            }
+
+            JsonNode jsonNode = objectMapper.readTree(createCheckoutResponse.body());
+            return jsonNode.get("checkout_url").asText();
+
+        } catch (Exception e) {
+            e.getMessage();
+            throw new RuntimeException("Failed to create checkout");
+        }
+    }
+
+    private CreatePriceResponse createPrice(String productId, Integer amount) throws IOException, InterruptedException {
         CreatePriceRequest price = new CreatePriceRequest(amount, productId);
         String createPriceRequestBody = objectMapper.writeValueAsString(price);
 
@@ -63,12 +82,12 @@ public class ChargilyPayService {
             throw new RuntimeException("Failed to create price");
         }
 
-//        return objectMapper.readValue(
-//                createPriceResponseBody.body(), CreatePriceResponse.class
-//        );
+        return objectMapper.readValue(
+                createPriceResponseBody.body(), CreatePriceResponse.class
+        );
     }
 
-    public void createProduct(Course course)  {
+    public String createProduct(Course course)  {
         try {
             CreateProductRequest product = modelMapper.map(course, CreateProductRequest.class);
             String createProductRequestBody = objectMapper.writeValueAsString(product);
@@ -89,7 +108,8 @@ public class ChargilyPayService {
                 CreateProductResponse createProductResponse = objectMapper.readValue(
                         createProductResponseBody.body(), CreateProductResponse.class
                 );
-                createPrice(createProductResponse.getId(), course.getPrice());
+                CreatePriceResponse createPriceResponse = createPrice(createProductResponse.getId(), course.getPrice());
+                return createPriceResponse.getId();
             } else {
                 throw new RuntimeException("Failed to create product");
             }

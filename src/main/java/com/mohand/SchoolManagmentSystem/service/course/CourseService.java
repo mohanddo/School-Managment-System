@@ -46,7 +46,8 @@ public class CourseService implements ICourseService {
         Course course = Course.builder(request.getTitle(), request.getDescription(), request.getPrice(), request.getPricingModelEnum(), teacher, request.getImageUrl(), request.getIntroductionVideoUrl())
                 .build();
 
-        chargilyPayService.createProduct(course);
+        String priceId = chargilyPayService.createProduct(course);
+        course.setPriceId(priceId);
 
         teacher.setNumberOfCourses(teacher.getNumberOfCourses() + 1);
         courseRepository.save(course);

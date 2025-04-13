@@ -1,5 +1,6 @@
 package com.mohand.SchoolManagmentSystem.controller;
 
+import com.mohand.SchoolManagmentSystem.exception.BadRequestException;
 import com.mohand.SchoolManagmentSystem.exception.InvalidEnumValueException;
 import com.mohand.SchoolManagmentSystem.exception.ResourceNotFoundException;
 import com.mohand.SchoolManagmentSystem.exception.user.account.AccountAlreadyExistException;
@@ -94,15 +95,6 @@ public class GlobalExceptionHandler {
         return errorDetail;
     }
 
-    @ExceptionHandler(InvalidEnumValueException.class)
-    public ProblemDetail handleInvalidPricingModelException(InvalidEnumValueException exception) {
-        exception.printStackTrace();
-        ProblemDetail errorDetail = null;
-
-        errorDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
-
-        return errorDetail;
-    }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -118,6 +110,12 @@ public class GlobalExceptionHandler {
         });
 
         return errors;
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ProblemDetail handleBadRequestException(BadRequestException exception) {
+        exception.printStackTrace();
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
