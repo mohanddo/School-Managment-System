@@ -1,19 +1,28 @@
 package com.mohand.SchoolManagmentSystem.service.payment;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mohand.SchoolManagmentSystem.enums.ChargilyPayFeesAllocation;
 import com.mohand.SchoolManagmentSystem.exception.BadRequestException;
+import com.mohand.SchoolManagmentSystem.exception.ConflictException;
+import com.mohand.SchoolManagmentSystem.model.ProcessedWebhooks;
 import com.mohand.SchoolManagmentSystem.model.course.CartItem;
 import com.mohand.SchoolManagmentSystem.model.course.Course;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
-import com.mohand.SchoolManagmentSystem.model.user.User;
 import com.mohand.SchoolManagmentSystem.repository.CartItemRepository;
+import com.mohand.SchoolManagmentSystem.repository.ProcessedWebhooksRepository;
 import com.mohand.SchoolManagmentSystem.request.payment.CreateCheckoutRequest;
 import com.mohand.SchoolManagmentSystem.request.payment.Item;
-import com.mohand.SchoolManagmentSystem.service.course.CourseService;
+import com.mohand.SchoolManagmentSystem.response.payment.CreateCheckoutResponse;
+import com.mohand.SchoolManagmentSystem.response.payment.CreatePriceResponse;
+import com.mohand.SchoolManagmentSystem.response.payment.WebhookResponse;
 import com.mohand.SchoolManagmentSystem.service.course.ICourseService;
+import com.mohand.SchoolManagmentSystem.util.Util;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,6 +35,8 @@ public class PurchaseService implements IPurchaseService {
     private final CartItemRepository cartItemRepository;
     private final ChargilyPayService chargilyPayService;
     private final ICourseService courseService;
+    private final ProcessedWebhooksRepository processedWebhooksRepository;
+    private final ObjectMapper objectMapper;
 
     @Value("${chargily.pay.success.url}")
     private String successUrl;
@@ -44,18 +55,18 @@ public class PurchaseService implements IPurchaseService {
         List<Item> items = new ArrayList<>();
         int amount_discount = 0;
 
-        HashMap<String, String> metadata = new HashMap<>();
-        metadata.put("user_id", student.getId().toString());
-        StringBuilder course_Ids = new StringBuilder();
+        HashMap<String, Object> metadata = new HashMap<>();
+        metadata.put("user_id", student.getId());
+        List<Long> course_Ids = new ArrayList<>();
 
         for (CartItem cartItem : cartItems) {
             Course course = cartItem.getCourse();
             amount_discount += (course.getPrice() * course.getDiscountPercentage() / 100);
             items.add(new Item(course.getPriceId(), 1));
-            course_Ids.append(course.getId()).append(",");
+            course_Ids.add(course.getId());
         }
 
-        metadata.put("course_ids", course_Ids.toString());
+        metadata.put("course_ids", course_Ids);
 
 
         CreateCheckoutRequest createCheckoutRequest =
@@ -66,20 +77,70 @@ public class PurchaseService implements IPurchaseService {
 
     @Override
     public String purchaseCourse(Student student, Long courseId) {
+
+        if (courseService.existsByIdAndStudentId(courseId, student.getId())) {
+            throw new ConflictException("Student already enrolled in this course");
+        }
+
         Course course = courseService.getById(courseId);
 
         List<Item> items = new ArrayList<>();
         items.add(new Item(course.getPriceId(), 1));
 
-        int amount_discount = course.getPrice() - (course.getPrice() * course.getDiscountPercentage() / 100);
+        int amount_discount = (course.getPrice() * course.getDiscountPercentage() / 100);
 
-        HashMap<String, String> metadata = new HashMap<>();
-        metadata.put("user_id", student.getId().toString());
-        metadata.put("course_ids", course.getId().toString());
+        HashMap<String, Object> metadata = new HashMap<>();
+        metadata.put("user_id", student.getId());
+        List<Long> course_Ids = List.of(courseId);
+        metadata.put("course_ids", course_Ids);
 
         CreateCheckoutRequest createCheckoutRequest =
                 new CreateCheckoutRequest(items, successUrl, failureUrl, ChargilyPayFeesAllocation.customer, amount_discount, metadata);
 
         return chargilyPayService.createCheckout(createCheckoutRequest);
     }
+
+    @Override
+    @Transactional
+    public void handleWebhook(HttpServletRequest req) {
+
+        System.out.println("Webhook received");
+
+        String requestBody = Util.getRequestBody(req);
+        String signature = req.getHeader("signature");
+
+        WebhookResponse webhookResponse;
+        try {
+            webhookResponse = objectMapper.readValue(
+                    requestBody, WebhookResponse.class
+            );
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+
+        if (!chargilyPayService.isSignatureValid(requestBody, signature)) {
+            return;
+        }
+
+            CreateCheckoutResponse payload = webhookResponse.getData();
+            if (!payload.getEntity().equals("checkout") || !payload.getStatus().equals("paid")) {
+                return;
+            }
+
+            if (processedWebhooksRepository.existsById(webhookResponse.getId())) {
+                return;
+            }
+
+            List<Integer> courseIds = (List<Integer>) payload.getMetadata().get("course_ids");
+            Long studentId = Long.valueOf( (Integer) payload.getMetadata().get("user_id"));
+            for (Integer courseId : courseIds) {
+                courseService.addStudentToCourse(Long.valueOf(courseId), studentId);
+            }
+
+            ProcessedWebhooks processedWebhooks = new ProcessedWebhooks(webhookResponse.getId(), webhookResponse.getEntity(), webhookResponse.getLivemode(), webhookResponse.getType(), webhookResponse.getCreated_at(), webhookResponse.getUpdated_at());
+            processedWebhooksRepository.save(processedWebhooks);
+    }
 }
+
+

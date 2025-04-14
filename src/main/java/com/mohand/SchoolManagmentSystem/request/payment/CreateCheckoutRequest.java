@@ -19,5 +19,5 @@ public class CreateCheckoutRequest {
     private String failure_url;
     private ChargilyPayFeesAllocation chargily_pay_fees_allocation;
     private Integer amount_discount;
-    private HashMap<String, String> metadata;
+    private HashMap<String, Object> metadata;
 }

@@ -1,8 +1,9 @@
 package com.mohand.SchoolManagmentSystem.controller;
 
 import com.mohand.SchoolManagmentSystem.exception.BadRequestException;
-import com.mohand.SchoolManagmentSystem.exception.InvalidEnumValueException;
+import com.mohand.SchoolManagmentSystem.exception.ConflictException;
 import com.mohand.SchoolManagmentSystem.exception.ResourceNotFoundException;
+import com.mohand.SchoolManagmentSystem.exception.ForbiddenRequestException;
 import com.mohand.SchoolManagmentSystem.exception.user.account.AccountAlreadyExistException;
 import com.mohand.SchoolManagmentSystem.exception.user.account.AccountException;
 import com.mohand.SchoolManagmentSystem.exception.user.account.AccountNotEnabledException;
@@ -15,19 +16,15 @@ import com.mohand.SchoolManagmentSystem.exception.user.verificationCode.AccountA
 import com.mohand.SchoolManagmentSystem.exception.user.verificationCode.VerificationCodeException;
 import com.mohand.SchoolManagmentSystem.exception.user.verificationCode.VerificationCodeExpiredException;
 import com.mohand.SchoolManagmentSystem.exception.user.verificationCode.VerificationCodeInvalidException;
-import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -118,12 +115,26 @@ public class GlobalExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
 
+    @ExceptionHandler(ForbiddenRequestException.class)
+    public ProblemDetail handleForbiddenRequestException(ForbiddenRequestException exception) {
+        exception.printStackTrace();
+        return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, exception.getMessage());
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public ProblemDetail handleConflictException(ConflictException exception) {
+        exception.printStackTrace();
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+    }
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ProblemDetail handleResourceNotFoundException(ResourceNotFoundException ex) {
         ex.printStackTrace();
 
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
     }
+
+
 
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleGlobalException(Exception exception) {

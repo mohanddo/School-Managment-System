@@ -90,6 +90,19 @@ public class CourseService implements ICourseService {
     }
 
     @Override
+    public void addStudentToCourse(Long courseId, Long studentId) {
+        Course course = getById(courseId);
+        Student student = studentService.getById(studentId);
+
+        course.getStudents().add(student);
+        course.setNumberOfStudents(course.getNumberOfStudents() + 1);
+        student.getCourses().add(course);
+
+        courseRepository.save(course);
+        studentService.save(student);
+    }
+
+    @Override
     public List<CoursePreview> getAll() {
         List<Course> allCourses = courseRepository.findAll();
 

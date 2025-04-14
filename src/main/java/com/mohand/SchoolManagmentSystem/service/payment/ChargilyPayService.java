@@ -2,23 +2,33 @@ package com.mohand.SchoolManagmentSystem.service.payment;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mohand.SchoolManagmentSystem.model.course.CartItem;
+import com.mohand.SchoolManagmentSystem.exception.BadRequestException;
+import com.mohand.SchoolManagmentSystem.exception.ForbiddenRequestException;
 import com.mohand.SchoolManagmentSystem.model.course.Course;
 import com.mohand.SchoolManagmentSystem.request.payment.CreateCheckoutRequest;
 import com.mohand.SchoolManagmentSystem.request.payment.CreatePriceRequest;
 import com.mohand.SchoolManagmentSystem.request.payment.CreateProductRequest;
 import com.mohand.SchoolManagmentSystem.response.payment.CreatePriceResponse;
 import com.mohand.SchoolManagmentSystem.response.payment.CreateProductResponse;
+import com.mohand.SchoolManagmentSystem.util.Util;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.List;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+
+import static com.mohand.SchoolManagmentSystem.util.Util.bytesToHexString;
 
 @Service
 @RequiredArgsConstructor
@@ -120,4 +130,31 @@ public class ChargilyPayService {
         }
     }
 
+    private String computeHmacSha256(String data) {
+        try {
+            Mac sha256Hmac = Mac.getInstance("HmacSHA256");
+            SecretKeySpec secretKey = new SecretKeySpec(chargilyPaySecretKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+            sha256Hmac.init(secretKey);
+            byte[] hashBytes = sha256Hmac.doFinal(data.getBytes(StandardCharsets.UTF_8));
+            return bytesToHexString(hashBytes);
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            // Handle exceptions according to your application's requirements
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public boolean isSignatureValid(String reqBody, String signature) {
+
+        if (signature == null || signature.isEmpty()) {
+            throw new BadRequestException("Signature is missing");
+        }
+        String computedSignature = computeHmacSha256(reqBody);
+
+        if (!computedSignature.equals(signature)) {
+            throw new ForbiddenRequestException("Invalid signature");
+        }
+
+        return true;
+    }
 }

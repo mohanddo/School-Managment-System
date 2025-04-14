@@ -18,6 +18,8 @@ public interface ICourseService {
 //    void delete(Long courseId, Teacher teacher);
     void update(UpdateCourseRequest request, Teacher teacher);
 
+    void addStudentToCourse(Long courseId, Long studentId);
+
     List<CoursePreview> getAll();
     Course getById(Long id);
 
