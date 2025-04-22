@@ -10,24 +10,30 @@ import com.mohand.SchoolManagmentSystem.model.user.Admin;
 import com.mohand.SchoolManagmentSystem.request.authentication.LogInUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.RegisterUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.VerifyUserRequest;
-import com.mohand.SchoolManagmentSystem.response.authentication.SignUpResponse;
 import com.mohand.SchoolManagmentSystem.service.EmailService;
 import com.mohand.SchoolManagmentSystem.service.JwtService;
 import com.mohand.SchoolManagmentSystem.service.admin.IAdminService;
 import com.mohand.SchoolManagmentSystem.service.user.IUserService;
 import com.mohand.SchoolManagmentSystem.util.Util;
+import jakarta.servlet.http.HttpServletResponse;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Service
 public class AdminAuthenticationService extends AuthenticationService {
 
     private final IAdminService adminService;
+
+    @Value("${send.cookie.over.https}")
+    private String sendCookieOverHttps;
 
     public AdminAuthenticationService(IUserService userService, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, EmailService emailService, IAdminService adminService, JwtService jwtService,  ModelMapper modelMapper) {
         super(userService, passwordEncoder, authenticationManager, emailService, jwtService, modelMapper);
@@ -36,7 +42,7 @@ public class AdminAuthenticationService extends AuthenticationService {
 
 
     @Override
-    public SignUpResponse signup(RegisterUserRequest input) {
+    public void signup(RegisterUserRequest input) {
 
         if (userService.checkIfExist(input.email())) {
             throw new AccountAlreadyExistException();
@@ -52,12 +58,10 @@ public class AdminAuthenticationService extends AuthenticationService {
                 LocalDateTime.now().plusSeconds(verificationCodeExpirationTime / 1000));
         sendVerificationEmail(admin.getEmail(), admin.getVerificationCode());
         adminService.save(admin);
-
-        return new SignUpResponse(admin.getVerificationCode(), admin.getVerificationCodeExpiresAt());
     }
 
     @Override
-    public com.mohand.SchoolManagmentSystem.response.authentication.Admin authenticate(LogInUserRequest request) {
+    public com.mohand.SchoolManagmentSystem.response.authentication.Admin authenticate(LogInUserRequest request, HttpServletResponse response) {
         Admin admin = adminService.getByEmail(request.email());
 
         if (!admin.isEnabled()) {
@@ -74,13 +78,22 @@ public class AdminAuthenticationService extends AuthenticationService {
         com.mohand.SchoolManagmentSystem.response.authentication.Admin adminResponse = modelMapper.map(admin, com.mohand.SchoolManagmentSystem.response.authentication.Admin.class);
 
         String jwtToken = jwtService.generateToken(admin);
-        adminResponse.setJwtToken(jwtToken);
+
+        String cookie = ResponseCookie.from("token", jwtToken)
+                .httpOnly(true)
+                .secure(Boolean.parseBoolean(sendCookieOverHttps))
+                .sameSite("Strict")
+                .path("/")
+                .maxAge(Duration.ofHours(1))
+                .build().toString();
+
+        response.addHeader("Set-Cookie", cookie);
 
         return adminResponse;
     }
 
     @Override
-    public com.mohand.SchoolManagmentSystem.response.authentication.Admin verifyUser(VerifyUserRequest request) {
+    public com.mohand.SchoolManagmentSystem.response.authentication.Admin verifyUser(VerifyUserRequest request, HttpServletResponse response) {
         Admin admin = adminService.getByEmail(request.email());
 
         if (admin.isEnabled()) {
@@ -98,10 +111,19 @@ public class AdminAuthenticationService extends AuthenticationService {
 
             com.mohand.SchoolManagmentSystem.response.authentication.Admin adminResponse = modelMapper.map(admin, com.mohand.SchoolManagmentSystem.response.authentication.Admin.class);
 
-            String jwtToken = jwtService.generateToken(admin);
-            adminResponse.setJwtToken(jwtToken);
-
             adminService.save(admin);
+
+            String jwtToken = jwtService.generateToken(admin);
+
+            String cookie = ResponseCookie.from("token", jwtToken)
+                    .httpOnly(true)
+                    .secure(Boolean.parseBoolean(sendCookieOverHttps))
+                    .sameSite("Strict")
+                    .path("/")
+                    .maxAge(Duration.ofHours(1))
+                    .build().toString();
+
+            response.addHeader("Set-Cookie", cookie);
 
             return adminResponse;
         } else {

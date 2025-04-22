@@ -10,20 +10,22 @@ import com.mohand.SchoolManagmentSystem.model.user.Teacher;
 import com.mohand.SchoolManagmentSystem.request.authentication.LogInUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.RegisterUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.VerifyUserRequest;
-import com.mohand.SchoolManagmentSystem.response.authentication.SignUpResponse;
 import com.mohand.SchoolManagmentSystem.service.EmailService;
 import com.mohand.SchoolManagmentSystem.service.JwtService;
 import com.mohand.SchoolManagmentSystem.service.azure.AzureBlobService;
 import com.mohand.SchoolManagmentSystem.service.teacher.ITeacherService;
 import com.mohand.SchoolManagmentSystem.service.user.IUserService;
 import com.mohand.SchoolManagmentSystem.util.Util;
+import jakarta.servlet.http.HttpServletResponse;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -38,6 +40,9 @@ public class TeacherAuthenticationService extends AuthenticationService {
 
     private final AzureBlobService azureBlobService;
 
+    @Value("${send.cookie.over.https}")
+    private String sendCookieOverHttps;
+
     public TeacherAuthenticationService(IUserService userService, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, EmailService emailService, ITeacherService teacherService, AzureBlobService azureBlobService, JwtService jwtService, ModelMapper modelMapper) {
         super(userService, passwordEncoder, authenticationManager, emailService, jwtService, modelMapper);
         this.teacherService = teacherService;
@@ -46,7 +51,7 @@ public class TeacherAuthenticationService extends AuthenticationService {
 
 
     @Override
-    public SignUpResponse signup(RegisterUserRequest input) {
+    public void signup(RegisterUserRequest input) {
 
         if (userService.checkIfExist(input.email())) {
             throw new AccountAlreadyExistException();
@@ -65,12 +70,10 @@ public class TeacherAuthenticationService extends AuthenticationService {
                     containerName);
             sendVerificationEmail(teacher.getEmail(), teacher.getVerificationCode());
             teacherService.save(teacher);
-            return new SignUpResponse(teacher.getVerificationCode(), teacher.getVerificationCodeExpiresAt());
-
     }
 
     @Override
-    public com.mohand.SchoolManagmentSystem.response.authentication.Teacher authenticate(LogInUserRequest request) {
+    public com.mohand.SchoolManagmentSystem.response.authentication.Teacher authenticate(LogInUserRequest request, HttpServletResponse response) {
         Teacher teacher = teacherService.getByEmail(request.email());
 
         if (!teacher.isEnabled()) {
@@ -89,12 +92,22 @@ public class TeacherAuthenticationService extends AuthenticationService {
 
         com.mohand.SchoolManagmentSystem.response.authentication.Teacher teacherResponse = modelMapper.map(teacher, com.mohand.SchoolManagmentSystem.response.authentication.Teacher.class);
         String jwtToken = jwtService.generateToken(teacher);
-        teacherResponse.setJwtToken(jwtToken);
+
+        String cookie = ResponseCookie.from("token", jwtToken)
+                .httpOnly(true)
+                .secure(Boolean.parseBoolean(sendCookieOverHttps))
+                .sameSite("Strict")
+                .path("/")
+                .maxAge(Duration.ofHours(1))
+                .build().toString();
+
+        response.addHeader("Set-Cookie", cookie);
+
         return teacherResponse;
     }
 
     @Override
-    public com.mohand.SchoolManagmentSystem.response.authentication.Teacher verifyUser(VerifyUserRequest request) {
+    public com.mohand.SchoolManagmentSystem.response.authentication.Teacher verifyUser(VerifyUserRequest request, HttpServletResponse response) {
         Teacher teacher = teacherService.getByEmail(request.email());
 
         if (teacher.isEnabled()) {
@@ -115,10 +128,20 @@ public class TeacherAuthenticationService extends AuthenticationService {
 
             com.mohand.SchoolManagmentSystem.response.authentication.Teacher teacherResponse = modelMapper.map(teacher, com.mohand.SchoolManagmentSystem.response.authentication.Teacher.class);
 
-            String jwtToken = jwtService.generateToken(teacher);
-            teacherResponse.setJwtToken(jwtToken);
-
             teacherService.save(teacher);
+
+            String jwtToken = jwtService.generateToken(teacher);
+
+            String cookie = ResponseCookie.from("token", jwtToken)
+                    .httpOnly(true)
+                    .secure(Boolean.parseBoolean(sendCookieOverHttps))
+                    .sameSite("Strict")
+                    .path("/")
+                    .maxAge(Duration.ofHours(1))
+                    .build().toString();
+
+            response.addHeader("Set-Cookie", cookie);
+
             return teacherResponse;
         } else {
             throw new VerificationCodeInvalidException("Verification code is invalid");

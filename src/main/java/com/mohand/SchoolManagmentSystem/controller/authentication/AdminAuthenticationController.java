@@ -4,8 +4,8 @@ import com.mohand.SchoolManagmentSystem.request.authentication.LogInUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.RegisterUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.VerifyUserRequest;
 import com.mohand.SchoolManagmentSystem.response.authentication.Admin;
-import com.mohand.SchoolManagmentSystem.response.authentication.SignUpResponse;
 import com.mohand.SchoolManagmentSystem.service.authentication.AdminAuthenticationService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.LocalDateTime;
+
 @Controller
 @RequestMapping("${api.prefix}/auth/admin")
 @RequiredArgsConstructor
@@ -22,18 +24,19 @@ public class AdminAuthenticationController {
     private final AdminAuthenticationService adminAuthenticationService;
 
     @PostMapping("/signup")
-    public ResponseEntity<SignUpResponse> register(@Valid @RequestBody RegisterUserRequest request) {
-            return ResponseEntity.ok(adminAuthenticationService.signup(request));
+    public ResponseEntity<String> register(@Valid @RequestBody RegisterUserRequest request) {
+        adminAuthenticationService.signup(request);
+        return ResponseEntity.ok("Admin registered successfully");
     }
 
         @PostMapping("/login")
-        public ResponseEntity<Admin> authenticate(@Valid @RequestBody LogInUserRequest request) {
-                return ResponseEntity.ok(adminAuthenticationService.authenticate(request));
+        public ResponseEntity<Admin> authenticate(@Valid @RequestBody LogInUserRequest request, HttpServletResponse response) {
+                return ResponseEntity.ok(adminAuthenticationService.authenticate(request , response));
         }
 
         @PostMapping("/verify")
-        public ResponseEntity<Admin> verifyStudent(@Valid @RequestBody VerifyUserRequest request) {
-            return ResponseEntity.ok(adminAuthenticationService.verifyUser(request));
+        public ResponseEntity<Admin> verifyStudent(@Valid @RequestBody VerifyUserRequest request, HttpServletResponse response) {
+            return ResponseEntity.ok(adminAuthenticationService.verifyUser(request, response));
         }
 
         @PostMapping("/resend")

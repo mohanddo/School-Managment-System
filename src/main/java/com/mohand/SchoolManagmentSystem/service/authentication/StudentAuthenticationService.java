@@ -10,19 +10,21 @@ import com.mohand.SchoolManagmentSystem.model.user.Student;
 import com.mohand.SchoolManagmentSystem.request.authentication.LogInUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.RegisterUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.VerifyUserRequest;
-import com.mohand.SchoolManagmentSystem.response.authentication.SignUpResponse;
 import com.mohand.SchoolManagmentSystem.service.EmailService;
 import com.mohand.SchoolManagmentSystem.service.JwtService;
 import com.mohand.SchoolManagmentSystem.service.student.IStudentService;
 import com.mohand.SchoolManagmentSystem.service.user.IUserService;
 import com.mohand.SchoolManagmentSystem.util.Util;
+import jakarta.servlet.http.HttpServletResponse;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Service
@@ -30,6 +32,9 @@ public class StudentAuthenticationService extends AuthenticationService {
 
     @Value("${verification.code.expiration-time}")
     private Long verificationCodeExpirationTime;
+
+    @Value("${send.cookie.over.https}")
+    private String sendCookieOverHttps;
 
     private final IStudentService studentService;
 
@@ -40,7 +45,7 @@ public class StudentAuthenticationService extends AuthenticationService {
 
 
     @Override
-    public SignUpResponse signup(RegisterUserRequest input) {
+    public void signup(RegisterUserRequest input) {
 
         if (userService.checkIfExist(input.email())) {
             throw new AccountAlreadyExistException();
@@ -56,12 +61,10 @@ public class StudentAuthenticationService extends AuthenticationService {
                 LocalDateTime.now().plusSeconds(verificationCodeExpirationTime / 1000));
         sendVerificationEmail(student.getEmail(), student.getVerificationCode());
         studentService.save(student);
-
-        return new SignUpResponse(student.getVerificationCode(), student.getVerificationCodeExpiresAt());
     }
 
     @Override
-    public com.mohand.SchoolManagmentSystem.response.authentication.Student authenticate(LogInUserRequest request) {
+    public com.mohand.SchoolManagmentSystem.response.authentication.Student authenticate(LogInUserRequest request, HttpServletResponse response) {
         Student student = studentService.getByEmail(request.email());
 
         if (!student.isEnabled()) {
@@ -75,17 +78,27 @@ public class StudentAuthenticationService extends AuthenticationService {
                 )
         );
 
+
         com.mohand.SchoolManagmentSystem.response.authentication.Student studentResponse =
                 modelMapper.map(student, com.mohand.SchoolManagmentSystem.response.authentication.Student.class);
 
         String jwtToken = jwtService.generateToken(student);
-        studentResponse.setJwtToken(jwtToken);
+
+        String cookie = ResponseCookie.from("token", jwtToken)
+                .httpOnly(true)
+                .secure(Boolean.parseBoolean(sendCookieOverHttps))
+                .sameSite("Strict")
+                .path("/")
+                .maxAge(Duration.ofHours(1))
+                .build().toString();
+
+        response.addHeader("Set-Cookie", cookie);
 
         return studentResponse;
     }
 
     @Override
-    public com.mohand.SchoolManagmentSystem.response.authentication.Student verifyUser(VerifyUserRequest request) {
+    public com.mohand.SchoolManagmentSystem.response.authentication.Student verifyUser(VerifyUserRequest request, HttpServletResponse response) {
         Student student = studentService.getByEmail(request.email());
 
         if (student.isEnabled()) {
@@ -104,10 +117,19 @@ public class StudentAuthenticationService extends AuthenticationService {
             com.mohand.SchoolManagmentSystem.response.authentication.Student studentResponse =
                     modelMapper.map(student, com.mohand.SchoolManagmentSystem.response.authentication.Student.class);
 
-            String jwtToken = jwtService.generateToken(student);
-            studentResponse.setJwtToken(jwtToken);
-
             studentService.save(student);
+
+            String jwtToken = jwtService.generateToken(student);
+
+            String cookie = ResponseCookie.from("token", jwtToken)
+                    .httpOnly(true)
+                    .secure(Boolean.parseBoolean(sendCookieOverHttps))
+                    .sameSite("Strict")
+                    .path("/")
+                    .maxAge(Duration.ofHours(1))
+                    .build().toString();
+
+            response.addHeader("Set-Cookie", cookie);
 
             return studentResponse;
 

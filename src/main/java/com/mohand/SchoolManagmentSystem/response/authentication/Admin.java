@@ -9,6 +9,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Admin extends User {
     public Admin(String firstName, String lastName, String email, String profilePicDownloadUrl, String jwtToken) {
-        super(firstName, lastName, email, profilePicDownloadUrl, jwtToken);
+        super(firstName, lastName, email, profilePicDownloadUrl);
     }
 }

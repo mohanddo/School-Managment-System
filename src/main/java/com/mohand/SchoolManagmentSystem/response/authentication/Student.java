@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 public class Student extends User {
 
-    public Student(String firstName, String lastName, String email, String profilePicDownloadUrl, String jwtToken) {
-        super(firstName, lastName, email, profilePicDownloadUrl, jwtToken);
+    public Student(String firstName, String lastName, String email, String profilePicDownloadUrl) {
+        super(firstName, lastName, email, profilePicDownloadUrl);
     }
 }

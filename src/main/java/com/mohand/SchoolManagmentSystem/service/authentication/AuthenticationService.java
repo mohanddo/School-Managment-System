@@ -3,18 +3,22 @@ package com.mohand.SchoolManagmentSystem.service.authentication;
 import com.mohand.SchoolManagmentSystem.request.authentication.LogInUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.RegisterUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.VerifyUserRequest;
-import com.mohand.SchoolManagmentSystem.response.authentication.SignUpResponse;
 import com.mohand.SchoolManagmentSystem.response.authentication.User;
 import com.mohand.SchoolManagmentSystem.service.EmailService;
 import com.mohand.SchoolManagmentSystem.service.JwtService;
 import com.mohand.SchoolManagmentSystem.service.user.IUserService;
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Random;
 
 @RequiredArgsConstructor
@@ -30,11 +34,15 @@ public abstract class AuthenticationService {
     protected final JwtService jwtService;
     protected final ModelMapper modelMapper;
 
-    abstract SignUpResponse signup(RegisterUserRequest request);
+    @Value("${send.cookie.over.https}")
+    private String sendCookieOverHttps;
 
-    abstract com.mohand.SchoolManagmentSystem.response.authentication.User authenticate(LogInUserRequest request);
 
-    abstract User verifyUser(VerifyUserRequest request);
+    abstract void signup(RegisterUserRequest request);
+
+    abstract com.mohand.SchoolManagmentSystem.response.authentication.User authenticate(LogInUserRequest request, HttpServletResponse response);
+
+    abstract User verifyUser(VerifyUserRequest request, HttpServletResponse response);
 
     abstract void resendVerificationCode(String email);
 

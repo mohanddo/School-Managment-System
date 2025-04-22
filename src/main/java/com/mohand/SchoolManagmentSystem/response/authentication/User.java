@@ -23,6 +23,4 @@ public class User {
     protected String email;
 
     protected String profilePicDownloadUrl;
-
-    protected String jwtToken;
 }
