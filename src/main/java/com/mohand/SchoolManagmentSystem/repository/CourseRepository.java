@@ -19,4 +19,6 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
             "WHERE s.id = :studentId AND c.id = :courseId")
     boolean isStudentEnrolledInCourse(@Param("studentId") Long studentId, @Param("courseId") Long courseId);
 
+    @Query("SELECT c FROM Course c JOIN c.students s WHERE s.id = :studentId")
+    List<Course> findAllCoursesByStudentId(@Param("studentId") Long studentId);
 }

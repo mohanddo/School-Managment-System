@@ -10,4 +10,5 @@ public interface FavoriteCourseRepository extends JpaRepository<FavoriteCourse, 
     boolean existsByStudentIdAndCourseId(Long studentId, Long courseId);
     @Transactional
     void deleteByStudentIdAndCourseId(Long studentId, Long courseId);
+    List<FavoriteCourse> findAllByStudentId(Long studentId);
 }

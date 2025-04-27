@@ -6,26 +6,39 @@ import com.mohand.SchoolManagmentSystem.exception.user.password.WeakPasswordExce
 import com.mohand.SchoolManagmentSystem.exception.user.verificationCode.AccountAlreadyVerifiedException;
 import com.mohand.SchoolManagmentSystem.exception.user.verificationCode.VerificationCodeExpiredException;
 import com.mohand.SchoolManagmentSystem.exception.user.verificationCode.VerificationCodeInvalidException;
+import com.mohand.SchoolManagmentSystem.model.course.CartItem;
+import com.mohand.SchoolManagmentSystem.model.course.Course;
+import com.mohand.SchoolManagmentSystem.model.course.FavoriteCourse;
+import com.mohand.SchoolManagmentSystem.model.user.Admin;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
+import com.mohand.SchoolManagmentSystem.repository.CartItemRepository;
+import com.mohand.SchoolManagmentSystem.repository.FavoriteCourseRepository;
 import com.mohand.SchoolManagmentSystem.request.authentication.LogInUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.RegisterUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.VerifyUserRequest;
+import com.mohand.SchoolManagmentSystem.response.authentication.User;
+import com.mohand.SchoolManagmentSystem.response.course.CoursePreview;
 import com.mohand.SchoolManagmentSystem.service.EmailService;
 import com.mohand.SchoolManagmentSystem.service.JwtService;
+import com.mohand.SchoolManagmentSystem.service.course.ICourseService;
 import com.mohand.SchoolManagmentSystem.service.student.IStudentService;
 import com.mohand.SchoolManagmentSystem.service.user.IUserService;
 import com.mohand.SchoolManagmentSystem.util.Util;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class StudentAuthenticationService extends AuthenticationService {
@@ -42,6 +55,7 @@ public class StudentAuthenticationService extends AuthenticationService {
         super(userService, passwordEncoder, authenticationManager, emailService, jwtService, modelMapper);
         this.studentService = studentService;
     }
+
 
 
     @Override
@@ -81,6 +95,8 @@ public class StudentAuthenticationService extends AuthenticationService {
 
         com.mohand.SchoolManagmentSystem.response.authentication.Student studentResponse =
                 modelMapper.map(student, com.mohand.SchoolManagmentSystem.response.authentication.Student.class);
+
+        studentService.addCoursesToStudentResponse(studentResponse);
 
         String jwtToken = jwtService.generateToken(student);
 

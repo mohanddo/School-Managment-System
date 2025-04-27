@@ -1,6 +1,7 @@
 package com.mohand.SchoolManagmentSystem.config;
 
 import com.mohand.SchoolManagmentSystem.model.course.Course;
+import com.mohand.SchoolManagmentSystem.model.user.Student;
 import com.mohand.SchoolManagmentSystem.model.user.Teacher;
 import com.mohand.SchoolManagmentSystem.model.user.User;
 import com.mohand.SchoolManagmentSystem.repository.StudentRepository;
@@ -87,6 +88,10 @@ public class AppConfiguration {
                 mapping.map(Course::getTitle, CreateProductRequest::setName);
                 mapping.using(courseImageUrlToArray).map(Course::getImageUrl, CreateProductRequest::setImages);
             });
+
+            modelMapper.typeMap(Student.class, com.mohand.SchoolManagmentSystem.response.authentication.Student.class)
+                    .addMappings(mapper -> mapper.skip(com.mohand.SchoolManagmentSystem.response.authentication.Student::setCourses));
+
 
             return modelMapper;
         }

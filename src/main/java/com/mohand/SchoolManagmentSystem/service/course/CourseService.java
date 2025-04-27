@@ -1,5 +1,6 @@
 package com.mohand.SchoolManagmentSystem.service.course;
 
+import com.mohand.SchoolManagmentSystem.exception.ConflictException;
 import com.mohand.SchoolManagmentSystem.exception.ResourceNotFoundException;
 import com.mohand.SchoolManagmentSystem.model.course.CartItem;
 import com.mohand.SchoolManagmentSystem.model.course.*;
@@ -18,6 +19,7 @@ import com.mohand.SchoolManagmentSystem.service.student.StudentService;
 import com.mohand.SchoolManagmentSystem.service.teacher.TeacherService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,11 +28,11 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Lazy
 public class CourseService implements ICourseService {
 
     private final CourseRepository courseRepository;
     private final TeacherService teacherService;
-    private final StudentService studentService;
     private final FavoriteCourseRepository favoriteCourseRepository;
     private final CourseReviewRepository courseReviewRepository;
     private final AnnouncementRepository announcementRepository;
@@ -43,7 +45,7 @@ public class CourseService implements ICourseService {
     @Transactional
     public void create(CreateCourseRequest request, Teacher teacher) {
 
-        Course course = Course.builder(request.getTitle(), request.getDescription(), request.getPrice(), request.getPricingModelEnum(), teacher, request.getImageUrl(), request.getIntroductionVideoUrl())
+        Course course = Course.builder(request.getTitle(), request.getDescription(), request.getPrice(), request.getPricingModelEnum(), request.getCategoryEnum(), teacher, request.getImageUrl(), request.getIntroductionVideoUrl())
                 .build();
 
         String priceId = chargilyPayService.createProduct(course);
@@ -54,16 +56,6 @@ public class CourseService implements ICourseService {
         teacherService.save(teacher);
     }
 
-//    @Override
-//    public void delete(Long courseId, Teacher teacher) {
-//
-//        courseRepository.findByIdAndTeacherId(courseId, teacher.getId()).ifPresentOrElse((course) -> {
-//            teacher.getCourses().remove(course);
-//            teacher.setNumberOfCourses();
-//        }, () -> {
-//            throw new CourseNotFoundException();
-//        });
-//    }
 
     @Override
     public void update(UpdateCourseRequest request, Teacher teacher) {
@@ -76,7 +68,8 @@ public class CourseService implements ICourseService {
             course.setImageUrl(request.getImageUrl());
             course.setIntroductionVideoUrl(request.getIntroductionVideoUrl());
 
-            Optional.ofNullable(request.getPricingModelEnum()).ifPresent(course::setPricingModel);
+            course.setPricingModel(request.getPricingModelEnum());
+            course.setCategory(request.getCategoryEnum());
             course.setPrice(request.getPrice());
 
             course.setDiscountPercentage(request.getDiscountPercentage());
@@ -89,18 +82,6 @@ public class CourseService implements ICourseService {
         );
     }
 
-    @Override
-    public void addStudentToCourse(Long courseId, Long studentId) {
-        Course course = getById(courseId);
-        Student student = studentService.getById(studentId);
-
-        course.getStudents().add(student);
-        course.setNumberOfStudents(course.getNumberOfStudents() + 1);
-        student.getCourses().add(course);
-
-        courseRepository.save(course);
-        studentService.save(student);
-    }
 
     @Override
     public List<CoursePreview> getAll() {
@@ -119,12 +100,11 @@ public class CourseService implements ICourseService {
 
     @Override
     @Transactional
-    public void addOrRemoveCourseFromFavourite(Long studentId, Long courseId) {
-        Student student = studentService.getById(studentId);
+    public void addOrRemoveCourseFromFavourite(Student student, Long courseId) {
         Course course = getById(courseId);
 
-        if(favoriteCourseRepository.existsByStudentIdAndCourseId(studentId, courseId)) {
-            favoriteCourseRepository.deleteByStudentIdAndCourseId(studentId, courseId);
+        if(favoriteCourseRepository.existsByStudentIdAndCourseId(student.getId(), courseId)) {
+            favoriteCourseRepository.deleteByStudentIdAndCourseId(student.getId(), courseId);
             return;
         }
 
@@ -133,12 +113,15 @@ public class CourseService implements ICourseService {
 
     @Override
     @Transactional
-    public void addOrRemoveCourseFromCart(Long studentId, Long courseId) {
-        Student student = studentService.getById(studentId);
+    public void addOrRemoveCourseFromCart(Student student, Long courseId) {
         Course course = getById(courseId);
 
-        if(cartItemRepository.existsByStudentIdAndCourseId(studentId, courseId)) {
-            cartItemRepository.deleteByStudentIdAndCourseId(studentId, courseId);
+        if (existsByIdAndStudentId(courseId, student.getId())) {
+            throw new ConflictException("Student already enrolled in this course");
+        }
+
+        if(cartItemRepository.existsByStudentIdAndCourseId(student.getId(), courseId)) {
+            cartItemRepository.deleteByStudentIdAndCourseId(student.getId(), courseId);
             return;
         }
 
@@ -147,13 +130,14 @@ public class CourseService implements ICourseService {
 
     @Override
     @Transactional
-    public void createOrUpdateCourseReview(CreateOrUpdateCourseReviewRequest request, Long studentId) {
-        Student student = studentService.getById(studentId);
+    public void createOrUpdateCourseReview(CreateOrUpdateCourseReviewRequest request, Student student) {
         Course course = getById(request.courseId());
 
+        if (!existsByIdAndStudentId(request.courseId(), student.getId())) {
+            throw new ResourceNotFoundException("Course not found");
+        }
 
-
-        courseReviewRepository.findByStudentIdAndCourseId(studentId, request.courseId()).ifPresentOrElse((courseReview) -> {
+        courseReviewRepository.findByStudentIdAndCourseId(student.getId(), request.courseId()).ifPresentOrElse((courseReview) -> {
             courseReview.setComment(request.comment());
             courseReview.setReview(request.getReviewEnum());
             courseReviewRepository.save(courseReview);
@@ -279,6 +263,16 @@ public class CourseService implements ICourseService {
             double reviewsSum = courseReviews.stream().map((courseReview -> courseReview.getReview().getValue())).reduce(0.0, Double::sum);
             return reviewsSum / courseReviews.size();
         }
+    }
+
+    @Override
+    public List<Course> getAllCoursesByStudentId(Long studentId) {
+        return courseRepository.findAllCoursesByStudentId(studentId);
+    }
+
+    @Override
+    public void save(Course course) {
+        courseRepository.save(course);
     }
 
 }

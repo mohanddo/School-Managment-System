@@ -17,6 +17,7 @@ import com.mohand.SchoolManagmentSystem.response.payment.CreateCheckoutResponse;
 import com.mohand.SchoolManagmentSystem.response.payment.CreatePriceResponse;
 import com.mohand.SchoolManagmentSystem.response.payment.WebhookResponse;
 import com.mohand.SchoolManagmentSystem.service.course.ICourseService;
+import com.mohand.SchoolManagmentSystem.service.student.IStudentService;
 import com.mohand.SchoolManagmentSystem.util.Util;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,7 @@ public class PurchaseService implements IPurchaseService {
 
     private final CartItemRepository cartItemRepository;
     private final ChargilyPayService chargilyPayService;
+    private final IStudentService studentService;
     private final ICourseService courseService;
     private final ProcessedWebhooksRepository processedWebhooksRepository;
     private final ObjectMapper objectMapper;
@@ -135,7 +137,7 @@ public class PurchaseService implements IPurchaseService {
             List<Integer> courseIds = (List<Integer>) payload.getMetadata().get("course_ids");
             Long studentId = Long.valueOf( (Integer) payload.getMetadata().get("user_id"));
             for (Integer courseId : courseIds) {
-                courseService.addStudentToCourse(Long.valueOf(courseId), studentId);
+                studentService.addStudentToCourse(Long.valueOf(courseId), studentId);
             }
 
             ProcessedWebhooks processedWebhooks = new ProcessedWebhooks(webhookResponse.getId(), webhookResponse.getEntity(), webhookResponse.getLivemode(), webhookResponse.getType(), webhookResponse.getCreated_at(), webhookResponse.getUpdated_at());

@@ -6,10 +6,12 @@ import com.mohand.SchoolManagmentSystem.exception.user.password.WeakPasswordExce
 import com.mohand.SchoolManagmentSystem.exception.user.verificationCode.AccountAlreadyVerifiedException;
 import com.mohand.SchoolManagmentSystem.exception.user.verificationCode.VerificationCodeExpiredException;
 import com.mohand.SchoolManagmentSystem.exception.user.verificationCode.VerificationCodeInvalidException;
+import com.mohand.SchoolManagmentSystem.model.user.Admin;
 import com.mohand.SchoolManagmentSystem.model.user.Teacher;
 import com.mohand.SchoolManagmentSystem.request.authentication.LogInUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.RegisterUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.VerifyUserRequest;
+import com.mohand.SchoolManagmentSystem.response.authentication.User;
 import com.mohand.SchoolManagmentSystem.service.EmailService;
 import com.mohand.SchoolManagmentSystem.service.JwtService;
 import com.mohand.SchoolManagmentSystem.service.azure.AzureBlobService;
@@ -22,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -48,7 +51,6 @@ public class TeacherAuthenticationService extends AuthenticationService {
         this.teacherService = teacherService;
         this.azureBlobService = azureBlobService;
     }
-
 
     @Override
     public void signup(RegisterUserRequest input) {

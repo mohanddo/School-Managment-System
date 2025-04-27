@@ -12,7 +12,6 @@ import java.util.Map;
 @NoArgsConstructor
 public class CreateProductRequest {
     private String name;
-    private String description;
     private String[] images;
     private Map<String, Object> metadata = new HashMap<>();
 }

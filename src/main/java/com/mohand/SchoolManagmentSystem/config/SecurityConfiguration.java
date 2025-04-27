@@ -54,14 +54,14 @@ public class SecurityConfiguration {
                                         "/api/v1/purchase/webhook"
                                 ).permitAll()
 
-//                                .requestMatchers("/api/v1/auth/teacher/signup", "/api/v1/auth/admin/signup")
+//                                .requestMatchers("/api/v1/auth/teacher/signup", "/api/v1/auth/admin/signup", "/api/v1/admin/**")
 //                                .hasAuthority(Role.ROLE_ADMIN.getValue())
 
                                 .requestMatchers("/api/v1/course/create", "/api/v1/course/delete/**", "/api/v1/course/update",
                                         "/api/v1/course/announcement/createOrUpdate", "/api/v1/course/announcement/delete/**",
                                         "/api/v1/chapter/addOrUpdate",
                                         "/api/v1/resource/addVideo", "/api/v1/resource/addDocument",
-                                        "/api/v1/resource/updateVideo", "/api/v1/resource/updateDocument")
+                                        "/api/v1/resource/updateVideo", "/api/v1/resource/updateDocument", "/api/v1/teacher/**")
                                 .hasAuthority(Role.ROLE_TEACHER.getValue())
 
                                 .requestMatchers("/api/v1/course/addOrRemoveCourseFromFavorite/**",
@@ -70,7 +70,8 @@ public class SecurityConfiguration {
                                         "/api/v1/course/courseReview/delete/**",
                                         "/api/v1/resource/addOrDeleteFinishedResource/**",
                                         "/api/v1/purchase/cart",
-                                        "/api/v1/purchase/course/**")
+                                        "/api/v1/purchase/course/**",
+                                        "/api/v1/student/**")
                                 .hasAuthority(Role.ROLE_STUDENT.getValue()).
 
                                 requestMatchers("/api/v1/course/announcementComment/createOrUpdate", "/api/v1/course/announcementComment/delete/**",
@@ -97,7 +98,7 @@ public class SecurityConfiguration {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/api/**")
                         .allowedOrigins(allowedOrigins.split(","))
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
                         .allowedHeaders("*")
                         .allowCredentials(true);
             }

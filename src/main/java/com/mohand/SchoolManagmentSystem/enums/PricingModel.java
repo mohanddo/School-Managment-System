@@ -1,6 +1,6 @@
 package com.mohand.SchoolManagmentSystem.enums;
 
-import com.mohand.SchoolManagmentSystem.exception.InvalidEnumValueException;
+import com.mohand.SchoolManagmentSystem.exception.BadRequestException;
 
 public enum PricingModel {
     SUBSCRIPTION,
@@ -11,7 +11,7 @@ public enum PricingModel {
         try {
             return PricingModel.valueOf(pricingModel.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new InvalidEnumValueException(pricingModel, PricingModel.class);
+            throw new BadRequestException("Invalid pricing model: " + pricingModel);
         }
     }
 }

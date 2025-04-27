@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class Admin extends User {
-    public Admin(String firstName, String lastName, String email, String profilePicDownloadUrl, String jwtToken) {
-        super(firstName, lastName, email, profilePicDownloadUrl);
+    public Admin(long id, String firstName, String lastName, String email, String profilePicDownloadUrl, String jwtToken) {
+        super(id, firstName, lastName, email, profilePicDownloadUrl);
     }
 }

@@ -94,4 +94,15 @@ public class ResourceService implements IResourceService {
         return resourceRepository.findByIdAndChapterIdAndCourseId(resourceId, chapterId, courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Resource not found"));
     }
+
+    @Override
+    public int countProgressPercentageByCourseIdAndStudentId(Long courseId, Long studentId) {
+        if (!courseService.existsByIdAndStudentId(courseId, studentId))
+            throw new ResourceNotFoundException("Course not found");
+
+        if (resourceRepository.countByCourseId(courseId) == 0) {
+            return 0;
+        }
+        return (finishedResourceRepository.countFinishedResourceByCourseIdAndStudentId(courseId, studentId) / resourceRepository.countByCourseId(courseId)) * 100;
+    }
 }

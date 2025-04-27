@@ -89,7 +89,8 @@ public class AzureBlobService {
                 .setStartTime(OffsetDateTime.now());
 
         String encodedSasToken = blobClient.generateSas(sasValues);
-        return blobUrl + "?" + URLDecoder.decode(encodedSasToken, StandardCharsets.UTF_8);
+        System.out.println(blobUrl + "?" + encodedSasToken);
+        return blobUrl + "?" + encodedSasToken;
     }
 
 

@@ -2,10 +2,12 @@ package com.mohand.SchoolManagmentSystem.model.course;
 
 import com.mohand.SchoolManagmentSystem.model.user.Student;
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @Entity
+@Getter
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = {"student_id", "course_id"}) } )
 public class FavoriteCourse {
     @Id

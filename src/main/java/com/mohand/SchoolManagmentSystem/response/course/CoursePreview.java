@@ -1,5 +1,6 @@
 package com.mohand.SchoolManagmentSystem.response.course;
 
+import com.mohand.SchoolManagmentSystem.enums.CourseCategory;
 import com.mohand.SchoolManagmentSystem.enums.PricingModel;
 import com.mohand.SchoolManagmentSystem.model.course.CourseReview;
 import com.mohand.SchoolManagmentSystem.response.teacher.TeacherPreview;
@@ -24,8 +25,12 @@ public class CoursePreview {
     private Integer discountPercentage;
     private LocalDate discountExpirationDate;
     private PricingModel pricingModel;
+    private CourseCategory category;
     private Double rating;
     private TeacherPreview teacher;
     private List<com.mohand.SchoolManagmentSystem.response.course.CourseReview> courseReviews;
     private Boolean favourite;
+    private Boolean enrolled;
+    private Boolean inCart;
+    private int progressPercentage;
 }

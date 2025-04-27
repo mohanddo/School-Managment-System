@@ -8,6 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class TeacherPreview {
+    private long id;
     private String firstName;
     private String lastName;
     private int numberOfCourses;

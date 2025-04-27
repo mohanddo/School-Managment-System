@@ -16,6 +16,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
+    protected long id;
+
     protected String firstName;
 
     protected String lastName;

@@ -37,7 +37,6 @@ public abstract class AuthenticationService {
     @Value("${send.cookie.over.https}")
     private String sendCookieOverHttps;
 
-
     abstract void signup(RegisterUserRequest request);
 
     abstract com.mohand.SchoolManagmentSystem.response.authentication.User authenticate(LogInUserRequest request, HttpServletResponse response);
@@ -48,7 +47,7 @@ public abstract class AuthenticationService {
 
     protected String generateVerificationCode() {
         Random random = new Random();
-        int code = random.nextInt(999999) + 100000;
+        int code = random.nextInt(899999) + 100000;
         return String.valueOf(code);
     }
 

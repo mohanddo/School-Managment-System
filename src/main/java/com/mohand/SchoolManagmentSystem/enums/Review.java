@@ -1,6 +1,6 @@
 package com.mohand.SchoolManagmentSystem.enums;
 
-import com.mohand.SchoolManagmentSystem.exception.InvalidEnumValueException;
+import com.mohand.SchoolManagmentSystem.exception.BadRequestException;
 import lombok.Getter;
 
 @Getter
@@ -28,6 +28,6 @@ public enum Review {
                 return r;
             }
         }
-        throw new InvalidEnumValueException(value.toString(), Review.class);
+        throw new BadRequestException("Invalid review value: " + value);
     }
 }

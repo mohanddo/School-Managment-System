@@ -11,9 +11,9 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Teacher extends User {
 
-    public Teacher(String firstName, String lastName, String email, String profilePicDownloadUrl,
+    public Teacher(long id, String firstName, String lastName, String email, String profilePicDownloadUrl,
                    int numberOfStudents, int numberOfCourses, String facebookLink, String youtubeLink, String instagramLink, String description, String sasToken) {
-        super(firstName, lastName, email, profilePicDownloadUrl);
+        super(id, firstName, lastName, email, profilePicDownloadUrl);
         this.numberOfStudents = numberOfStudents;
         this.numberOfCourses = numberOfCourses;
         this.facebookLink = facebookLink;

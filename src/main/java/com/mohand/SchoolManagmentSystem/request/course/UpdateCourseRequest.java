@@ -1,5 +1,6 @@
 package com.mohand.SchoolManagmentSystem.request.course;
 
+import com.mohand.SchoolManagmentSystem.enums.CourseCategory;
 import com.mohand.SchoolManagmentSystem.enums.PricingModel;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
@@ -7,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.Locale;
 
 @Getter
 @Setter
@@ -25,6 +27,9 @@ public class UpdateCourseRequest {
     @NotBlank(message = "Course must have a pricing model")
     private String pricingModel;
 
+    @NotBlank(message = "Course must have a category")
+    private String category;
+
     @Min(value = 0, message = "Price must be greater than or equal to 0")
     private int price;
 
@@ -40,6 +45,10 @@ public class UpdateCourseRequest {
 
     public PricingModel getPricingModelEnum() {
         return PricingModel.validatePricingModel(pricingModel);
+    }
+
+    public CourseCategory getCategoryEnum() {
+        return CourseCategory.validateCategory(category);
     }
 
     @AssertTrue(message = "For free courses, the price must be 0. Either set price to 0 or select a different pricing model.")

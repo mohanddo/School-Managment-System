@@ -1,5 +1,6 @@
 package com.mohand.SchoolManagmentSystem.model.course;
 
+import com.mohand.SchoolManagmentSystem.enums.CourseCategory;
 import com.mohand.SchoolManagmentSystem.enums.PricingModel;
 import com.mohand.SchoolManagmentSystem.model.*;
 import com.mohand.SchoolManagmentSystem.model.chapter.Chapter;
@@ -35,8 +36,12 @@ public class Course {
     private String title;
 
     @NotBlank
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private CourseCategory category;
 
     private String imageUrl;
 
@@ -94,7 +99,7 @@ public class Course {
     @OneToMany(mappedBy = "course")
     private List<OrderItem> orderItems;
 
-    public static CourseBuilder builder(String title, String description, int price, PricingModel pricingModel, Teacher teacher, String imageUrl, String introductionVideoUrl) {
+    public static CourseBuilder builder(String title, String description, int price, PricingModel pricingModel, CourseCategory category, Teacher teacher, String imageUrl, String introductionVideoUrl) {
         return hiddenBuilder()
                 .title(title)
                 .description(description)
@@ -102,6 +107,7 @@ public class Course {
                 .numberOfStudents(0)
                 .price(price)
                 .pricingModel(pricingModel)
+                .category(category)
                 .numberOfReviews(0)
                 .numberOfHours(0)
                 .imageUrl(imageUrl)

@@ -21,4 +21,7 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
     Optional<Resource> findByIdAndChapterIdAndCourseId(@Param("resourceId") Long resourceId,
                                                                 @Param("chapterId") Long chapterId,
                                                                 @Param("courseId") Long courseId);
+
+    @Query("select count(r) from Resource r where r.chapter.course.id = :courseId")
+    int countByCourseId(Long courseId);
 }

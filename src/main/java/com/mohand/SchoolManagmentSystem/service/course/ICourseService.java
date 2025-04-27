@@ -1,6 +1,7 @@
 package com.mohand.SchoolManagmentSystem.service.course;
 
 import com.mohand.SchoolManagmentSystem.model.course.Course;
+import com.mohand.SchoolManagmentSystem.model.user.Student;
 import com.mohand.SchoolManagmentSystem.model.user.Teacher;
 import com.mohand.SchoolManagmentSystem.model.user.User;
 import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnouncementCommentRequest;
@@ -18,16 +19,14 @@ public interface ICourseService {
 //    void delete(Long courseId, Teacher teacher);
     void update(UpdateCourseRequest request, Teacher teacher);
 
-    void addStudentToCourse(Long courseId, Long studentId);
-
     List<CoursePreview> getAll();
     Course getById(Long id);
 
 
-    void addOrRemoveCourseFromFavourite(Long studentId, Long courseId);
-    void addOrRemoveCourseFromCart(Long studentId, Long courseId);
+    void addOrRemoveCourseFromFavourite(Student student, Long courseId);
+    void addOrRemoveCourseFromCart(Student student, Long courseId);
 
-    void createOrUpdateCourseReview(CreateOrUpdateCourseReviewRequest request, Long studentId);
+    void createOrUpdateCourseReview(CreateOrUpdateCourseReviewRequest request, Student student);
     void deleteCourseReview(Long courseId, Long studentId);
 
     void createOrUpdateAnnouncement(CreateOrUpdateAnnouncementRequest request, Long teacherId);
@@ -42,4 +41,8 @@ public interface ICourseService {
     Course findByIdAndTeacherId(Long id, Long teacherId);
 
     double calculateRating(Long courseId);
+
+    List<Course> getAllCoursesByStudentId(Long studentId);
+
+    void save(Course course);
 }

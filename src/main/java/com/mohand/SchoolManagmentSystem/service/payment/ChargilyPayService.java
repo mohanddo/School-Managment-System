@@ -138,7 +138,6 @@ public class ChargilyPayService {
             byte[] hashBytes = sha256Hmac.doFinal(data.getBytes(StandardCharsets.UTF_8));
             return bytesToHexString(hashBytes);
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-            // Handle exceptions according to your application's requirements
             e.printStackTrace();
             return null;
         }

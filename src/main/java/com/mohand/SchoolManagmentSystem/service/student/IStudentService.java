@@ -1,6 +1,8 @@
 package com.mohand.SchoolManagmentSystem.service.student;
 
+import com.mohand.SchoolManagmentSystem.model.course.Course;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
@@ -16,4 +18,10 @@ public interface IStudentService {
     boolean checkIfExistById(Long id);
 
     Student getById(Long id);
+
+    com.mohand.SchoolManagmentSystem.response.authentication.Student me(Authentication authentication);
+
+    void addStudentToCourse(Long courseId, Long studentId);
+
+    void addCoursesToStudentResponse(com.mohand.SchoolManagmentSystem.response.authentication.Student studentResponse);
 }
