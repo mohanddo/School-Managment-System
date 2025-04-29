@@ -13,9 +13,8 @@ import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnou
 import com.mohand.SchoolManagmentSystem.request.course.CreateCourseRequest;
 import com.mohand.SchoolManagmentSystem.request.course.CreateOrUpdateCourseReviewRequest;
 import com.mohand.SchoolManagmentSystem.request.course.UpdateCourseRequest;
-import com.mohand.SchoolManagmentSystem.response.course.CoursePreview;
+import com.mohand.SchoolManagmentSystem.response.course.Course;
 import com.mohand.SchoolManagmentSystem.service.payment.ChargilyPayService;
-import com.mohand.SchoolManagmentSystem.service.student.StudentService;
 import com.mohand.SchoolManagmentSystem.service.teacher.TeacherService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -24,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,29 +30,12 @@ import java.util.Optional;
 public class CourseService implements ICourseService {
 
     private final CourseRepository courseRepository;
-    private final TeacherService teacherService;
     private final FavoriteCourseRepository favoriteCourseRepository;
     private final CourseReviewRepository courseReviewRepository;
     private final AnnouncementRepository announcementRepository;
     private final AnnouncementCommentRepository announcementCommentRepository;
     private final CartItemRepository cartItemRepository;
     private final ModelMapper modelMapper;
-    private final ChargilyPayService chargilyPayService;
-
-    @Override
-    @Transactional
-    public void create(CreateCourseRequest request, Teacher teacher) {
-
-        Course course = Course.builder(request.getTitle(), request.getDescription(), request.getPrice(), request.getPricingModelEnum(), request.getCategoryEnum(), teacher, request.getImageUrl(), request.getIntroductionVideoUrl())
-                .build();
-
-        String priceId = chargilyPayService.createProduct(course);
-        course.setPriceId(priceId);
-
-        teacher.setNumberOfCourses(teacher.getNumberOfCourses() + 1);
-        courseRepository.save(course);
-        teacherService.save(teacher);
-    }
 
 
     @Override
@@ -84,24 +65,21 @@ public class CourseService implements ICourseService {
 
 
     @Override
-    public List<CoursePreview> getAll() {
-        List<Course> allCourses = courseRepository.findAll();
+    public List<Course> getAll() {
+        List<com.mohand.SchoolManagmentSystem.model.course.Course> allCourses = courseRepository.findAll();
 
-        return allCourses.stream().map(course -> { CoursePreview coursePreview = modelMapper.map(course, CoursePreview.class);
-            coursePreview.setRating(calculateRating(course.getId()));
-            return coursePreview;
-        }).toList();
+        return allCourses.stream().map(course -> modelMapper.map(course, Course.class)).toList();
     }
 
     @Override
-    public Course getById(Long id) {
+    public com.mohand.SchoolManagmentSystem.model.course.Course getById(Long id) {
         return courseRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Course not found"));
     }
 
     @Override
     @Transactional
     public void addOrRemoveCourseFromFavourite(Student student, Long courseId) {
-        Course course = getById(courseId);
+        com.mohand.SchoolManagmentSystem.model.course.Course course = getById(courseId);
 
         if(favoriteCourseRepository.existsByStudentIdAndCourseId(student.getId(), courseId)) {
             favoriteCourseRepository.deleteByStudentIdAndCourseId(student.getId(), courseId);
@@ -114,7 +92,7 @@ public class CourseService implements ICourseService {
     @Override
     @Transactional
     public void addOrRemoveCourseFromCart(Student student, Long courseId) {
-        Course course = getById(courseId);
+        com.mohand.SchoolManagmentSystem.model.course.Course course = getById(courseId);
 
         if (existsByIdAndStudentId(courseId, student.getId())) {
             throw new ConflictException("Student already enrolled in this course");
@@ -131,7 +109,7 @@ public class CourseService implements ICourseService {
     @Override
     @Transactional
     public void createOrUpdateCourseReview(CreateOrUpdateCourseReviewRequest request, Student student) {
-        Course course = getById(request.courseId());
+        com.mohand.SchoolManagmentSystem.model.course.Course course = getById(request.courseId());
 
         if (!existsByIdAndStudentId(request.courseId(), student.getId())) {
             throw new ResourceNotFoundException("Course not found");
@@ -165,7 +143,7 @@ public class CourseService implements ICourseService {
     @Override
     public void createOrUpdateAnnouncement(CreateOrUpdateAnnouncementRequest request, Long teacherId) {
 
-        Course course = findByIdAndTeacherId(request.courseId(), teacherId);
+        com.mohand.SchoolManagmentSystem.model.course.Course course = findByIdAndTeacherId(request.courseId(), teacherId);
 
             if (request.announcementId() == null) {
                 Announcement announcement = new Announcement(request.text(), course);
@@ -250,29 +228,24 @@ public class CourseService implements ICourseService {
     }
 
     @Override
-    public Course findByIdAndTeacherId(Long id, Long teacherId) {
+    public com.mohand.SchoolManagmentSystem.model.course.Course findByIdAndTeacherId(Long id, Long teacherId) {
         return courseRepository.findByIdAndTeacherId(id, teacherId).orElseThrow(() -> new ResourceNotFoundException("Course not found"));
     }
 
     @Override
-    public double calculateRating(Long courseId) {
-        List<CourseReview> courseReviews = courseReviewRepository.findAllByCourseId(courseId);
-        if(courseReviews.isEmpty()) {
-            return 0;
-        } else {
-            double reviewsSum = courseReviews.stream().map((courseReview -> courseReview.getReview().getValue())).reduce(0.0, Double::sum);
-            return reviewsSum / courseReviews.size();
-        }
-    }
-
-    @Override
-    public List<Course> getAllCoursesByStudentId(Long studentId) {
+    public List<com.mohand.SchoolManagmentSystem.model.course.Course> getAllCoursesByStudentId(Long studentId) {
         return courseRepository.findAllCoursesByStudentId(studentId);
     }
 
     @Override
-    public void save(Course course) {
+    public List<com.mohand.SchoolManagmentSystem.model.course.Course> getAllCoursesByTeacherId(Long teacherId) {
+        return courseRepository.findAllByTeacherId(teacherId);
+    }
+
+    @Override
+    public void save(com.mohand.SchoolManagmentSystem.model.course.Course course) {
         courseRepository.save(course);
     }
+
 
 }

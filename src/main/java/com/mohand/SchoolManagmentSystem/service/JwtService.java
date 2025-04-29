@@ -42,6 +42,7 @@ public class JwtService {
     }
 
     private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long jwtExpirationTime) {
+        extraClaims.put("role", userDetails.getAuthorities().iterator().next().getAuthority());
         return Jwts.builder()
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())

@@ -1,6 +1,5 @@
 package com.mohand.SchoolManagmentSystem.service.course;
 
-import com.mohand.SchoolManagmentSystem.model.course.Course;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
 import com.mohand.SchoolManagmentSystem.model.user.Teacher;
 import com.mohand.SchoolManagmentSystem.model.user.User;
@@ -9,18 +8,16 @@ import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnou
 import com.mohand.SchoolManagmentSystem.request.course.CreateCourseRequest;
 import com.mohand.SchoolManagmentSystem.request.course.CreateOrUpdateCourseReviewRequest;
 import com.mohand.SchoolManagmentSystem.request.course.UpdateCourseRequest;
-import com.mohand.SchoolManagmentSystem.response.course.CoursePreview;
+import com.mohand.SchoolManagmentSystem.response.course.Course;
 
 import java.util.List;
 
 public interface ICourseService {
 
-    void create(CreateCourseRequest request, Teacher teacher);
-//    void delete(Long courseId, Teacher teacher);
     void update(UpdateCourseRequest request, Teacher teacher);
 
-    List<CoursePreview> getAll();
-    Course getById(Long id);
+    List<Course> getAll();
+    com.mohand.SchoolManagmentSystem.model.course.Course getById(Long id);
 
 
     void addOrRemoveCourseFromFavourite(Student student, Long courseId);
@@ -38,11 +35,11 @@ public interface ICourseService {
 
     boolean existsByIdAndStudentId(Long id, Long studentId);
     boolean existsByIdAndTeacherId(Long id, Long teacherId);
-    Course findByIdAndTeacherId(Long id, Long teacherId);
+    com.mohand.SchoolManagmentSystem.model.course.Course findByIdAndTeacherId(Long id, Long teacherId);
 
-    double calculateRating(Long courseId);
+    List<com.mohand.SchoolManagmentSystem.model.course.Course> getAllCoursesByStudentId(Long studentId);
+    List<com.mohand.SchoolManagmentSystem.model.course.Course> getAllCoursesByTeacherId(Long teacherId);
 
-    List<Course> getAllCoursesByStudentId(Long studentId);
+    void save(com.mohand.SchoolManagmentSystem.model.course.Course course);
 
-    void save(Course course);
 }

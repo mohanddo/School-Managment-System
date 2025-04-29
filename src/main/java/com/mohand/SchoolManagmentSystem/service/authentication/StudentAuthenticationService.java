@@ -1,44 +1,26 @@
 package com.mohand.SchoolManagmentSystem.service.authentication;
 
 import com.mohand.SchoolManagmentSystem.exception.user.account.AccountAlreadyExistException;
-import com.mohand.SchoolManagmentSystem.exception.user.account.AccountNotEnabledException;
 import com.mohand.SchoolManagmentSystem.exception.user.password.WeakPasswordException;
 import com.mohand.SchoolManagmentSystem.exception.user.verificationCode.AccountAlreadyVerifiedException;
 import com.mohand.SchoolManagmentSystem.exception.user.verificationCode.VerificationCodeExpiredException;
 import com.mohand.SchoolManagmentSystem.exception.user.verificationCode.VerificationCodeInvalidException;
-import com.mohand.SchoolManagmentSystem.model.course.CartItem;
-import com.mohand.SchoolManagmentSystem.model.course.Course;
-import com.mohand.SchoolManagmentSystem.model.course.FavoriteCourse;
-import com.mohand.SchoolManagmentSystem.model.user.Admin;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
-import com.mohand.SchoolManagmentSystem.repository.CartItemRepository;
-import com.mohand.SchoolManagmentSystem.repository.FavoriteCourseRepository;
-import com.mohand.SchoolManagmentSystem.request.authentication.LogInUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.RegisterUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.VerifyUserRequest;
-import com.mohand.SchoolManagmentSystem.response.authentication.User;
-import com.mohand.SchoolManagmentSystem.response.course.CoursePreview;
 import com.mohand.SchoolManagmentSystem.service.EmailService;
 import com.mohand.SchoolManagmentSystem.service.JwtService;
-import com.mohand.SchoolManagmentSystem.service.course.ICourseService;
 import com.mohand.SchoolManagmentSystem.service.student.IStudentService;
 import com.mohand.SchoolManagmentSystem.service.user.IUserService;
 import com.mohand.SchoolManagmentSystem.util.Util;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class StudentAuthenticationService extends AuthenticationService {
@@ -57,8 +39,6 @@ public class StudentAuthenticationService extends AuthenticationService {
     }
 
 
-
-    @Override
     public void signup(RegisterUserRequest input) {
 
         if (userService.checkIfExist(input.email())) {
@@ -77,43 +57,7 @@ public class StudentAuthenticationService extends AuthenticationService {
         studentService.save(student);
     }
 
-    @Override
-    public com.mohand.SchoolManagmentSystem.response.authentication.Student authenticate(LogInUserRequest request, HttpServletResponse response) {
-        Student student = studentService.getByEmail(request.email());
 
-        if (!student.isEnabled()) {
-            throw new AccountNotEnabledException();
-        }
-
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.email(),
-                        request.password()
-                )
-        );
-
-
-        com.mohand.SchoolManagmentSystem.response.authentication.Student studentResponse =
-                modelMapper.map(student, com.mohand.SchoolManagmentSystem.response.authentication.Student.class);
-
-        studentService.addCoursesToStudentResponse(studentResponse);
-
-        String jwtToken = jwtService.generateToken(student);
-
-        String cookie = ResponseCookie.from("token", jwtToken)
-                .httpOnly(true)
-                .secure(Boolean.parseBoolean(sendCookieOverHttps))
-                .sameSite("Strict")
-                .path("/")
-                .maxAge(Duration.ofHours(1))
-                .build().toString();
-
-        response.addHeader("Set-Cookie", cookie);
-
-        return studentResponse;
-    }
-
-    @Override
     public com.mohand.SchoolManagmentSystem.response.authentication.Student verifyUser(VerifyUserRequest request, HttpServletResponse response) {
         Student student = studentService.getByEmail(request.email());
 
@@ -137,15 +81,8 @@ public class StudentAuthenticationService extends AuthenticationService {
 
             String jwtToken = jwtService.generateToken(student);
 
-            String cookie = ResponseCookie.from("token", jwtToken)
-                    .httpOnly(true)
-                    .secure(Boolean.parseBoolean(sendCookieOverHttps))
-                    .sameSite("Strict")
-                    .path("/")
-                    .maxAge(Duration.ofHours(1))
-                    .build().toString();
-
-            response.addHeader("Set-Cookie", cookie);
+            setJwtCookie(response, jwtToken);
+            setIsLoggedCookie(response);
 
             return studentResponse;
 
@@ -154,7 +91,6 @@ public class StudentAuthenticationService extends AuthenticationService {
         }
     }
 
-    @Override
     public void resendVerificationCode(String email) {
         Student student = studentService.getByEmail(email);
         if (student.isEnabled()) {

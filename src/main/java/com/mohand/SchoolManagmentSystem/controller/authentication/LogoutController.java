@@ -18,7 +18,7 @@ public class LogoutController {
 
     @PostMapping
     private void logout(HttpServletResponse response) {
-        String cookie = ResponseCookie.from("token", "")
+        String jwtCookie = ResponseCookie.from("token", "")
                 .httpOnly(true)
                 .secure(Boolean.parseBoolean(sendCookieOverHttps))
                 .sameSite("Strict")
@@ -26,7 +26,16 @@ public class LogoutController {
                 .maxAge(0)
                 .build().toString();
 
-        response.addHeader("Set-Cookie", cookie);
+        String isLoggedCookie = ResponseCookie.from("isLogged", "")
+                .httpOnly(false)
+                .secure(Boolean.parseBoolean(sendCookieOverHttps))
+                .sameSite("Strict")
+                .path("/")
+                .maxAge(0)
+                .build().toString();
+
+        response.addHeader("Set-Cookie", isLoggedCookie);
+        response.addHeader("Set-Cookie", jwtCookie);
     }
 }
 

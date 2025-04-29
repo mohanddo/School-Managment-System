@@ -54,9 +54,6 @@ public class Course {
     private Integer numberOfHours;
 
     @Column(nullable = false)
-    private Integer numberOfStudents;
-
-    @Column(nullable = false)
     @Min(message = "Price must be greater than 0", value = 0)
     private Integer price;
 
@@ -83,7 +80,6 @@ public class Course {
     @ManyToMany(mappedBy = "courses")
     private List<Student> students;
 
-
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CourseReview> courseReviews;
 
@@ -104,7 +100,6 @@ public class Course {
                 .title(title)
                 .description(description)
                 .teacher(teacher)
-                .numberOfStudents(0)
                 .price(price)
                 .pricingModel(pricingModel)
                 .category(category)

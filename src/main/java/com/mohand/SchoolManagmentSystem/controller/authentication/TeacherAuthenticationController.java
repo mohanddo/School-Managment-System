@@ -19,18 +19,13 @@ import java.time.LocalDateTime;
 @Controller
 @RequestMapping("${api.prefix}/auth/teacher")
 @RequiredArgsConstructor
-public class TeacherAuthenticationController {
+public class   TeacherAuthenticationController {
     private final TeacherAuthenticationService teacherAuthenticationService;
 
     @PostMapping("/signup")
     public ResponseEntity<String> register(@Valid @RequestBody RegisterUserRequest request) {
             teacherAuthenticationService.signup(request);
             return ResponseEntity.ok("Teacher registered successfully");
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<Teacher> login(@Valid @RequestBody LogInUserRequest request, HttpServletResponse response) {
-        return ResponseEntity.ok(teacherAuthenticationService.authenticate(request, response));
     }
 
 

@@ -9,6 +9,7 @@ import com.mohand.SchoolManagmentSystem.model.comment.UpVoteComment;
 import com.mohand.SchoolManagmentSystem.model.course.Course;
 import com.mohand.SchoolManagmentSystem.model.course.CourseReview;
 import com.mohand.SchoolManagmentSystem.model.course.FavoriteCourse;
+import com.mohand.SchoolManagmentSystem.model.course.TeacherStudent;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -59,6 +60,10 @@ public class Student extends User {
     @JsonIgnore
     @OneToMany(mappedBy = "student")
     private List<Purchase> purchases;
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<TeacherStudent> teachers;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

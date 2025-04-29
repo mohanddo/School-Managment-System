@@ -140,6 +140,8 @@ public class PurchaseService implements IPurchaseService {
                 studentService.addStudentToCourse(Long.valueOf(courseId), studentId);
             }
 
+
+
             ProcessedWebhooks processedWebhooks = new ProcessedWebhooks(webhookResponse.getId(), webhookResponse.getEntity(), webhookResponse.getLivemode(), webhookResponse.getType(), webhookResponse.getCreated_at(), webhookResponse.getUpdated_at());
             processedWebhooksRepository.save(processedWebhooks);
     }

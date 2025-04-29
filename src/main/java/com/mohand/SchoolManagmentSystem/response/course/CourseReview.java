@@ -1,6 +1,7 @@
 package com.mohand.SchoolManagmentSystem.response.course;
 
 import com.mohand.SchoolManagmentSystem.enums.Review;
+import com.mohand.SchoolManagmentSystem.response.user.StudentPreview;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,4 +14,5 @@ public class CourseReview {
     private Review review;
     private String comment;
     private LocalDateTime dateOfCreation;
+    private StudentPreview student;
 }

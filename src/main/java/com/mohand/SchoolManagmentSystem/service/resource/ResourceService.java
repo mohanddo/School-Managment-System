@@ -18,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ResourceService implements IResourceService {
@@ -104,5 +106,15 @@ public class ResourceService implements IResourceService {
             return 0;
         }
         return (finishedResourceRepository.countFinishedResourceByCourseIdAndStudentId(courseId, studentId) / resourceRepository.countByCourseId(courseId)) * 100;
+    }
+
+    @Override
+    public List<Video> getAllVideosByChapterId(Long chapterId) {
+        return videoRepository.findAllByChapterId(chapterId);
+    }
+
+    @Override
+    public List<Document> getAllDocumentsByChapterId(Long chapterId) {
+        return documentRepository.findAllByChapterId(chapterId);
     }
 }

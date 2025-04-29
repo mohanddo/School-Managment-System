@@ -1,5 +1,7 @@
 package com.mohand.SchoolManagmentSystem.response.authentication;
 
+import com.mohand.SchoolManagmentSystem.response.course.Course;
+import com.mohand.SchoolManagmentSystem.response.course.StudentCourse;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,5 +17,5 @@ public class Student extends User {
         super(id, firstName, lastName, email, profilePicDownloadUrl);
     }
 
-    private List<com.mohand.SchoolManagmentSystem.response.course.CoursePreview> courses;
+    private List<StudentCourse> courses;
 }

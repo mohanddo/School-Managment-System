@@ -6,6 +6,7 @@ import com.mohand.SchoolManagmentSystem.model.comment.Comment;
 import com.mohand.SchoolManagmentSystem.model.comment.UpVoteComment;
 import com.mohand.SchoolManagmentSystem.model.course.AnnouncementComment;
 import com.mohand.SchoolManagmentSystem.model.course.Course;
+import com.mohand.SchoolManagmentSystem.model.course.TeacherStudent;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,14 +29,10 @@ public class Teacher extends User {
         super(firstName, lastName, email, password, verificationCode, verificationCodeExpiresAt, Role.ROLE_TEACHER);
         this.containerName = containerName;
         this.numberOfCourses = 0;
-        this.numberOfStudents = 0;
     }
 
     @Column(nullable = false)
     private Integer numberOfCourses;
-
-    @Column(nullable = false)
-    private Integer numberOfStudents;
 
     private String facebookLink;
 
@@ -52,6 +49,10 @@ public class Teacher extends User {
 
     @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Course> courses;
+
+    @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<TeacherStudent> students;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

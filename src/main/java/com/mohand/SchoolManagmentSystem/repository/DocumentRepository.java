@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface DocumentRepository extends JpaRepository<Document, Long> {
@@ -21,4 +22,5 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
                                                                 @Param("courseId") Long courseId,
                                                                 @Param("teacherId") Long teacherId);
 
+    List<Document> findAllByChapterId(Long chapterId);
 }

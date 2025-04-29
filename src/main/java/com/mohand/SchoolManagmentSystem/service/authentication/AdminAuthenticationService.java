@@ -43,7 +43,7 @@ public class AdminAuthenticationService extends AuthenticationService {
     }
 
 
-    @Override
+
     public void signup(RegisterUserRequest input) {
 
         if (userService.checkIfExist(input.email())) {
@@ -62,39 +62,6 @@ public class AdminAuthenticationService extends AuthenticationService {
         adminService.save(admin);
     }
 
-    @Override
-    public com.mohand.SchoolManagmentSystem.response.authentication.Admin authenticate(LogInUserRequest request, HttpServletResponse response) {
-        Admin admin = adminService.getByEmail(request.email());
-
-        if (!admin.isEnabled()) {
-            throw new AccountNotEnabledException();
-        }
-
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.email(),
-                        request.password()
-                )
-        );
-
-        com.mohand.SchoolManagmentSystem.response.authentication.Admin adminResponse = modelMapper.map(admin, com.mohand.SchoolManagmentSystem.response.authentication.Admin.class);
-
-        String jwtToken = jwtService.generateToken(admin);
-
-        String cookie = ResponseCookie.from("token", jwtToken)
-                .httpOnly(true)
-                .secure(Boolean.parseBoolean(sendCookieOverHttps))
-                .sameSite("Strict")
-                .path("/")
-                .maxAge(Duration.ofHours(1))
-                .build().toString();
-
-        response.addHeader("Set-Cookie", cookie);
-
-        return adminResponse;
-    }
-
-    @Override
     public com.mohand.SchoolManagmentSystem.response.authentication.Admin verifyUser(VerifyUserRequest request, HttpServletResponse response) {
         Admin admin = adminService.getByEmail(request.email());
 
@@ -117,15 +84,8 @@ public class AdminAuthenticationService extends AuthenticationService {
 
             String jwtToken = jwtService.generateToken(admin);
 
-            String cookie = ResponseCookie.from("token", jwtToken)
-                    .httpOnly(true)
-                    .secure(Boolean.parseBoolean(sendCookieOverHttps))
-                    .sameSite("Strict")
-                    .path("/")
-                    .maxAge(Duration.ofHours(1))
-                    .build().toString();
-
-            response.addHeader("Set-Cookie", cookie);
+            setJwtCookie(response, jwtToken);
+            setIsLoggedCookie(response);
 
             return adminResponse;
         } else {
@@ -133,7 +93,6 @@ public class AdminAuthenticationService extends AuthenticationService {
         }
     }
 
-    @Override
     public void resendVerificationCode(String email) {
         Admin admin = adminService.getByEmail(email);
         if (admin.isEnabled()) {

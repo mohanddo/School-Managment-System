@@ -30,11 +30,6 @@ public class StudentAuthenticationController {
             return ResponseEntity.ok("Student registered successfully");
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<Student> authenticate(@Valid @RequestBody LogInUserRequest request, HttpServletResponse response) {
-        return ResponseEntity.ok(studentAuthenticationService.authenticate(request, response));
-    }
-
 
     @PostMapping("/verify")
         public ResponseEntity<Student> verifyStudent(@Valid @RequestBody VerifyUserRequest request, HttpServletResponse response) {

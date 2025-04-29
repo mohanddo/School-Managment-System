@@ -52,7 +52,6 @@ public class TeacherAuthenticationService extends AuthenticationService {
         this.azureBlobService = azureBlobService;
     }
 
-    @Override
     public void signup(RegisterUserRequest input) {
 
         if (userService.checkIfExist(input.email())) {
@@ -74,41 +73,6 @@ public class TeacherAuthenticationService extends AuthenticationService {
             teacherService.save(teacher);
     }
 
-    @Override
-    public com.mohand.SchoolManagmentSystem.response.authentication.Teacher authenticate(LogInUserRequest request, HttpServletResponse response) {
-        Teacher teacher = teacherService.getByEmail(request.email());
-
-        if (!teacher.isEnabled()) {
-            throw new AccountNotEnabledException();
-        }
-
-        String sasToken = azureBlobService.generateSASTokenForContainer(teacher.getContainerName());
-        teacher.setSasToken(sasToken);
-
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.email(),
-                        request.password()
-                )
-        );
-
-        com.mohand.SchoolManagmentSystem.response.authentication.Teacher teacherResponse = modelMapper.map(teacher, com.mohand.SchoolManagmentSystem.response.authentication.Teacher.class);
-        String jwtToken = jwtService.generateToken(teacher);
-
-        String cookie = ResponseCookie.from("token", jwtToken)
-                .httpOnly(true)
-                .secure(Boolean.parseBoolean(sendCookieOverHttps))
-                .sameSite("Strict")
-                .path("/")
-                .maxAge(Duration.ofHours(1))
-                .build().toString();
-
-        response.addHeader("Set-Cookie", cookie);
-
-        return teacherResponse;
-    }
-
-    @Override
     public com.mohand.SchoolManagmentSystem.response.authentication.Teacher verifyUser(VerifyUserRequest request, HttpServletResponse response) {
         Teacher teacher = teacherService.getByEmail(request.email());
 
@@ -134,15 +98,8 @@ public class TeacherAuthenticationService extends AuthenticationService {
 
             String jwtToken = jwtService.generateToken(teacher);
 
-            String cookie = ResponseCookie.from("token", jwtToken)
-                    .httpOnly(true)
-                    .secure(Boolean.parseBoolean(sendCookieOverHttps))
-                    .sameSite("Strict")
-                    .path("/")
-                    .maxAge(Duration.ofHours(1))
-                    .build().toString();
-
-            response.addHeader("Set-Cookie", cookie);
+            setJwtCookie(response, jwtToken);
+            setIsLoggedCookie(response);
 
             return teacherResponse;
         } else {
@@ -150,7 +107,6 @@ public class TeacherAuthenticationService extends AuthenticationService {
         }
     }
 
-    @Override
     public void resendVerificationCode(String email) {
         Teacher teacher = teacherService.getByEmail(email);
         if (teacher.isEnabled()) {

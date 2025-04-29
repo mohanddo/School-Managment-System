@@ -8,10 +8,9 @@ import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnou
 import com.mohand.SchoolManagmentSystem.request.course.CreateCourseRequest;
 import com.mohand.SchoolManagmentSystem.request.course.CreateOrUpdateCourseReviewRequest;
 import com.mohand.SchoolManagmentSystem.request.course.UpdateCourseRequest;
-import com.mohand.SchoolManagmentSystem.response.course.CoursePreview;
+import com.mohand.SchoolManagmentSystem.response.course.Course;
 import com.mohand.SchoolManagmentSystem.service.course.ICourseService;
-import com.mohand.SchoolManagmentSystem.service.student.IStudentService;
-import com.mohand.SchoolManagmentSystem.service.student.StudentService;
+import com.mohand.SchoolManagmentSystem.service.teacher.TeacherService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,10 +25,10 @@ import java.util.List;
 public class CourseController {
 
     private final ICourseService courseService;
-    private final IStudentService studentService;
+    private final TeacherService teacherService;
 
     @GetMapping("/all")
-    private ResponseEntity<List<CoursePreview>> getAllCourses() {
+    private ResponseEntity<List<Course>> getAllCourses() {
         return ResponseEntity.ok(courseService.getAll());
     }
 
@@ -51,7 +50,7 @@ public class CourseController {
 
     @PostMapping("/create")
     private ResponseEntity<String> createCourse(@Valid @RequestBody CreateCourseRequest request, Authentication authentication) {
-        courseService.create(request, (Teacher) ( authentication.getPrincipal() ));
+        teacherService.create(request, (Teacher) ( authentication.getPrincipal() ));
         return ResponseEntity.ok("Course created successfully");
     }
 

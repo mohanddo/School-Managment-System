@@ -1,9 +1,11 @@
 package com.mohand.SchoolManagmentSystem.service.authentication;
 
+import com.mohand.SchoolManagmentSystem.exception.user.account.AccountNotEnabledException;
+import com.mohand.SchoolManagmentSystem.model.user.Teacher;
+import com.mohand.SchoolManagmentSystem.model.user.User;
 import com.mohand.SchoolManagmentSystem.request.authentication.LogInUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.RegisterUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.VerifyUserRequest;
-import com.mohand.SchoolManagmentSystem.response.authentication.User;
 import com.mohand.SchoolManagmentSystem.service.EmailService;
 import com.mohand.SchoolManagmentSystem.service.JwtService;
 import com.mohand.SchoolManagmentSystem.service.user.IUserService;
@@ -14,18 +16,24 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Random;
 
+@Service
 @RequiredArgsConstructor
-public abstract class AuthenticationService {
+public class AuthenticationService {
 
     @Value("${verification.code.expiration-time}")
     protected Long verificationCodeExpirationTime;
+
+    @Value("${security.jwt.expiration-time}")
+    protected Long jwtExpirationTime;
 
     protected final IUserService userService;
     protected final PasswordEncoder passwordEncoder;
@@ -37,13 +45,25 @@ public abstract class AuthenticationService {
     @Value("${send.cookie.over.https}")
     private String sendCookieOverHttps;
 
-    abstract void signup(RegisterUserRequest request);
+    public void authenticate(LogInUserRequest request, HttpServletResponse response) {
+        User user = userService.getByEmail(request.email());
 
-    abstract com.mohand.SchoolManagmentSystem.response.authentication.User authenticate(LogInUserRequest request, HttpServletResponse response);
+        if (!user.isEnabled()) {
+            throw new AccountNotEnabledException();
+        }
 
-    abstract User verifyUser(VerifyUserRequest request, HttpServletResponse response);
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.email(),
+                        request.password()
+                )
+        );
 
-    abstract void resendVerificationCode(String email);
+        String jwtToken = jwtService.generateToken(user);
+
+        setJwtCookie(response, jwtToken);
+        setIsLoggedCookie(response);
+    }
 
     protected String generateVerificationCode() {
         Random random = new Random();
@@ -71,5 +91,29 @@ public abstract class AuthenticationService {
         } catch (MessagingException e) {
             e.printStackTrace();
         }
+    }
+
+    protected void setJwtCookie(HttpServletResponse response, String jwtToken) {
+        String cookie = ResponseCookie.from("token", jwtToken)
+                .httpOnly(true)
+                .secure(Boolean.parseBoolean(sendCookieOverHttps))
+                .sameSite("Strict")
+                .path("/")
+                .maxAge(Duration.ofSeconds(jwtExpirationTime / 1000))
+                .build().toString();
+
+        response.addHeader("Set-Cookie", cookie);
+    }
+
+    protected void setIsLoggedCookie(HttpServletResponse response) {
+        String cookie = ResponseCookie.from("isLogged", "true")
+                .httpOnly(false)
+                .secure(Boolean.parseBoolean(sendCookieOverHttps))
+                .sameSite("Strict")
+                .path("/")
+                .maxAge(Duration.ofSeconds(jwtExpirationTime / 1000 ))
+                .build().toString();
+
+        response.addHeader("Set-Cookie", cookie);
     }
 }

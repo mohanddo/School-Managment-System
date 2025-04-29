@@ -27,11 +27,6 @@ public class AdminAuthenticationController {
         return ResponseEntity.ok("Admin registered successfully");
     }
 
-        @PostMapping("/login")
-        public ResponseEntity<Admin> authenticate(@Valid @RequestBody LogInUserRequest request, HttpServletResponse response) {
-                return ResponseEntity.ok(adminAuthenticationService.authenticate(request , response));
-        }
-
         @PostMapping("/verify")
         public ResponseEntity<Admin> verifyStudent(@Valid @RequestBody VerifyUserRequest request, HttpServletResponse response) {
             return ResponseEntity.ok(adminAuthenticationService.verifyUser(request, response));

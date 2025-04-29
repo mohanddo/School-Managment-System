@@ -11,6 +11,8 @@ import com.mohand.SchoolManagmentSystem.request.chapter.UpdateDocumentRequest;
 import com.mohand.SchoolManagmentSystem.request.chapter.UpdateVideoRequest;
 import org.springframework.data.repository.query.Param;
 
+import java.io.DataInput;
+import java.util.List;
 import java.util.Optional;
 
 public interface IResourceService {
@@ -35,4 +37,7 @@ public interface IResourceService {
     Resource findByIdAndChapterIdAndCourseId(Long resourceId, Long chapterId, Long courseId);
 
     int countProgressPercentageByCourseIdAndStudentId(Long courseId, Long studentId);
+
+    List<Video> getAllVideosByChapterId(Long chapterId);
+    List<Document> getAllDocumentsByChapterId(Long chapterId);
 }
