@@ -118,12 +118,18 @@ public class AppConfiguration {
             Converter<String, String> containerNameToBaseUrl =
                     ctx -> azureStorageEndpoint + "/" + ctx.getSource();
 
+            Converter<String, String> containerNameToSaSToken =
+                    ctx -> azureBlobService.generateSASTokenForContainer(ctx.getSource());
+
             modelMapper.typeMap(Teacher.class, com.mohand.SchoolManagmentSystem.response.authentication.Teacher.class).addMappings(mapper -> {
                 mapper.using(containerNameToBaseUrl).map(
                         Teacher::getContainerName, com.mohand.SchoolManagmentSystem.response.authentication.Teacher::setBaseUrl
                 );
                 mapper.using(teacherIdToStudentCount).map(
                         Teacher::getId, com.mohand.SchoolManagmentSystem.response.authentication.Teacher::setNumberOfStudents
+                );
+                mapper.using(containerNameToSaSToken).map(
+                        Teacher::getContainerName, com.mohand.SchoolManagmentSystem.response.authentication.Teacher::setSasToken
                 );
             });
 

@@ -36,8 +36,8 @@ public interface IResourceService {
 
     Resource findByIdAndChapterIdAndCourseId(Long resourceId, Long chapterId, Long courseId);
 
-    int countProgressPercentageByCourseIdAndStudentId(Long courseId, Long studentId);
-
     List<Video> getAllVideosByChapterId(Long chapterId);
     List<Document> getAllDocumentsByChapterId(Long chapterId);
+
+    int countByCourseId(Long courseId);
 }

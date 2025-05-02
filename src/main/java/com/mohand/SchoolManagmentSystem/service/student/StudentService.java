@@ -7,6 +7,7 @@ import com.mohand.SchoolManagmentSystem.model.course.FavoriteCourse;
 import com.mohand.SchoolManagmentSystem.model.course.TeacherStudent;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
 import com.mohand.SchoolManagmentSystem.repository.*;
+import com.mohand.SchoolManagmentSystem.request.user.UpdateStudentRequest;
 import com.mohand.SchoolManagmentSystem.response.chapter.Chapter;
 import com.mohand.SchoolManagmentSystem.response.chapter.Document;
 import com.mohand.SchoolManagmentSystem.response.chapter.Video;
@@ -145,7 +146,7 @@ public class StudentService implements IStudentService {
                 if (coursePreview.getId() == course.getId()) {
                     coursePreview.setEnrolled(true);
                     coursePreview.setProgressPercentage(
-                            resourceService.countProgressPercentageByCourseIdAndStudentId(coursePreview.getId(), studentResponse.getId())
+                            courseService.countProgressPercentageByCourseIdAndStudentId(coursePreview.getId(), studentResponse.getId())
                     );
                     continue outer;
                 }
@@ -155,7 +156,7 @@ public class StudentService implements IStudentService {
             coursePreview.setFavourite(false);
             coursePreview.setInCart(false);
             coursePreview.setProgressPercentage(
-                    resourceService.countProgressPercentageByCourseIdAndStudentId(coursePreview.getId(), studentResponse.getId())
+                    courseService.countProgressPercentageByCourseIdAndStudentId(coursePreview.getId(), studentResponse.getId())
             );
             courses.add(coursePreview);
         }
@@ -173,11 +174,7 @@ public class StudentService implements IStudentService {
                     .map(video -> {
                         Video videoResponse = modelMapper.map(video, Video.class);
                         videoResponse.setDownloadUrl(azureBlobService.signBlobUrl(video.getDownloadUrl(), true));
-                        if (finishedResourceRepository.existsByResourceIdAndStudentId(videoResponse.getId(), studentId)) {
-                            videoResponse.setIsFinished(true);
-                        } else {
-                            videoResponse.setIsFinished(false);
-                        }
+                        videoResponse.setIsFinished(finishedResourceRepository.existsByResourceIdAndStudentId(videoResponse.getId(), studentId));
                         return videoResponse;
                     }).toList();
             chapter.setVideos(videos);
@@ -187,11 +184,7 @@ public class StudentService implements IStudentService {
                     .map(document -> {
                         Document documentResponse = modelMapper.map(document, Document.class);
                         documentResponse.setDownloadUrl(azureBlobService.signBlobUrl(document.getDownloadUrl(), true));
-                        if (finishedResourceRepository.existsByResourceIdAndStudentId(documentResponse.getId(), studentId)) {
-                            documentResponse.setIsFinished(true);
-                        } else {
-                            documentResponse.setIsFinished(false);
-                        }
+                        documentResponse.setIsFinished(finishedResourceRepository.existsByResourceIdAndStudentId(documentResponse.getId(), studentId));
                         return documentResponse;
                     }).toList();
             chapter.setDocuments(documents);
@@ -200,6 +193,21 @@ public class StudentService implements IStudentService {
         })).toList();
 
         studentCourse.setChapters(chapters);
+    }
+
+    @Override
+    public void update(UpdateStudentRequest request, Long id) {
+//        Student student = getById(id);
+//        if (request.getProfilePicDownloadUrl() != null && !request.getProfilePicDownloadUrl().isEmpty()) {
+//            student.setProfilePicDownloadUrl(request.getProfilePicDownloadUrl());
+//        }
+//        if (request.getFirstName() != null && !request.getFirstName().isEmpty()) {
+//            student.setFirstName(request.getFirstName());
+//        }
+//        if (request.getLastName() != null && !request.getLastName().isEmpty()) {
+//            student.setLastName(request.getLastName());
+//        }
+//        save(student);
     }
 
 }

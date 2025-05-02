@@ -10,12 +10,14 @@ import com.mohand.SchoolManagmentSystem.model.user.User;
 import com.mohand.SchoolManagmentSystem.repository.*;
 import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnouncementCommentRequest;
 import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnouncementRequest;
-import com.mohand.SchoolManagmentSystem.request.course.CreateCourseRequest;
 import com.mohand.SchoolManagmentSystem.request.course.CreateOrUpdateCourseReviewRequest;
 import com.mohand.SchoolManagmentSystem.request.course.UpdateCourseRequest;
+import com.mohand.SchoolManagmentSystem.response.chapter.Document;
+import com.mohand.SchoolManagmentSystem.response.chapter.Video;
 import com.mohand.SchoolManagmentSystem.response.course.Course;
-import com.mohand.SchoolManagmentSystem.service.payment.ChargilyPayService;
-import com.mohand.SchoolManagmentSystem.service.teacher.TeacherService;
+import com.mohand.SchoolManagmentSystem.service.azure.AzureBlobService;
+import com.mohand.SchoolManagmentSystem.service.resource.ResourceService;
+import com.mohand.SchoolManagmentSystem.response.chapter.Chapter;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Lazy;
@@ -35,7 +37,10 @@ public class CourseService implements ICourseService {
     private final AnnouncementRepository announcementRepository;
     private final AnnouncementCommentRepository announcementCommentRepository;
     private final CartItemRepository cartItemRepository;
+    private final FinishedResourceRepository finishedResourceRepository;
+    private final ResourceService resourceService;
     private final ModelMapper modelMapper;
+    private final AzureBlobService azureBlobService;
 
 
     @Override
@@ -67,8 +72,34 @@ public class CourseService implements ICourseService {
     @Override
     public List<Course> getAll() {
         List<com.mohand.SchoolManagmentSystem.model.course.Course> allCourses = courseRepository.findAll();
+        return allCourses.stream().map(course ->  {
+            Course courseResponse = modelMapper.map(course, Course.class);
 
-        return allCourses.stream().map(course -> modelMapper.map(course, Course.class)).toList();
+            for (Chapter chapter : courseResponse.getChapters()) {
+                List<Video> videos = resourceService.getAllVideosByChapterId(chapter.getId())
+                        .stream()
+                        .map(video -> {
+                            Video videoResponse = modelMapper.map(video, Video.class);
+                            videoResponse.setDownloadUrl(null);
+                            return videoResponse;
+                        })
+                        .toList();
+                chapter.setVideos(videos);
+
+                List<Document> documents = resourceService.getAllDocumentsByChapterId(chapter.getId())
+                        .stream()
+                        .map(document -> {
+                            Document documentResponse = modelMapper.map(document, Document.class);
+                            documentResponse.setDownloadUrl(null);
+                            return documentResponse;
+                        }
+                        ).toList();
+
+                chapter.setDocuments(documents);
+            }
+
+            return courseResponse;
+        }).toList();
     }
 
     @Override
@@ -247,5 +278,15 @@ public class CourseService implements ICourseService {
         courseRepository.save(course);
     }
 
+    @Override
+    public int countProgressPercentageByCourseIdAndStudentId(Long courseId, Long studentId) {
+        if (!existsByIdAndStudentId(courseId, studentId))
+            throw new ResourceNotFoundException("Course not found");
+
+        if (resourceService.countByCourseId(courseId) == 0) {
+            return 0;
+        }
+        return (finishedResourceRepository.countFinishedResourceByCourseIdAndStudentId(courseId, studentId) / resourceService.countByCourseId(courseId)) * 100;
+    }
 
 }

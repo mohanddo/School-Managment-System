@@ -42,8 +42,6 @@ public class Teacher extends User {
 
     private String description;
 
-    private String sasToken;
-
     @Column(nullable = false, updatable = false)
     private String containerName;
 

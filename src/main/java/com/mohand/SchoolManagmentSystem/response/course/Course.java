@@ -28,6 +28,6 @@ public class Course {
     protected CourseCategory category;
     protected Double rating;
     protected TeacherPreview teacher;
+    protected List<Chapter> chapters;
     protected List<com.mohand.SchoolManagmentSystem.response.course.CourseReview> courseReviews;
-    private List<Chapter> chapters;
 }

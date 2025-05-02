@@ -35,13 +35,16 @@ public class SecurityConfiguration {
               .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize ->
                         authorize
-                                .requestMatchers("/api/v1/login",
-                                        "/api/v1/auth/student/**",
-                                        "/api/v1/auth/teacher/verify",
-                                        "/api/v1/auth/admin/resend",
-                                        "/api/v1/auth/admin/login",
-                                        "/api/v1/auth/admin/verify",
-                                        "/api/v1/auth/teacher/resend",
+                                .requestMatchers("/api/v1/auth/logout",
+                                        "/api/v1/auth/login",
+                                        "/api/v1/auth/resend/**",
+                                        "/api/v1/auth/verify",
+                                        "/api/v1/auth/student/signup",
+
+                                        // Only in development
+                                        "/api/v1/auth/teacher/signup",
+                                        "/api/v1/auth/admin/signup",
+
                                         "/api/v1/password/verifyEmail/**",
                                         "/api/v1/password/savePassword",
                                         "/api/v1/password/resetPassword",
@@ -50,7 +53,7 @@ public class SecurityConfiguration {
                                         "/passwordChangedSuccessfully.html",
                                         "/api/v1/password/updatePassword",
                                         "/api/v1/payments/checkout",
-                                        "/api/v1/course/all","/api/v1/auth/teacher/signup", "/api/v1/auth/admin/signup",
+                                        "/api/v1/course/all",
                                         "/api/v1/purchase/webhook"
                                 ).permitAll()
 

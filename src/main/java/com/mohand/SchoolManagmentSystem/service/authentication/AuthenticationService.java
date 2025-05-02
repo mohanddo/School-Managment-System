@@ -1,10 +1,11 @@
 package com.mohand.SchoolManagmentSystem.service.authentication;
 
 import com.mohand.SchoolManagmentSystem.exception.user.account.AccountNotEnabledException;
-import com.mohand.SchoolManagmentSystem.model.user.Teacher;
+import com.mohand.SchoolManagmentSystem.exception.user.verificationCode.AccountAlreadyVerifiedException;
+import com.mohand.SchoolManagmentSystem.exception.user.verificationCode.VerificationCodeExpiredException;
+import com.mohand.SchoolManagmentSystem.exception.user.verificationCode.VerificationCodeInvalidException;
 import com.mohand.SchoolManagmentSystem.model.user.User;
 import com.mohand.SchoolManagmentSystem.request.authentication.LogInUserRequest;
-import com.mohand.SchoolManagmentSystem.request.authentication.RegisterUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.VerifyUserRequest;
 import com.mohand.SchoolManagmentSystem.service.EmailService;
 import com.mohand.SchoolManagmentSystem.service.JwtService;
@@ -17,7 +18,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -49,6 +49,7 @@ public class AuthenticationService {
         User user = userService.getByEmail(request.email());
 
         if (!user.isEnabled()) {
+            resendVerificationCode(request.email());
             throw new AccountNotEnabledException();
         }
 
@@ -115,5 +116,44 @@ public class AuthenticationService {
                 .build().toString();
 
         response.addHeader("Set-Cookie", cookie);
+    }
+
+    public void resendVerificationCode(String email) {
+        User user = userService.getByEmail(email);
+        if (user.isEnabled()) {
+            throw new AccountAlreadyVerifiedException();
+        }
+        user.setVerificationCode(generateVerificationCode());
+        user.setVerificationCodeExpiresAt(LocalDateTime.now().plusSeconds(verificationCodeExpirationTime / 1000));
+        sendVerificationEmail(user.getEmail(), user.getVerificationCode());
+        userService.save(user);
+    }
+
+    public void verifyUser(VerifyUserRequest request, HttpServletResponse response) {
+        User user = userService.getByEmail(request.email());
+
+        if (user.isEnabled()) {
+            throw new AccountAlreadyVerifiedException();
+        }
+
+        if (user.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new VerificationCodeExpiredException("Verification code has expired");
+        }
+
+        if (user.getVerificationCode().equals(request.verificationCode())) {
+            user.setEnabled(true);
+            user.setVerificationCode(null);
+            user.setVerificationCodeExpiresAt(null);
+
+            userService.save(user);
+
+            String jwtToken = jwtService.generateToken(user);
+
+            setJwtCookie(response, jwtToken);
+            setIsLoggedCookie(response);
+
+        } else {
+            throw new VerificationCodeInvalidException("Verification code is invalid");
+        }
     }
 }

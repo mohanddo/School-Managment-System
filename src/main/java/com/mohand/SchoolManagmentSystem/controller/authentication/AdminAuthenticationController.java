@@ -27,16 +27,5 @@ public class AdminAuthenticationController {
         return ResponseEntity.ok("Admin registered successfully");
     }
 
-        @PostMapping("/verify")
-        public ResponseEntity<Admin> verifyStudent(@Valid @RequestBody VerifyUserRequest request, HttpServletResponse response) {
-            return ResponseEntity.ok(adminAuthenticationService.verifyUser(request, response));
-        }
-
-        @PostMapping("/resend")
-        public ResponseEntity<String> resendEmail(@RequestParam String email) {
-                adminAuthenticationService.resendVerificationCode(email);
-                return ResponseEntity.ok("Verification email resent successfully");
-        }
-
 
 }

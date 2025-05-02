@@ -61,47 +61,4 @@ public class AdminAuthenticationService extends AuthenticationService {
         sendVerificationEmail(admin.getEmail(), admin.getVerificationCode());
         adminService.save(admin);
     }
-
-    public com.mohand.SchoolManagmentSystem.response.authentication.Admin verifyUser(VerifyUserRequest request, HttpServletResponse response) {
-        Admin admin = adminService.getByEmail(request.email());
-
-        if (admin.isEnabled()) {
-            throw new AccountAlreadyVerifiedException();
-        }
-
-        if (admin.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new VerificationCodeExpiredException("Verification code has expired");
-        }
-
-        if (admin.getVerificationCode().equals(request.verificationCode())) {
-            admin.setEnabled(true);
-            admin.setVerificationCode(null);
-            admin.setVerificationCodeExpiresAt(null);
-
-            com.mohand.SchoolManagmentSystem.response.authentication.Admin adminResponse = modelMapper.map(admin, com.mohand.SchoolManagmentSystem.response.authentication.Admin.class);
-
-            adminService.save(admin);
-
-            String jwtToken = jwtService.generateToken(admin);
-
-            setJwtCookie(response, jwtToken);
-            setIsLoggedCookie(response);
-
-            return adminResponse;
-        } else {
-            throw new VerificationCodeInvalidException("Verification code is invalid");
-        }
-    }
-
-    public void resendVerificationCode(String email) {
-        Admin admin = adminService.getByEmail(email);
-        if (admin.isEnabled()) {
-            throw new AccountAlreadyVerifiedException();
-        }
-        admin.setVerificationCode(generateVerificationCode());
-        admin.setVerificationCodeExpiresAt(LocalDateTime.now().plusSeconds(verificationCodeExpirationTime / 1000));
-        sendVerificationEmail(admin.getEmail(), admin.getVerificationCode());
-        adminService.save(admin);
-    }
-
 }

@@ -57,49 +57,4 @@ public class StudentAuthenticationService extends AuthenticationService {
         studentService.save(student);
     }
 
-
-    public com.mohand.SchoolManagmentSystem.response.authentication.Student verifyUser(VerifyUserRequest request, HttpServletResponse response) {
-        Student student = studentService.getByEmail(request.email());
-
-        if (student.isEnabled()) {
-            throw new AccountAlreadyVerifiedException();
-        }
-
-        if (student.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new VerificationCodeExpiredException("Verification code has expired");
-        }
-
-        if (student.getVerificationCode().equals(request.verificationCode())) {
-            student.setEnabled(true);
-            student.setVerificationCode(null);
-            student.setVerificationCodeExpiresAt(null);
-
-            com.mohand.SchoolManagmentSystem.response.authentication.Student studentResponse =
-                    modelMapper.map(student, com.mohand.SchoolManagmentSystem.response.authentication.Student.class);
-
-            studentService.save(student);
-
-            String jwtToken = jwtService.generateToken(student);
-
-            setJwtCookie(response, jwtToken);
-            setIsLoggedCookie(response);
-
-            return studentResponse;
-
-        } else {
-            throw new VerificationCodeInvalidException("Verification code is invalid");
-        }
-    }
-
-    public void resendVerificationCode(String email) {
-        Student student = studentService.getByEmail(email);
-        if (student.isEnabled()) {
-            throw new AccountAlreadyVerifiedException();
-        }
-        student.setVerificationCode(generateVerificationCode());
-        student.setVerificationCodeExpiresAt(LocalDateTime.now().plusSeconds(verificationCodeExpirationTime / 1000));
-        sendVerificationEmail(student.getEmail(), student.getVerificationCode());
-        studentService.save(student);
-    }
-
 }

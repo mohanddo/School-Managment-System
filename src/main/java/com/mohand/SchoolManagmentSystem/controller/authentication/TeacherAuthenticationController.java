@@ -28,16 +28,4 @@ public class   TeacherAuthenticationController {
             return ResponseEntity.ok("Teacher registered successfully");
     }
 
-
-        @PostMapping("/verify")
-        public ResponseEntity<Teacher> verifyTeacher(@Valid @RequestBody VerifyUserRequest request, HttpServletResponse response) {
-                return ResponseEntity.ok(teacherAuthenticationService.verifyUser(request, response));
-        }
-
-        @PostMapping("/resend")
-        public ResponseEntity<String> resendEmail(@RequestParam String email) {
-                teacherAuthenticationService.resendVerificationCode(email);
-                return ResponseEntity.ok("Verification email resent successfully");
-        }
-
 }

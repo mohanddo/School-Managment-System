@@ -16,12 +16,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ChapterService implements IChapterService {
 
-    private final ICourseService courseService;
     private final ChapterRepository chapterRepository;
 
     @Override
-    public void addOrUpdateChapter(AddOrUpdateChapterRequest request, Teacher teacher) {
-        Course course = courseService.findByIdAndTeacherId(request.getCourseId(), teacher.getId());
+    public void addOrUpdateChapter(AddOrUpdateChapterRequest request, Course course) {
 
         Chapter chapter;
 

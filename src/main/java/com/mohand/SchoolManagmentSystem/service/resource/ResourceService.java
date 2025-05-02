@@ -4,10 +4,7 @@ import com.mohand.SchoolManagmentSystem.exception.ResourceNotFoundException;
 import com.mohand.SchoolManagmentSystem.model.chapter.*;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
 import com.mohand.SchoolManagmentSystem.model.user.Teacher;
-import com.mohand.SchoolManagmentSystem.repository.DocumentRepository;
-import com.mohand.SchoolManagmentSystem.repository.FinishedResourceRepository;
-import com.mohand.SchoolManagmentSystem.repository.ResourceRepository;
-import com.mohand.SchoolManagmentSystem.repository.VideoRepository;
+import com.mohand.SchoolManagmentSystem.repository.*;
 import com.mohand.SchoolManagmentSystem.request.chapter.AddDocumentRequest;
 import com.mohand.SchoolManagmentSystem.request.chapter.AddVideoRequest;
 import com.mohand.SchoolManagmentSystem.request.chapter.UpdateDocumentRequest;
@@ -28,7 +25,7 @@ public class ResourceService implements IResourceService {
     private final ChapterService chapterService;
     private final DocumentRepository documentRepository;
     private final ResourceRepository resourceRepository;
-    private final ICourseService courseService;
+    private final CourseRepository courseRepository;
     private final FinishedResourceRepository finishedResourceRepository;
 
     @Override
@@ -63,7 +60,7 @@ public class ResourceService implements IResourceService {
     @Override
     @Transactional
     public void addOrDeleteFinishedResource(Long resourceId, Long chapterId, Long courseId, Student student) {
-        if (!courseService.existsByIdAndStudentId(courseId, student.getId()))
+        if (!courseRepository.isStudentEnrolledInCourse(courseId, student.getId()))
             throw new ResourceNotFoundException("Course not found");
 
         Resource resource = findByIdAndChapterIdAndCourseId(resourceId, chapterId, courseId);
@@ -98,17 +95,6 @@ public class ResourceService implements IResourceService {
     }
 
     @Override
-    public int countProgressPercentageByCourseIdAndStudentId(Long courseId, Long studentId) {
-        if (!courseService.existsByIdAndStudentId(courseId, studentId))
-            throw new ResourceNotFoundException("Course not found");
-
-        if (resourceRepository.countByCourseId(courseId) == 0) {
-            return 0;
-        }
-        return (finishedResourceRepository.countFinishedResourceByCourseIdAndStudentId(courseId, studentId) / resourceRepository.countByCourseId(courseId)) * 100;
-    }
-
-    @Override
     public List<Video> getAllVideosByChapterId(Long chapterId) {
         return videoRepository.findAllByChapterId(chapterId);
     }
@@ -116,5 +102,10 @@ public class ResourceService implements IResourceService {
     @Override
     public List<Document> getAllDocumentsByChapterId(Long chapterId) {
         return documentRepository.findAllByChapterId(chapterId);
+    }
+
+    @Override
+    public int countByCourseId(Long courseId) {
+        return resourceRepository.countByCourseId(courseId);
     }
 }

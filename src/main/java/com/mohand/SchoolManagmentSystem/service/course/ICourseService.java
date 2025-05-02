@@ -1,5 +1,6 @@
 package com.mohand.SchoolManagmentSystem.service.course;
 
+import com.mohand.SchoolManagmentSystem.exception.ResourceNotFoundException;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
 import com.mohand.SchoolManagmentSystem.model.user.Teacher;
 import com.mohand.SchoolManagmentSystem.model.user.User;
@@ -42,4 +43,6 @@ public interface ICourseService {
 
     void save(com.mohand.SchoolManagmentSystem.model.course.Course course);
 
+
+    int countProgressPercentageByCourseIdAndStudentId(Long courseId, Long studentId);
 }

@@ -2,6 +2,7 @@ package com.mohand.SchoolManagmentSystem.service.student;
 
 import com.mohand.SchoolManagmentSystem.model.course.Course;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
+import com.mohand.SchoolManagmentSystem.request.user.UpdateStudentRequest;
 import com.mohand.SchoolManagmentSystem.response.course.StudentCourse;
 import org.springframework.security.core.Authentication;
 
@@ -27,4 +28,6 @@ public interface IStudentService {
     void addCoursesToStudentResponse(com.mohand.SchoolManagmentSystem.response.authentication.Student studentResponse);
 
     void addChaptersToStudentCourse(StudentCourse studentCourse, Long studentId);
+
+    void update(UpdateStudentRequest request, Long id);
 }

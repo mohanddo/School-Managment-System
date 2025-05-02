@@ -1,5 +1,6 @@
 package com.mohand.SchoolManagmentSystem.response.course;
 
+import com.mohand.SchoolManagmentSystem.response.chapter.Chapter;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
