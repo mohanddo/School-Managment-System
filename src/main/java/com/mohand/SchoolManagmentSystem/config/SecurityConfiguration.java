@@ -54,6 +54,7 @@ public class SecurityConfiguration {
                                         "/api/v1/password/updatePassword",
                                         "/api/v1/payments/checkout",
                                         "/api/v1/course/all",
+                                        "/api/v1/course/byId/**",
                                         "/api/v1/purchase/webhook"
                                 ).permitAll()
 
@@ -67,8 +68,10 @@ public class SecurityConfiguration {
                                         "/api/v1/resource/updateVideo", "/api/v1/resource/updateDocument", "/api/v1/teacher/**")
                                 .hasAuthority(Role.ROLE_TEACHER.getValue())
 
-                                .requestMatchers("/api/v1/course/addOrRemoveCourseFromFavorite/**",
-                                        "/api/v1/course/addOrRemoveCourseFromCart/**",
+                                .requestMatchers("/api/v1/course/addCourseToFavorite/**",
+                                        "/api/v1/course/removeCourseFromFavorite/**",
+                                        "/api/v1/course/addCourseToCart/**",
+                                        "/api/v1/course/removeCourseFromCart/**",
                                         "/api/v1/course/courseReview/createOrUpdate",
                                         "/api/v1/course/courseReview/delete/**",
                                         "/api/v1/resource/addOrDeleteFinishedResource/**",

@@ -1,9 +1,6 @@
 package com.mohand.SchoolManagmentSystem.controller;
 
-import com.mohand.SchoolManagmentSystem.exception.BadRequestException;
-import com.mohand.SchoolManagmentSystem.exception.ConflictException;
-import com.mohand.SchoolManagmentSystem.exception.ResourceNotFoundException;
-import com.mohand.SchoolManagmentSystem.exception.ForbiddenRequestException;
+import com.mohand.SchoolManagmentSystem.exception.*;
 import com.mohand.SchoolManagmentSystem.exception.user.account.AccountAlreadyExistException;
 import com.mohand.SchoolManagmentSystem.exception.user.account.AccountException;
 import com.mohand.SchoolManagmentSystem.exception.user.account.AccountNotEnabledException;
@@ -125,6 +122,12 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleConflictException(ConflictException exception) {
         exception.printStackTrace();
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ProblemDetail handleNotFoundException(NotFoundException exception) {
+        exception.printStackTrace();
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)

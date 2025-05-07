@@ -4,12 +4,15 @@ package com.mohand.SchoolManagmentSystem.service.chapter;
 import com.mohand.SchoolManagmentSystem.exception.ResourceNotFoundException;
 import com.mohand.SchoolManagmentSystem.model.chapter.Chapter;
 import com.mohand.SchoolManagmentSystem.model.course.Course;
-import com.mohand.SchoolManagmentSystem.model.user.Teacher;
 import com.mohand.SchoolManagmentSystem.repository.ChapterRepository;
+import com.mohand.SchoolManagmentSystem.repository.CourseRepository;
 import com.mohand.SchoolManagmentSystem.request.chapter.AddOrUpdateChapterRequest;
-import com.mohand.SchoolManagmentSystem.service.course.ICourseService;
+import com.mohand.SchoolManagmentSystem.service.resource.ResourceService;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 
 @Service

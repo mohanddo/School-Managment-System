@@ -32,20 +32,40 @@ public class CourseController {
         return ResponseEntity.ok(courseService.getAll());
     }
 
-    @PutMapping("/addOrRemoveCourseFromFavorite/{courseId}")
-    private ResponseEntity<String> addOrRemoveCourseFromFavourite(@PathVariable Long courseId, Authentication authentication) {
+    @GetMapping("/byId/{courseId}")
+    private ResponseEntity<Course> getCourseById(@PathVariable Long courseId) {
+        return ResponseEntity.ok(courseService.getCourseResponseById(courseId));
+    }
+
+
+    @PostMapping("/addCourseToFavorite/{courseId}")
+    private ResponseEntity<String> addCourseToFavourite(@PathVariable Long courseId, Authentication authentication) {
         Student student = ( (Student) ( authentication.getPrincipal() ) );
-        courseService.addOrRemoveCourseFromFavourite(student, courseId);
+        courseService.addCourseToFavourite(student, courseId);
         return ResponseEntity.ok("Success");
     }
 
-    @PutMapping("/addOrRemoveCourseFromCart/{courseId}")
+    @DeleteMapping("/removeCourseFromFavorite/{courseId}")
+    private ResponseEntity<String> removeCourseFromFavourite(@PathVariable Long courseId, Authentication authentication) {
+        Student student = ( (Student) ( authentication.getPrincipal() ) );
+        courseService.removeCourseFromFavourite(student, courseId);
+        return ResponseEntity.ok("Success");
+    }
+
+    @PostMapping("/addCourseToCart/{courseId}")
     private ResponseEntity<String> addOrRemoveCourseFromCart(@PathVariable Long courseId, Authentication authentication) {
         Student student = ( (Student) ( authentication.getPrincipal() ) );
-        courseService.addOrRemoveCourseFromCart(student, courseId);
+        courseService.addCourseToCart(student, courseId);
         return ResponseEntity.ok("Success");
     }
 
+
+    @DeleteMapping("/removeCourseFromCart/{courseId}")
+    private ResponseEntity<String> removeCourseFromCart(@PathVariable Long courseId, Authentication authentication) {
+        Student student = ( (Student) ( authentication.getPrincipal() ) );
+        courseService.removeCourseFromCart(student, courseId);
+        return ResponseEntity.ok("Success");
+    }
 
 
     @PostMapping("/create")

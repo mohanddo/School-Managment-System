@@ -1,6 +1,7 @@
 package com.mohand.SchoolManagmentSystem.service.course;
 
 import com.mohand.SchoolManagmentSystem.exception.ConflictException;
+import com.mohand.SchoolManagmentSystem.exception.NotFoundException;
 import com.mohand.SchoolManagmentSystem.exception.ResourceNotFoundException;
 import com.mohand.SchoolManagmentSystem.model.course.CartItem;
 import com.mohand.SchoolManagmentSystem.model.course.*;
@@ -12,12 +13,9 @@ import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnou
 import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnouncementRequest;
 import com.mohand.SchoolManagmentSystem.request.course.CreateOrUpdateCourseReviewRequest;
 import com.mohand.SchoolManagmentSystem.request.course.UpdateCourseRequest;
-import com.mohand.SchoolManagmentSystem.response.chapter.Document;
-import com.mohand.SchoolManagmentSystem.response.chapter.Video;
 import com.mohand.SchoolManagmentSystem.response.course.Course;
-import com.mohand.SchoolManagmentSystem.service.azure.AzureBlobService;
+import com.mohand.SchoolManagmentSystem.service.chapter.ChapterService;
 import com.mohand.SchoolManagmentSystem.service.resource.ResourceService;
-import com.mohand.SchoolManagmentSystem.response.chapter.Chapter;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Lazy;
@@ -40,7 +38,6 @@ public class CourseService implements ICourseService {
     private final FinishedResourceRepository finishedResourceRepository;
     private final ResourceService resourceService;
     private final ModelMapper modelMapper;
-    private final AzureBlobService azureBlobService;
 
 
     @Override
@@ -74,32 +71,22 @@ public class CourseService implements ICourseService {
         List<com.mohand.SchoolManagmentSystem.model.course.Course> allCourses = courseRepository.findAll();
         return allCourses.stream().map(course ->  {
             Course courseResponse = modelMapper.map(course, Course.class);
-
-            for (Chapter chapter : courseResponse.getChapters()) {
-                List<Video> videos = resourceService.getAllVideosByChapterId(chapter.getId())
-                        .stream()
-                        .map(video -> {
-                            Video videoResponse = modelMapper.map(video, Video.class);
-                            videoResponse.setDownloadUrl(null);
-                            return videoResponse;
-                        })
-                        .toList();
-                chapter.setVideos(videos);
-
-                List<Document> documents = resourceService.getAllDocumentsByChapterId(chapter.getId())
-                        .stream()
-                        .map(document -> {
-                            Document documentResponse = modelMapper.map(document, Document.class);
-                            documentResponse.setDownloadUrl(null);
-                            return documentResponse;
-                        }
-                        ).toList();
-
-                chapter.setDocuments(documents);
-            }
-
+            resourceService.addChapterToCourseResponse(courseResponse, null);
             return courseResponse;
         }).toList();
+    }
+
+    @Override
+    public Course getCourseResponseById(Long id) {
+        com.mohand.SchoolManagmentSystem.model.course.Course courses = getById(id);
+        Course courseResponse = modelMapper.map(courses, Course.class);
+        resourceService.addChapterToCourseResponse(courseResponse, null);
+        return courseResponse;
+    }
+
+    @Override
+    public List<com.mohand.SchoolManagmentSystem.model.course.Course> findAll() {
+        return courseRepository.findAll();
     }
 
     @Override
@@ -109,33 +96,50 @@ public class CourseService implements ICourseService {
 
     @Override
     @Transactional
-    public void addOrRemoveCourseFromFavourite(Student student, Long courseId) {
+    public void addCourseToFavourite(Student student, Long courseId) {
         com.mohand.SchoolManagmentSystem.model.course.Course course = getById(courseId);
 
         if(favoriteCourseRepository.existsByStudentIdAndCourseId(student.getId(), courseId)) {
-            favoriteCourseRepository.deleteByStudentIdAndCourseId(student.getId(), courseId);
-            return;
+            throw new ConflictException("Course already added to favorites");
+        } else {
+            favoriteCourseRepository.save(new FavoriteCourse(student, course));
         }
-
-        favoriteCourseRepository.save(new FavoriteCourse(student, course));
     }
 
     @Override
     @Transactional
-    public void addOrRemoveCourseFromCart(Student student, Long courseId) {
+    public void removeCourseFromFavourite(Student student, Long courseId) {
+        if(!favoriteCourseRepository.existsByStudentIdAndCourseId(student.getId(), courseId)) {
+            throw new NotFoundException("Course not found in favorites");
+        } else {
+            favoriteCourseRepository.deleteByStudentIdAndCourseId(student.getId(), courseId);
+        }
+    }
+
+
+
+    @Override
+    @Transactional
+    public void addCourseToCart(Student student, Long courseId) {
         com.mohand.SchoolManagmentSystem.model.course.Course course = getById(courseId);
 
-        if (existsByIdAndStudentId(courseId, student.getId())) {
+        if (cartItemRepository.existsByStudentIdAndCourseId(student.getId(), courseId)) {
             throw new ConflictException("Student already enrolled in this course");
+        } else {
+            cartItemRepository.save(new CartItem(student, course));
         }
-
-        if(cartItemRepository.existsByStudentIdAndCourseId(student.getId(), courseId)) {
-            cartItemRepository.deleteByStudentIdAndCourseId(student.getId(), courseId);
-            return;
-        }
-
-        cartItemRepository.save(new CartItem(student, course));
     }
+
+    @Override
+    @Transactional
+    public void removeCourseFromCart(Student student, Long courseId) {
+        if (!cartItemRepository.existsByStudentIdAndCourseId(student.getId(), courseId)) {
+            throw new NotFoundException("Course not found in cart");
+        } else {
+            cartItemRepository.deleteByStudentIdAndCourseId(student.getId(), courseId);
+        }
+    }
+
 
     @Override
     @Transactional

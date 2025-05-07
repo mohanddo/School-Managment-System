@@ -18,11 +18,15 @@ public interface ICourseService {
     void update(UpdateCourseRequest request, Teacher teacher);
 
     List<Course> getAll();
+    Course getCourseResponseById(Long id);;
+    List<com.mohand.SchoolManagmentSystem.model.course.Course> findAll();
     com.mohand.SchoolManagmentSystem.model.course.Course getById(Long id);
 
 
-    void addOrRemoveCourseFromFavourite(Student student, Long courseId);
-    void addOrRemoveCourseFromCart(Student student, Long courseId);
+    void addCourseToFavourite(Student student, Long courseId);
+    void removeCourseFromFavourite(Student student, Long courseId);
+    void addCourseToCart(Student student, Long courseId);
+    void removeCourseFromCart(Student student, Long courseId);
 
     void createOrUpdateCourseReview(CreateOrUpdateCourseReviewRequest request, Student student);
     void deleteCourseReview(Long courseId, Long studentId);

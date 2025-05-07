@@ -27,7 +27,9 @@ public interface IStudentService {
 
     void addCoursesToStudentResponse(com.mohand.SchoolManagmentSystem.response.authentication.Student studentResponse);
 
-    void addChaptersToStudentCourse(StudentCourse studentCourse, Long studentId);
-
     void update(UpdateStudentRequest request, Long id);
+
+    List<StudentCourse> getAllCourses(Student student);
+
+    StudentCourse getCourseResponseById(Long courseId, Long studentId);
 }

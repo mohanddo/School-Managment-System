@@ -3,16 +3,14 @@ package com.mohand.SchoolManagmentSystem.service.student;
 import com.mohand.SchoolManagmentSystem.exception.ConflictException;
 import com.mohand.SchoolManagmentSystem.exception.user.account.AccountNotFoundException;
 import com.mohand.SchoolManagmentSystem.model.course.CartItem;
+import com.mohand.SchoolManagmentSystem.model.course.Course;
 import com.mohand.SchoolManagmentSystem.model.course.FavoriteCourse;
 import com.mohand.SchoolManagmentSystem.model.course.TeacherStudent;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
 import com.mohand.SchoolManagmentSystem.repository.*;
 import com.mohand.SchoolManagmentSystem.request.user.UpdateStudentRequest;
-import com.mohand.SchoolManagmentSystem.response.chapter.Chapter;
-import com.mohand.SchoolManagmentSystem.response.chapter.Document;
-import com.mohand.SchoolManagmentSystem.response.chapter.Video;
 import com.mohand.SchoolManagmentSystem.response.course.StudentCourse;
-import com.mohand.SchoolManagmentSystem.service.azure.AzureBlobService;
+import com.mohand.SchoolManagmentSystem.service.chapter.ChapterService;
 import com.mohand.SchoolManagmentSystem.service.course.CourseService;
 import com.mohand.SchoolManagmentSystem.service.resource.ResourceService;
 import lombok.RequiredArgsConstructor;
@@ -32,11 +30,9 @@ public class StudentService implements IStudentService {
     private final CartItemRepository cartItemRepository;
     private final FavoriteCourseRepository favoriteCourseRepository;
     private final CourseService courseService;
-    private final ResourceService resourceService;
     private final ModelMapper modelMapper;
     private final TeacherStudentRepository teacherStudentRepository;
-    private final AzureBlobService azureBlobService;
-    private final FinishedResourceRepository finishedResourceRepository;
+    private final ResourceService resourceService;
 
     @Override
     public Student getByEmail(String email) {
@@ -76,7 +72,7 @@ public class StudentService implements IStudentService {
                 .map(student, com.mohand.SchoolManagmentSystem.response.authentication.Student.class);
         addCoursesToStudentResponse(studentResponse);
         for(StudentCourse studentCourse: studentResponse.getCourses()) {
-            addChaptersToStudentCourse(studentCourse, student.getId());
+            resourceService.addChapterToCourseResponse(studentCourse, student.getId());
         }
         return studentResponse;
     }
@@ -119,6 +115,7 @@ public class StudentService implements IStudentService {
             course.setInCart(true);
             course.setFavourite(false);
             course.setEnrolled(false);
+            course.setAnnouncements(null);
             courses.add(course);
         }
 
@@ -135,6 +132,7 @@ public class StudentService implements IStudentService {
             StudentCourse course = modelMapper.map(favoriteCourse.getCourse(), StudentCourse.class);
             course.setFavourite(true);
             course.setEnrolled(false);
+            course.setAnnouncements(null);
             course.setInCart(false);
             courses.add(course);
         }
@@ -164,36 +162,6 @@ public class StudentService implements IStudentService {
         studentResponse.setCourses(courses);
     }
 
-    @Override
-    public void addChaptersToStudentCourse(StudentCourse studentCourse, Long studentId) {
-        List<Chapter> chapters = studentCourse.getChapters().stream().map((chapter -> {
-            Chapter chapterResponse = modelMapper.map(chapter, Chapter.class);
-
-            List<Video> videos = resourceService.getAllVideosByChapterId(chapter.getId())
-                    .stream()
-                    .map(video -> {
-                        Video videoResponse = modelMapper.map(video, Video.class);
-                        videoResponse.setDownloadUrl(azureBlobService.signBlobUrl(video.getDownloadUrl(), true));
-                        videoResponse.setIsFinished(finishedResourceRepository.existsByResourceIdAndStudentId(videoResponse.getId(), studentId));
-                        return videoResponse;
-                    }).toList();
-            chapter.setVideos(videos);
-
-            List<Document> documents = resourceService.getAllDocumentsByChapterId(chapter.getId())
-                    .stream()
-                    .map(document -> {
-                        Document documentResponse = modelMapper.map(document, Document.class);
-                        documentResponse.setDownloadUrl(azureBlobService.signBlobUrl(document.getDownloadUrl(), true));
-                        documentResponse.setIsFinished(finishedResourceRepository.existsByResourceIdAndStudentId(documentResponse.getId(), studentId));
-                        return documentResponse;
-                    }).toList();
-            chapter.setDocuments(documents);
-
-            return chapterResponse;
-        })).toList();
-
-        studentCourse.setChapters(chapters);
-    }
 
     @Override
     public void update(UpdateStudentRequest request, Long id) {
@@ -208,6 +176,45 @@ public class StudentService implements IStudentService {
 //            student.setLastName(request.getLastName());
 //        }
 //        save(student);
+    }
+
+    @Override
+    public List<StudentCourse> getAllCourses(Student student) {
+        return courseService.findAll().stream().map(course -> {
+            StudentCourse studentCourse = modelMapper.map(course, StudentCourse.class);
+            studentCourse.setInCart(cartItemRepository.existsByStudentIdAndCourseId(student.getId(), course.getId()));
+            studentCourse.setFavourite(favoriteCourseRepository.existsByStudentIdAndCourseId(student.getId(), course.getId()));
+            if (courseService.existsByIdAndStudentId(course.getId(), student.getId())) {
+                studentCourse.setEnrolled(true);
+                studentCourse.setProgressPercentage(
+                        courseService.countProgressPercentageByCourseIdAndStudentId(course.getId(), student.getId())
+                );
+            } else {
+                studentCourse.setEnrolled(false);
+                studentCourse.setAnnouncements(null);
+            }
+            resourceService.addChapterToCourseResponse(studentCourse, student.getId());
+            return studentCourse;
+        }).toList();
+    }
+
+    @Override
+    public StudentCourse getCourseResponseById(Long courseId, Long studentId) {
+        Course course = courseService.getById(courseId);
+        StudentCourse studentCourse = modelMapper.map(course, StudentCourse.class);
+        studentCourse.setInCart(cartItemRepository.existsByStudentIdAndCourseId(studentId, course.getId()));
+        studentCourse.setFavourite(favoriteCourseRepository.existsByStudentIdAndCourseId(studentId, course.getId()));
+        if (courseService.existsByIdAndStudentId(course.getId(), studentId)) {
+            studentCourse.setEnrolled(true);
+            studentCourse.setProgressPercentage(
+                    courseService.countProgressPercentageByCourseIdAndStudentId(course.getId(), studentId)
+            );
+        } else {
+            studentCourse.setEnrolled(false);
+            studentCourse.setAnnouncements(null);
+        }
+        resourceService.addChapterToCourseResponse(studentCourse, studentId);
+        return studentCourse;
     }
 
 }

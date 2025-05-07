@@ -9,6 +9,7 @@ import com.mohand.SchoolManagmentSystem.request.chapter.AddDocumentRequest;
 import com.mohand.SchoolManagmentSystem.request.chapter.AddVideoRequest;
 import com.mohand.SchoolManagmentSystem.request.chapter.UpdateDocumentRequest;
 import com.mohand.SchoolManagmentSystem.request.chapter.UpdateVideoRequest;
+import com.mohand.SchoolManagmentSystem.response.chapter.Chapter;
 import org.springframework.data.repository.query.Param;
 
 import java.io.DataInput;
@@ -40,4 +41,9 @@ public interface IResourceService {
     List<Document> getAllDocumentsByChapterId(Long chapterId);
 
     int countByCourseId(Long courseId);
+
+    int addVideosToChapterResponse(Chapter chapter, Long studentId, boolean hasAccessToResource);
+    int addDocumentsToChapterResponse(Chapter chapter, Long studentId, boolean hasAccessToResource);
+
+    void addChapterToCourseResponse(com.mohand.SchoolManagmentSystem.response.course.Course courseResponse, Long studentId);
 }

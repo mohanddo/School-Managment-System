@@ -12,4 +12,5 @@ import java.util.List;
 @NoArgsConstructor
 public class TeacherCourse extends Course {
     private List<Announcement> announcements;
+    private boolean ownsCourse;
 }

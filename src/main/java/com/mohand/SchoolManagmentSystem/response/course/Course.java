@@ -29,5 +29,7 @@ public class Course {
     protected Double rating;
     protected TeacherPreview teacher;
     protected List<Chapter> chapters;
+    protected int numberOfVideos;
+    protected int numberOfDocuments;
     protected List<com.mohand.SchoolManagmentSystem.response.course.CourseReview> courseReviews;
 }
