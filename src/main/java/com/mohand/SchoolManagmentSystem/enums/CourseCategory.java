@@ -8,6 +8,7 @@ public enum CourseCategory {
     SCIENCE,
     HISTORY,
     LANGUAGE,
+    PROGRAMMING,
     PHYSICS;
 
 

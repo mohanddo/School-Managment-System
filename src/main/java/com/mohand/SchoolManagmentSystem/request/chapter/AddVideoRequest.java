@@ -16,6 +16,9 @@ public class AddVideoRequest {
     @NotNull(message = "Video must have a duration in seconds")
     private Integer duration;
 
+    @NotBlank(message = "You must specify if the video is free or not")
+    private boolean isFree;
+
     @NotBlank(message = "Video must have a download url")
     private String downloadUrl;
 

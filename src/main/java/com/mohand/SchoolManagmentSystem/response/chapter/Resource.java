@@ -11,4 +11,5 @@ public class Resource {
     protected String downloadUrl;
     protected String dateOfCreation;
     protected Boolean isFinished;
+    protected Boolean free;
 }

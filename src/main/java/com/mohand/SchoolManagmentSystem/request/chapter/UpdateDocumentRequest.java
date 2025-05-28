@@ -13,6 +13,9 @@ public class UpdateDocumentRequest {
     @NotBlank(message = "Video must a title")
     private String title;
 
+    @NotBlank(message = "You must specify if the document is free or not")
+    private boolean isFree;
+
     @NotNull(message = "Request must have a course id")
     private Long courseId;
 

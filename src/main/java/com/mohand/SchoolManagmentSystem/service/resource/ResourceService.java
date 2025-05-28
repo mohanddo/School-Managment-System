@@ -34,14 +34,14 @@ public class ResourceService implements IResourceService {
     @Override
     public void addVideo(AddVideoRequest request, Teacher teacher) {
         Chapter chapter = chapterService.findByIdAndCourseIdAndTeacherId(request.getChapterId(), request.getCourseId(), teacher.getId());
-        Video video = new Video(request.getTitle(), request.getDownloadUrl(), chapter, request.getDuration());
+        Video video = new Video(request.getTitle(), request.getDownloadUrl(), chapter, request.getDuration(), request.isFree());
         videoRepository.save(video);
     }
 
     @Override
     public void addDocument(AddDocumentRequest request, Teacher teacher) {
         Chapter chapter = chapterService.findByIdAndCourseIdAndTeacherId(request.getChapterId(), request.getCourseId(), teacher.getId());
-        Document document = new Document(request.getTitle(), request.getDownloadUrl(), chapter);
+        Document document = new Document(request.getTitle(), request.getDownloadUrl(), chapter, request.isFree());
         documentRepository.save(document);
     }
 
@@ -50,6 +50,7 @@ public class ResourceService implements IResourceService {
         Video video = findVideoByIdAndChapterIdAndCourseIdAndTeacherId(request.getVideoId(), request.getChapterId(), request.getCourseId(), teacher.getId());
         video.setDuration(request.getDuration());
         video.setTitle(request.getTitle());
+        video.setFree(request.isFree());
         videoRepository.save(video);
     }
 
@@ -57,6 +58,7 @@ public class ResourceService implements IResourceService {
     public void updateDocument(UpdateDocumentRequest request, Teacher teacher) {
         Document document = findDocumentByIdAndChapterIdAndCourseIdAndTeacherId(request.getDocumentId(), request.getChapterId(), request.getCourseId(), teacher.getId());
         document.setTitle(request.getTitle());
+        document.setFree(request.isFree());
         documentRepository.save(document);
     }
 
@@ -113,14 +115,20 @@ public class ResourceService implements IResourceService {
     }
 
     @Override
-    public int addVideosToChapterResponse(com.mohand.SchoolManagmentSystem.response.chapter.Chapter chapter, Long studentId, boolean hasAccessToResource) {
+    public int addVideosToChapterResponse(com.mohand.SchoolManagmentSystem.response.chapter.Chapter chapter, Long studentId, Long courseId) {
         List<com.mohand.SchoolManagmentSystem.response.chapter.Video> videos = getAllVideosByChapterId(chapter.getId())
                 .stream()
                 .map(video -> {
                     com.mohand.SchoolManagmentSystem.response.chapter.Video videoResponse = modelMapper.map(video, com.mohand.SchoolManagmentSystem.response.chapter.Video.class);
-                    if (hasAccessToResource && studentId != null) {
+
+                    boolean hasAccessToResource = (studentId != null && courseRepository.isStudentEnrolledInCourse(studentId, courseId))
+                            || video.isFree();
+
+                    if (hasAccessToResource) {
                         videoResponse.setDownloadUrl(azureBlobService.signBlobUrl(video.getDownloadUrl(), true));
-                        videoResponse.setIsFinished(finishedResourceRepository.existsByResourceIdAndStudentId(videoResponse.getId(), studentId));
+                        if (studentId != null) {
+                            videoResponse.setIsFinished(finishedResourceRepository.existsByResourceIdAndStudentId(videoResponse.getId(), studentId));
+                        }
                     }
                     return videoResponse;
                 }).toList();
@@ -129,14 +137,20 @@ public class ResourceService implements IResourceService {
     }
 
     @Override
-    public int addDocumentsToChapterResponse(com.mohand.SchoolManagmentSystem.response.chapter.Chapter chapter, Long studentId, boolean hasAccessToResource) {
+    public int addDocumentsToChapterResponse(com.mohand.SchoolManagmentSystem.response.chapter.Chapter chapter, Long studentId, Long courseId) {
         List<com.mohand.SchoolManagmentSystem.response.chapter.Document> documents = getAllDocumentsByChapterId(chapter.getId())
                 .stream()
                 .map(document -> {
                     com.mohand.SchoolManagmentSystem.response.chapter.Document documentResponse = modelMapper.map(document, com.mohand.SchoolManagmentSystem.response.chapter.Document.class);
-                    if (hasAccessToResource && studentId != null) {
+
+                    boolean hasAccessToResource = (studentId != null && courseRepository.isStudentEnrolledInCourse(studentId, courseId))
+                            || document.isFree();
+
+                    if (hasAccessToResource) {
                         documentResponse.setDownloadUrl(azureBlobService.signBlobUrl(document.getDownloadUrl(), true));
-                        documentResponse.setIsFinished(finishedResourceRepository.existsByResourceIdAndStudentId(documentResponse.getId(), studentId));
+                        if (studentId != null) {
+                            documentResponse.setIsFinished(finishedResourceRepository.existsByResourceIdAndStudentId(documentResponse.getId(), studentId));
+                        }
                     }
                     return documentResponse;
                 }).toList();
@@ -146,14 +160,13 @@ public class ResourceService implements IResourceService {
 
     @Override
     public void addChapterToCourseResponse(com.mohand.SchoolManagmentSystem.response.course.Course courseResponse, Long studentId) {
+
         List<com.mohand.SchoolManagmentSystem.response.chapter.Chapter> chapters = courseResponse.getChapters().stream().map((chapter -> {
             com.mohand.SchoolManagmentSystem.response.chapter.Chapter chapterResponse = modelMapper.map(chapter, com.mohand.SchoolManagmentSystem.response.chapter.Chapter.class);
 
-            boolean hasAccessToResource = studentId != null && courseRepository.isStudentEnrolledInCourse(studentId, courseResponse.getId());
+            int numberOfVideosInChapter = addVideosToChapterResponse(chapter, studentId, courseResponse.getId());
 
-            int numberOfVideosInChapter = addVideosToChapterResponse(chapter, studentId, hasAccessToResource);
-
-            int numberOfDocumentsInChapter = addDocumentsToChapterResponse(chapter, studentId, hasAccessToResource);
+            int numberOfDocumentsInChapter = addDocumentsToChapterResponse(chapter, studentId, courseResponse.getId());
 
             courseResponse.setNumberOfDocuments(courseResponse.getNumberOfDocuments() + numberOfDocumentsInChapter);
             courseResponse.setNumberOfVideos(courseResponse.getNumberOfVideos() + numberOfVideosInChapter);

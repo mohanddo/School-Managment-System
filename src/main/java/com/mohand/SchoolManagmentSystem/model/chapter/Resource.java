@@ -20,11 +20,12 @@ public abstract class Resource {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    public Resource(String title, String downloadUrl, Chapter chapter) {
+    public Resource(String title, String downloadUrl, Chapter chapter, Boolean isFree) {
         this.title = title;
         this.downloadUrl = downloadUrl;
         this.chapter = chapter;
         this.dateOfCreation = LocalDateTime.now();
+        this.free = isFree;
     }
 
     @NotBlank
@@ -37,6 +38,9 @@ public abstract class Resource {
 
     @Column(nullable = false)
     private LocalDateTime dateOfCreation;
+
+    @Column(nullable = false)
+    private boolean free;
 
     @ManyToOne
     @JoinColumn(name = "chapter_id")

@@ -42,8 +42,8 @@ public interface IResourceService {
 
     int countByCourseId(Long courseId);
 
-    int addVideosToChapterResponse(Chapter chapter, Long studentId, boolean hasAccessToResource);
-    int addDocumentsToChapterResponse(Chapter chapter, Long studentId, boolean hasAccessToResource);
+    int addVideosToChapterResponse(Chapter chapter, Long studentId, Long courseId);
+    int addDocumentsToChapterResponse(Chapter chapter, Long studentId, Long courseId);
 
     void addChapterToCourseResponse(com.mohand.SchoolManagmentSystem.response.course.Course courseResponse, Long studentId);
 }

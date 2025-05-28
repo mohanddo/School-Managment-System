@@ -13,6 +13,9 @@ public class UpdateVideoRequest {
     @NotBlank(message = "Video must a title")
     private String title;
 
+    @NotBlank(message = "You must specify if the video is free or not")
+    private boolean isFree;
+
     @NotNull(message = "Video must have a duration in seconds")
     private Integer duration;
 

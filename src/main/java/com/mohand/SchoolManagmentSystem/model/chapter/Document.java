@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor
 public class Document extends Resource {
-    public Document(String title, String downloadUrl, Chapter chapter) {
-        super(title, downloadUrl, chapter);
+    public Document(String title, String downloadUrl, Chapter chapter, boolean isFree) {
+        super(title, downloadUrl, chapter, isFree);
     }
 }
