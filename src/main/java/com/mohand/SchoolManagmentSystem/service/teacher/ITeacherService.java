@@ -1,6 +1,8 @@
 package com.mohand.SchoolManagmentSystem.service.teacher;
 
 import com.mohand.SchoolManagmentSystem.model.user.Teacher;
+import com.mohand.SchoolManagmentSystem.request.user.UpdateStudentRequest;
+import com.mohand.SchoolManagmentSystem.request.user.UpdateTeacherRequest;
 import com.mohand.SchoolManagmentSystem.response.course.TeacherCourse;
 import org.springframework.security.core.Authentication;
 
@@ -19,4 +21,6 @@ public interface ITeacherService {
 
     List<TeacherCourse> getAllCourses(Teacher teacher);
     TeacherCourse getCourseResponseById(Long courseId, Long teacherId);
+
+    void update(UpdateTeacherRequest request, Long id);
 }

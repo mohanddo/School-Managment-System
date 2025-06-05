@@ -1,14 +1,15 @@
 package com.mohand.SchoolManagmentSystem.controller.user;
 
+import com.mohand.SchoolManagmentSystem.request.user.UpdateStudentRequest;
+import com.mohand.SchoolManagmentSystem.request.user.UpdateTeacherRequest;
 import com.mohand.SchoolManagmentSystem.response.course.TeacherCourse;
 import com.mohand.SchoolManagmentSystem.service.teacher.TeacherService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import com.mohand.SchoolManagmentSystem.response.authentication.Teacher;
 
 import java.util.List;
@@ -36,5 +37,12 @@ public class TeacherController {
     private ResponseEntity<TeacherCourse> getCourseById(@PathVariable Long courseId, Authentication authentication) {
         Long teacherId = ((com.mohand.SchoolManagmentSystem.model.user.Teacher) authentication.getPrincipal()).getId();
         return ResponseEntity.ok(teacherService.getCourseResponseById(courseId, teacherId));
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<String> update(@RequestBody @Valid UpdateTeacherRequest updateTeacherRequest, Authentication authentication) {
+        com.mohand.SchoolManagmentSystem.model.user.Teacher teacher = (com.mohand.SchoolManagmentSystem.model.user.Teacher) authentication.getPrincipal();
+        teacherService.update(updateTeacherRequest, teacher.getId());
+        return ResponseEntity.ok("Teacher updated successfully");
     }
 }

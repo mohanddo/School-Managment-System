@@ -5,10 +5,8 @@ import com.mohand.SchoolManagmentSystem.model.course.Course;
 import com.mohand.SchoolManagmentSystem.model.user.Teacher;
 import com.mohand.SchoolManagmentSystem.repository.TeacherRepository;
 import com.mohand.SchoolManagmentSystem.request.course.CreateCourseRequest;
-import com.mohand.SchoolManagmentSystem.response.course.StudentCourse;
+import com.mohand.SchoolManagmentSystem.request.user.UpdateTeacherRequest;
 import com.mohand.SchoolManagmentSystem.response.course.TeacherCourse;
-import com.mohand.SchoolManagmentSystem.service.azure.AzureBlobService;
-import com.mohand.SchoolManagmentSystem.service.chapter.ChapterService;
 import com.mohand.SchoolManagmentSystem.service.course.CourseService;
 import com.mohand.SchoolManagmentSystem.service.payment.ChargilyPayService;
 import com.mohand.SchoolManagmentSystem.service.resource.ResourceService;
@@ -97,6 +95,23 @@ public class TeacherService implements ITeacherService {
         }
         resourceService.addChapterToCourseResponse(teacherResponse, null);
         return teacherResponse;
+    }
+
+    @Override
+    public void update(UpdateTeacherRequest request, Long id) {
+
+            Teacher teacher = readById(id);
+
+            teacher.setHasProfilePic(request.isHasProfilePic());
+            teacher.setFirstName(request.getFirstName());
+            teacher.setLastName(request.getLastName());
+            teacher.setDescription(request.getDescription());
+            teacher.setFacebookLink(request.getFacebookLink());
+            teacher.setYoutubeLink(request.getYoutubeLink());
+            teacher.setInstagramLink(request.getInstagramLink());
+
+            save(teacher);
+
     }
 
     @Override
