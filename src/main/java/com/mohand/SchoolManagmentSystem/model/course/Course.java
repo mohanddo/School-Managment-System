@@ -51,9 +51,6 @@ public class Course {
     private Integer numberOfReviews;
 
     @Column(nullable = false)
-    private Integer numberOfHours;
-
-    @Column(nullable = false)
     @Min(message = "Price must be greater than 0", value = 0)
     private Integer price;
 
@@ -104,7 +101,6 @@ public class Course {
                 .pricingModel(pricingModel)
                 .category(category)
                 .numberOfReviews(0)
-                .numberOfHours(0)
                 .imageUrl(imageUrl)
                 .introductionVideoUrl(introductionVideoUrl)
                 .discountPercentage(0);

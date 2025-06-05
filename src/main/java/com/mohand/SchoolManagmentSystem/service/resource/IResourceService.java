@@ -23,7 +23,8 @@ public interface IResourceService {
     void updateVideo(UpdateVideoRequest request, Teacher teacher);
     void updateDocument(UpdateDocumentRequest request, Teacher teacher);
 
-    void addOrDeleteFinishedResource(Long resourceId, Long chapterId, Long courseId , Student student);
+    void addFinishedResource(Long resourceId, Long chapterId, Long courseId , Student student);
+    void deleteFinishedResource(Long resourceId, Student student);
 
     Video findVideoByIdAndChapterIdAndCourseIdAndTeacherId(Long videoId,
                                                            Long chapterId,

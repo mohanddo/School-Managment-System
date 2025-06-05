@@ -21,7 +21,6 @@ public class Course {
     protected int numberOfStudents;
     protected int numberOfReviews;
     protected int price;
-    protected double numberOfHours;
     protected Integer discountPercentage;
     protected LocalDate discountExpirationDate;
     protected PricingModel pricingModel;

@@ -167,9 +167,10 @@ public class CourseService implements ICourseService {
     @Override
     @Transactional
     public void deleteCourseReview(Long courseId, Long studentId) {
-
+        com.mohand.SchoolManagmentSystem.model.course.Course course = getById(courseId);
         if (courseReviewRepository.existsByStudentIdAndCourseId(studentId, courseId)) {
             courseReviewRepository.deleteByStudentIdAndCourseId(studentId, courseId);
+            course.setNumberOfReviews(course.getNumberOfReviews() - 1);
         } else {
             throw new ResourceNotFoundException("Course review not found");
         }

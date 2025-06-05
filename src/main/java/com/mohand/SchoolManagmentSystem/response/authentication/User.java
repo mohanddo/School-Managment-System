@@ -24,5 +24,9 @@ public class User {
 
     protected String email;
 
-    protected String profilePicDownloadUrl;
+    protected boolean hasProfilePic;
+
+    protected String sasTokenForReadingProfilePic;
+
+    protected String sasTokenForWritingProfilePic;
 }

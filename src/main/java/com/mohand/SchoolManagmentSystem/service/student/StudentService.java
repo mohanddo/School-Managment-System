@@ -165,17 +165,13 @@ public class StudentService implements IStudentService {
 
     @Override
     public void update(UpdateStudentRequest request, Long id) {
-//        Student student = getById(id);
-//        if (request.getProfilePicDownloadUrl() != null && !request.getProfilePicDownloadUrl().isEmpty()) {
-//            student.setProfilePicDownloadUrl(request.getProfilePicDownloadUrl());
-//        }
-//        if (request.getFirstName() != null && !request.getFirstName().isEmpty()) {
-//            student.setFirstName(request.getFirstName());
-//        }
-//        if (request.getLastName() != null && !request.getLastName().isEmpty()) {
-//            student.setLastName(request.getLastName());
-//        }
-//        save(student);
+        Student student = getById(id);
+
+        student.setHasProfilePic(request.isHasProfilePic());
+        student.setFirstName(request.getFirstName());
+        student.setLastName(request.getLastName());
+
+        save(student);
     }
 
     @Override

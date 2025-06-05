@@ -1,9 +1,10 @@
 package com.mohand.SchoolManagmentSystem.controller.user;
 
+import com.mohand.SchoolManagmentSystem.request.user.UpdateStudentRequest;
 import com.mohand.SchoolManagmentSystem.response.authentication.Student;
-import com.mohand.SchoolManagmentSystem.response.course.Course;
 import com.mohand.SchoolManagmentSystem.response.course.StudentCourse;
 import com.mohand.SchoolManagmentSystem.service.student.StudentService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -37,10 +38,10 @@ public class StudentController {
         return ResponseEntity.ok(studentService.getCourseResponseById(courseId, studentId));
     }
 
-//    @PutMapping("/update")
-//    public ResponseEntity<String> update(@RequestBody @Valid UpdateStudentRequest updateStudentRequest, Authentication authentication) {
-//        Student student = (Student) authentication.getPrincipal();
-//        studentService.update(updateStudentRequest, student.getId());
-//        return ResponseEntity.ok("Student updated successfully");
-//    }
+    @PutMapping("/update")
+    public ResponseEntity<String> update(@RequestBody @Valid UpdateStudentRequest updateStudentRequest, Authentication authentication) {
+        com.mohand.SchoolManagmentSystem.model.user.Student student = (com.mohand.SchoolManagmentSystem.model.user.Student) authentication.getPrincipal();
+        studentService.update(updateStudentRequest, student.getId());
+        return ResponseEntity.ok("Student updated successfully");
+    }
 }

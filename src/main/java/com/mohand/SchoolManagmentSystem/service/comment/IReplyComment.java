@@ -1,10 +1,11 @@
 package com.mohand.SchoolManagmentSystem.service.comment;
 
 import com.mohand.SchoolManagmentSystem.model.user.User;
+import com.mohand.SchoolManagmentSystem.request.comment.AddOrUpdateReplyCommentRequest;
 
 public interface IReplyComment {
 
-    void addOrUpdateReplyComment(String text, Long commentId, Long userId);
+    void addOrUpdateReplyComment(AddOrUpdateReplyCommentRequest request, User user);
 
     void deleteReplyComment(Long replyCommentId, User user);
 

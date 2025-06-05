@@ -1,11 +1,13 @@
 package com.mohand.SchoolManagmentSystem.service.comment;
 
 import com.mohand.SchoolManagmentSystem.exception.ResourceNotFoundException;
+import com.mohand.SchoolManagmentSystem.model.chapter.Resource;
 import com.mohand.SchoolManagmentSystem.model.comment.Comment;
 import com.mohand.SchoolManagmentSystem.model.comment.UpVoteComment;
 import com.mohand.SchoolManagmentSystem.model.user.User;
 import com.mohand.SchoolManagmentSystem.repository.ReplyCommentRepository;
 import com.mohand.SchoolManagmentSystem.repository.UpVoteCommentRepository;
+import com.mohand.SchoolManagmentSystem.request.comment.AddOrUpdateReplyCommentRequest;
 import com.mohand.SchoolManagmentSystem.service.course.ICourseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,8 +21,18 @@ public class ReplyComment implements IReplyComment {
     private final ICourseService courseService;
 
     @Override
-    public void addOrUpdateReplyComment(String text, Long commentId, Long userId) {
+    public void addOrUpdateReplyComment(AddOrUpdateReplyCommentRequest request, User user) {
 
+//        Resource resource = resourceService.findByIdAndChapterIdAndCourseId(request.getResourceId(), request.getChapterId(), request.getCourseId());
+//        Comment comment;
+//        if (request.getReplyCommentId() == null) {
+//            ReplyComment replyComment = new ReplyComment(request.getText(), user, );
+//        } else {
+//            comment = findByIdAndUserId(request.getCommentId(), user.getId());
+//            comment.setText(request.getText());
+//        }
+//
+//        replyCommentRepository.save(comment);
     }
 
     @Override

@@ -21,7 +21,9 @@ public class CourseReview {
     private Long id;
     @Enumerated(EnumType.STRING)
     private Review review;
+
     private String comment;
+
     private LocalDateTime dateOfCreation;
 
     @ManyToOne

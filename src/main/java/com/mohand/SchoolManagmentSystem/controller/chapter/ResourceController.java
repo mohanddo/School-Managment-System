@@ -47,10 +47,17 @@ public class ResourceController {
         return ResponseEntity.ok("Success");
     }
 
-    @PutMapping("/addOrDeleteFinishedResource/{courseId}/{chapterId}/{resourceId}")
-    public ResponseEntity<String> updateDocument(@PathVariable Long courseId, @PathVariable Long chapterId, @PathVariable Long resourceId, Authentication authentication) {
+    @PostMapping("/addFinishedResource/{courseId}/{chapterId}/{resourceId}")
+    public ResponseEntity<String> addFinishedResource(@PathVariable Long courseId, @PathVariable Long chapterId, @PathVariable Long resourceId, Authentication authentication) {
         Student student = (Student) ( authentication.getPrincipal() );
-        resourceService.addOrDeleteFinishedResource(resourceId, chapterId ,courseId , student);
+        resourceService.addFinishedResource(resourceId, chapterId , courseId , student);
+        return ResponseEntity.ok("Success");
+    }
+
+    @DeleteMapping("/deleteFinishedResource/{resourceId}")
+    public ResponseEntity<String> deleteFinishedResource(@PathVariable Long resourceId, Authentication authentication) {
+        Student student = (Student) ( authentication.getPrincipal() );
+        resourceService.deleteFinishedResource(resourceId, student);
         return ResponseEntity.ok("Success");
     }
 

@@ -6,6 +6,7 @@ import com.mohand.SchoolManagmentSystem.model.chapter.Video;
 import com.mohand.SchoolManagmentSystem.model.course.CourseReview;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
 import com.mohand.SchoolManagmentSystem.model.user.Teacher;
+import com.mohand.SchoolManagmentSystem.model.user.User;
 import com.mohand.SchoolManagmentSystem.repository.CourseRepository;
 import com.mohand.SchoolManagmentSystem.repository.CourseReviewRepository;
 import com.mohand.SchoolManagmentSystem.repository.TeacherStudentRepository;
@@ -69,7 +70,26 @@ public class AppConfiguration {
             Converter<String, String > urlToSignedUrl = context -> {
 
                 if (context.getSource() != null) {
-                    return azureBlobService.signBlobUrl(context.getSource(), false);
+                    return azureBlobService.signBlobUrl(context.getSource());
+                } else {
+                    return null;
+                }
+            };
+
+            Converter<Long, String > UserIdToSaSTokenWithReadPermission = context -> {
+
+                if (context.getSource() != null) {
+                    return azureBlobService.
+                            generateSasTokenForBlob(azureStorageEndpoint + "/profilepics" + "/" + context.getSource());
+                } else {
+                    return null;
+                }
+            };
+
+            Converter<Long, String > UserIdToSaSTokenWithWritePermission = context -> {
+
+                if (context.getSource() != null) {
+                    return azureBlobService.generateSasTokenForBlob(azureStorageEndpoint + "/profilepics" + "/" + context.getSource(), true);
                 } else {
                     return null;
                 }
@@ -107,12 +127,12 @@ public class AppConfiguration {
             };
 
             modelMapper.typeMap(Teacher.class, TeacherPreview.class).addMappings(mapper -> {
-                mapper.using(urlToSignedUrl).map(Teacher::getProfilePicDownloadUrl, TeacherPreview::setProfilePicDownloadUrl);
+                mapper.using(UserIdToSaSTokenWithReadPermission).map(Teacher::getId, TeacherPreview::setSasTokenForReadingProfilePic);
                 mapper.using(teacherIdToStudentCount).map(Teacher::getId, TeacherPreview::setNumberOfStudents);
             });
 
             modelMapper.typeMap(Student.class, StudentPreview.class).addMappings(mapper -> {
-                mapper.using(urlToSignedUrl).map(Student::getProfilePicDownloadUrl, StudentPreview::setProfilePicDownloadUrl);
+                mapper.using(UserIdToSaSTokenWithReadPermission).map(Student::getId, StudentPreview::setSasTokenForReadingProfilePic);
             });
 
             Converter<String, String> containerNameToBaseUrl =
@@ -133,9 +153,19 @@ public class AppConfiguration {
                 );
             });
 
+            modelMapper.typeMap(Student.class, com.mohand.SchoolManagmentSystem.response.authentication.Student.class).addMappings(mapper -> {
+                mapper.using(UserIdToSaSTokenWithReadPermission).map(Student::getId, com.mohand.SchoolManagmentSystem.response.authentication.Student::setSasTokenForReadingProfilePic);
+                mapper.using(UserIdToSaSTokenWithWritePermission).map(Student::getId, com.mohand.SchoolManagmentSystem.response.authentication.Student::setSasTokenForWritingProfilePic);
+            });
+
+            modelMapper.typeMap(Teacher.class, com.mohand.SchoolManagmentSystem.response.authentication.Teacher.class).addMappings(mapper -> {
+                mapper.using(UserIdToSaSTokenWithReadPermission).map(Teacher::getId, com.mohand.SchoolManagmentSystem.response.authentication.Teacher::setSasTokenForReadingProfilePic);
+                mapper.using(UserIdToSaSTokenWithWritePermission).map(Teacher::getId, com.mohand.SchoolManagmentSystem.response.authentication.Teacher::setSasTokenForWritingProfilePic);
+            });
+
             Converter<String, String[]> courseImageUrlToArray = (context) ->  {
                 if (context.getSource() != null) {
-                    return new String[] { azureBlobService.signBlobUrl(context.getSource(), false) };
+                    return new String[] { azureBlobService.signBlobUrl(context.getSource()) };
                 } else {
                     return new String[] {};
                 }

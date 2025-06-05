@@ -1,5 +1,7 @@
 package com.mohand.SchoolManagmentSystem.service.resource;
 
+import com.mohand.SchoolManagmentSystem.exception.ConflictException;
+import com.mohand.SchoolManagmentSystem.exception.NotFoundException;
 import com.mohand.SchoolManagmentSystem.exception.ResourceNotFoundException;
 import com.mohand.SchoolManagmentSystem.model.chapter.*;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
@@ -64,17 +66,27 @@ public class ResourceService implements IResourceService {
 
     @Override
     @Transactional
-    public void addOrDeleteFinishedResource(Long resourceId, Long chapterId, Long courseId, Student student) {
-        if (!courseRepository.isStudentEnrolledInCourse(courseId, student.getId()))
+    public void addFinishedResource(Long resourceId, Long chapterId, Long courseId, Student student) {
+        if (!courseRepository.isStudentEnrolledInCourse(student.getId(), courseId))
             throw new ResourceNotFoundException("Course not found");
 
         Resource resource = findByIdAndChapterIdAndCourseId(resourceId, chapterId, courseId);
 
         if (finishedResourceRepository.existsByResourceIdAndStudentId(resourceId, student.getId())) {
-            finishedResourceRepository.deleteByResourceIdAndStudentId(resourceId, student.getId());
+            throw new ConflictException("Resource already finished");
         } else {
             FinishedResource finishedResource = new FinishedResource(student, resource);
             finishedResourceRepository.save(finishedResource);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void deleteFinishedResource(Long resourceId, Student student) {
+        if (finishedResourceRepository.existsByResourceIdAndStudentId(resourceId, student.getId())) {
+            finishedResourceRepository.deleteByResourceIdAndStudentId(resourceId, student.getId());
+        } else {
+            throw new NotFoundException("Resource not finished");
         }
     }
 
@@ -125,7 +137,7 @@ public class ResourceService implements IResourceService {
                             || video.isFree();
 
                     if (hasAccessToResource) {
-                        videoResponse.setDownloadUrl(azureBlobService.signBlobUrl(video.getDownloadUrl(), true));
+                        videoResponse.setDownloadUrl(azureBlobService.signBlobUrl(video.getDownloadUrl()));
                         if (studentId != null) {
                             videoResponse.setIsFinished(finishedResourceRepository.existsByResourceIdAndStudentId(videoResponse.getId(), studentId));
                         }
@@ -147,7 +159,7 @@ public class ResourceService implements IResourceService {
                             || document.isFree();
 
                     if (hasAccessToResource) {
-                        documentResponse.setDownloadUrl(azureBlobService.signBlobUrl(document.getDownloadUrl(), true));
+                        documentResponse.setDownloadUrl(azureBlobService.signBlobUrl(document.getDownloadUrl()));
                         if (studentId != null) {
                             documentResponse.setIsFinished(finishedResourceRepository.existsByResourceIdAndStudentId(documentResponse.getId(), studentId));
                         }

@@ -35,6 +35,7 @@ public abstract class User implements UserDetails {
         this.email = email;
         this.password = password;
         this.enabled = false;
+        this.hasProfilePic = false;
         this.verificationCode = verificationCode;
         this.verificationCodeExpiresAt = verificationCodeExpiresAt;
         this.role = role;
@@ -57,7 +58,8 @@ public abstract class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    private String profilePicDownloadUrl;
+    @Column(nullable = false)
+    private boolean hasProfilePic;
 
     @Column(nullable = false)
     private Boolean enabled;
