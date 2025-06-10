@@ -9,6 +9,7 @@ import com.mohand.SchoolManagmentSystem.request.course.CreateCourseRequest;
 import com.mohand.SchoolManagmentSystem.request.course.CreateOrUpdateCourseReviewRequest;
 import com.mohand.SchoolManagmentSystem.request.course.UpdateCourseRequest;
 import com.mohand.SchoolManagmentSystem.response.course.Course;
+import com.mohand.SchoolManagmentSystem.service.course.CourseService;
 import com.mohand.SchoolManagmentSystem.service.course.ICourseService;
 import com.mohand.SchoolManagmentSystem.service.teacher.TeacherService;
 import jakarta.validation.Valid;
@@ -24,7 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CourseController {
 
-    private final ICourseService courseService;
+    private final CourseService courseService;
     private final TeacherService teacherService;
 
     @GetMapping("/all")

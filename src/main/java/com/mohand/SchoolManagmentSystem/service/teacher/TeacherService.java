@@ -7,6 +7,7 @@ import com.mohand.SchoolManagmentSystem.repository.TeacherRepository;
 import com.mohand.SchoolManagmentSystem.request.course.CreateCourseRequest;
 import com.mohand.SchoolManagmentSystem.request.user.UpdateTeacherRequest;
 import com.mohand.SchoolManagmentSystem.response.course.TeacherCourse;
+import com.mohand.SchoolManagmentSystem.response.user.TeacherPreview;
 import com.mohand.SchoolManagmentSystem.service.course.CourseService;
 import com.mohand.SchoolManagmentSystem.service.payment.ChargilyPayService;
 import com.mohand.SchoolManagmentSystem.service.resource.ResourceService;
@@ -76,6 +77,10 @@ public class TeacherService implements ITeacherService {
     public List<TeacherCourse> getAllCourses(Teacher teacher) {
         return courseService.findAll().stream().map(course -> {
             TeacherCourse teacherCourse = modelMapper.map(course, TeacherCourse.class);
+
+            TeacherPreview teacherPreview = modelMapper.map(course.getTeacher(), TeacherPreview.class);
+            teacherCourse.setTeacher(teacherPreview);
+
             teacherCourse.setOwnsCourse(courseService.existsByIdAndTeacherId(course.getId(), teacher.getId()));
             if (!courseService.existsByIdAndTeacherId(course.getId(), teacher.getId())) {
                 teacherCourse.setAnnouncements(null);
@@ -89,6 +94,10 @@ public class TeacherService implements ITeacherService {
     public TeacherCourse getCourseResponseById(Long courseId, Long teacherId) {
         Course course = courseService.getById(courseId);
         TeacherCourse teacherResponse = modelMapper.map(course, TeacherCourse.class);
+
+        TeacherPreview teacherPreview = modelMapper.map(course.getTeacher(), TeacherPreview.class);
+        teacherResponse.setTeacher(teacherPreview);
+
         teacherResponse.setOwnsCourse(courseService.existsByIdAndTeacherId(course.getId(),teacherId));
         if (!courseService.existsByIdAndTeacherId(course.getId(), teacherId)) {
             teacherResponse.setAnnouncements(null);

@@ -1,8 +1,5 @@
 package com.mohand.SchoolManagmentSystem.config;
 
-import com.mohand.SchoolManagmentSystem.model.chapter.Document;
-import com.mohand.SchoolManagmentSystem.model.chapter.Resource;
-import com.mohand.SchoolManagmentSystem.model.chapter.Video;
 import com.mohand.SchoolManagmentSystem.model.course.CourseReview;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
 import com.mohand.SchoolManagmentSystem.model.user.Teacher;
@@ -17,6 +14,7 @@ import com.mohand.SchoolManagmentSystem.response.course.StudentCourse;
 import com.mohand.SchoolManagmentSystem.response.course.TeacherCourse;
 import com.mohand.SchoolManagmentSystem.response.user.StudentPreview;
 import com.mohand.SchoolManagmentSystem.response.user.TeacherPreview;
+import com.mohand.SchoolManagmentSystem.response.user.UserPreview;
 import com.mohand.SchoolManagmentSystem.service.azure.AzureBlobService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.Converter;
@@ -38,12 +36,6 @@ import java.util.List;
 @Configuration
 @RequiredArgsConstructor
 public class AppConfiguration {
-
-        @Value("${api.prefix}")
-        private String apiPrefix;
-
-        @Value("${base.url}")
-        private String baseUrl;
 
         @Value("${azure.storage.endpoint}")
         private String azureStorageEndpoint;
@@ -67,6 +59,10 @@ public class AppConfiguration {
         public ModelMapper modelMapper() {
             ModelMapper modelMapper = new ModelMapper();
 
+
+
+
+
             Converter<String, String > urlToSignedUrl = context -> {
 
                 if (context.getSource() != null) {
@@ -79,6 +75,7 @@ public class AppConfiguration {
             Converter<Long, String > UserIdToSaSTokenWithReadPermission = context -> {
 
                 if (context.getSource() != null) {
+
                     return azureBlobService.
                             generateSasTokenForBlob(azureStorageEndpoint + "/profilepics" + "/" + context.getSource());
                 } else {
@@ -122,17 +119,22 @@ public class AppConfiguration {
                 mapper.using(courseIdToRating).map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, Course::setRating);
             });
 
-            Converter<Long, Integer> teacherIdToStudentCount = context -> {
-                return teacherStudentRepository.countByTeacherId(context.getSource());
-            };
+            Converter<Long, Integer> teacherIdToStudentCount = context -> teacherStudentRepository.countByTeacherId(context.getSource());
+            ;
 
             modelMapper.typeMap(Teacher.class, TeacherPreview.class).addMappings(mapper -> {
                 mapper.using(UserIdToSaSTokenWithReadPermission).map(Teacher::getId, TeacherPreview::setSasTokenForReadingProfilePic);
                 mapper.using(teacherIdToStudentCount).map(Teacher::getId, TeacherPreview::setNumberOfStudents);
             });
 
+
+
             modelMapper.typeMap(Student.class, StudentPreview.class).addMappings(mapper -> {
                 mapper.using(UserIdToSaSTokenWithReadPermission).map(Student::getId, StudentPreview::setSasTokenForReadingProfilePic);
+            });
+
+            modelMapper.typeMap(User.class, UserPreview.class).addMappings(mapper -> {
+                mapper.using(UserIdToSaSTokenWithReadPermission).map(User::getId, UserPreview::setSasTokenForReadingProfilePic);
             });
 
             Converter<String, String> containerNameToBaseUrl =
@@ -182,6 +184,7 @@ public class AppConfiguration {
 
             modelMapper.typeMap(Teacher.class, com.mohand.SchoolManagmentSystem.response.authentication.Teacher.class)
                     .addMappings(mapper -> mapper.skip(com.mohand.SchoolManagmentSystem.response.authentication.Teacher::setCourses));
+
 
 
             return modelMapper;

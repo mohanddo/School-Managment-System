@@ -14,6 +14,7 @@ import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnou
 import com.mohand.SchoolManagmentSystem.request.course.CreateOrUpdateCourseReviewRequest;
 import com.mohand.SchoolManagmentSystem.request.course.UpdateCourseRequest;
 import com.mohand.SchoolManagmentSystem.response.course.Course;
+import com.mohand.SchoolManagmentSystem.response.user.TeacherPreview;
 import com.mohand.SchoolManagmentSystem.service.chapter.ChapterService;
 import com.mohand.SchoolManagmentSystem.service.resource.ResourceService;
 import lombok.RequiredArgsConstructor;
@@ -71,6 +72,10 @@ public class CourseService implements ICourseService {
         List<com.mohand.SchoolManagmentSystem.model.course.Course> allCourses = courseRepository.findAll();
         return allCourses.stream().map(course ->  {
             Course courseResponse = modelMapper.map(course, Course.class);
+
+            TeacherPreview teacherPreview = modelMapper.map(course.getTeacher(), TeacherPreview.class);
+            courseResponse.setTeacher(teacherPreview);
+
             resourceService.addChapterToCourseResponse(courseResponse, null);
             return courseResponse;
         }).toList();
@@ -78,8 +83,12 @@ public class CourseService implements ICourseService {
 
     @Override
     public Course getCourseResponseById(Long id) {
-        com.mohand.SchoolManagmentSystem.model.course.Course courses = getById(id);
-        Course courseResponse = modelMapper.map(courses, Course.class);
+        com.mohand.SchoolManagmentSystem.model.course.Course course = getById(id);
+        Course courseResponse = modelMapper.map(course, Course.class);
+
+        TeacherPreview teacherPreview = modelMapper.map(course.getTeacher(), TeacherPreview.class);
+        courseResponse.setTeacher(teacherPreview);
+
         resourceService.addChapterToCourseResponse(courseResponse, null);
         return courseResponse;
     }

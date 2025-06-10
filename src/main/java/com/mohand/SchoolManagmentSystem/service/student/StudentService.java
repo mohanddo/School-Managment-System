@@ -10,7 +10,7 @@ import com.mohand.SchoolManagmentSystem.model.user.Student;
 import com.mohand.SchoolManagmentSystem.repository.*;
 import com.mohand.SchoolManagmentSystem.request.user.UpdateStudentRequest;
 import com.mohand.SchoolManagmentSystem.response.course.StudentCourse;
-import com.mohand.SchoolManagmentSystem.service.chapter.ChapterService;
+import com.mohand.SchoolManagmentSystem.response.user.TeacherPreview;
 import com.mohand.SchoolManagmentSystem.service.course.CourseService;
 import com.mohand.SchoolManagmentSystem.service.resource.ResourceService;
 import lombok.RequiredArgsConstructor;
@@ -178,6 +178,10 @@ public class StudentService implements IStudentService {
     public List<StudentCourse> getAllCourses(Student student) {
         return courseService.findAll().stream().map(course -> {
             StudentCourse studentCourse = modelMapper.map(course, StudentCourse.class);
+
+            TeacherPreview teacherPreview = modelMapper.map(course.getTeacher(), TeacherPreview.class);
+            studentCourse.setTeacher(teacherPreview);
+
             studentCourse.setInCart(cartItemRepository.existsByStudentIdAndCourseId(student.getId(), course.getId()));
             studentCourse.setFavourite(favoriteCourseRepository.existsByStudentIdAndCourseId(student.getId(), course.getId()));
             if (courseService.existsByIdAndStudentId(course.getId(), student.getId())) {
@@ -198,6 +202,11 @@ public class StudentService implements IStudentService {
     public StudentCourse getCourseResponseById(Long courseId, Long studentId) {
         Course course = courseService.getById(courseId);
         StudentCourse studentCourse = modelMapper.map(course, StudentCourse.class);
+
+
+        TeacherPreview teacherPreview = modelMapper.map(course.getTeacher(), TeacherPreview.class);
+        studentCourse.setTeacher(teacherPreview);
+
         studentCourse.setInCart(cartItemRepository.existsByStudentIdAndCourseId(studentId, course.getId()));
         studentCourse.setFavourite(favoriteCourseRepository.existsByStudentIdAndCourseId(studentId, course.getId()));
         if (courseService.existsByIdAndStudentId(course.getId(), studentId)) {

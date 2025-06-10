@@ -9,6 +9,6 @@ public class UserPreview {
     protected Long id;
     protected String firstName;
     protected String lastName;
-    protected boolean hasProfilePic;
+    protected Boolean hasProfilePic;
     protected String sasTokenForReadingProfilePic;
 }
