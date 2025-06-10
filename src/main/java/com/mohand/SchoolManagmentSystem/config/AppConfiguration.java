@@ -1,13 +1,12 @@
 package com.mohand.SchoolManagmentSystem.config;
 
+import com.mohand.SchoolManagmentSystem.model.comment.Comment;
+import com.mohand.SchoolManagmentSystem.model.comment.ReplyComment;
 import com.mohand.SchoolManagmentSystem.model.course.CourseReview;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
 import com.mohand.SchoolManagmentSystem.model.user.Teacher;
 import com.mohand.SchoolManagmentSystem.model.user.User;
-import com.mohand.SchoolManagmentSystem.repository.CourseRepository;
-import com.mohand.SchoolManagmentSystem.repository.CourseReviewRepository;
-import com.mohand.SchoolManagmentSystem.repository.TeacherStudentRepository;
-import com.mohand.SchoolManagmentSystem.repository.UserRepository;
+import com.mohand.SchoolManagmentSystem.repository.*;
 import com.mohand.SchoolManagmentSystem.request.payment.CreateProductRequest;
 import com.mohand.SchoolManagmentSystem.response.course.Course;
 import com.mohand.SchoolManagmentSystem.response.course.StudentCourse;
@@ -26,13 +25,14 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.net.http.HttpClient;
 import java.util.List;
-
+import org.springframework.security.core.context.SecurityContextHolder;
 @Configuration
 @RequiredArgsConstructor
 public class AppConfiguration {
@@ -44,6 +44,9 @@ public class AppConfiguration {
         private final CourseRepository courseRepository;
         private final TeacherStudentRepository teacherStudentRepository;
         private final CourseReviewRepository courseReviewRepository;
+        private final UpVoteReplyCommentRepository upVoteReplyCommentRepository;
+        private final UpVoteCommentRepository upVoteCommentRepository;
+
 
     public double calculateRating(Long courseId) {
         List<CourseReview> courseReviews = courseReviewRepository.findAllByCourseId(courseId);
@@ -120,7 +123,6 @@ public class AppConfiguration {
             });
 
             Converter<Long, Integer> teacherIdToStudentCount = context -> teacherStudentRepository.countByTeacherId(context.getSource());
-            ;
 
             modelMapper.typeMap(Teacher.class, TeacherPreview.class).addMappings(mapper -> {
                 mapper.using(UserIdToSaSTokenWithReadPermission).map(Teacher::getId, TeacherPreview::setSasTokenForReadingProfilePic);
@@ -129,13 +131,9 @@ public class AppConfiguration {
 
 
 
-            modelMapper.typeMap(Student.class, StudentPreview.class).addMappings(mapper -> {
-                mapper.using(UserIdToSaSTokenWithReadPermission).map(Student::getId, StudentPreview::setSasTokenForReadingProfilePic);
-            });
+            modelMapper.typeMap(Student.class, StudentPreview.class).addMappings(mapper -> mapper.using(UserIdToSaSTokenWithReadPermission).map(Student::getId, StudentPreview::setSasTokenForReadingProfilePic));
 
-            modelMapper.typeMap(User.class, UserPreview.class).addMappings(mapper -> {
-                mapper.using(UserIdToSaSTokenWithReadPermission).map(User::getId, UserPreview::setSasTokenForReadingProfilePic);
-            });
+            modelMapper.typeMap(User.class, UserPreview.class).addMappings(mapper -> mapper.using(UserIdToSaSTokenWithReadPermission).map(User::getId, UserPreview::setSasTokenForReadingProfilePic));
 
             Converter<String, String> containerNameToBaseUrl =
                     ctx -> azureStorageEndpoint + "/" + ctx.getSource();
@@ -185,6 +183,43 @@ public class AppConfiguration {
             modelMapper.typeMap(Teacher.class, com.mohand.SchoolManagmentSystem.response.authentication.Teacher.class)
                     .addMappings(mapper -> mapper.skip(com.mohand.SchoolManagmentSystem.response.authentication.Teacher::setCourses));
 
+            modelMapper.createTypeMap(Comment.class, com.mohand.SchoolManagmentSystem.response.course.Comment.class);
+            modelMapper.typeMap(Comment.class, com.mohand.SchoolManagmentSystem.response.course.Comment.class)
+                    .setPostConverter(ctx -> {
+                        Comment source = ctx.getSource();
+                        var dest = ctx.getDestination();
+
+                        Long commentId = source.getId();
+
+                        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                        Long currentUserId = ((User) auth.getPrincipal()).getId();
+
+                        dest.setUpVotes(upVoteCommentRepository.countByCommentId(commentId));
+                        dest.setHasCurrentUserUpVotedThisComment(
+                                upVoteCommentRepository.existsByUserIdAndCommentId(currentUserId, commentId)
+                        );
+
+                        return dest;
+                    });
+
+            modelMapper.createTypeMap(ReplyComment.class, com.mohand.SchoolManagmentSystem.response.course.ReplyComment.class);
+            modelMapper.typeMap(ReplyComment.class, com.mohand.SchoolManagmentSystem.response.course.ReplyComment.class)
+                    .setPostConverter(ctx -> {
+                        ReplyComment source = ctx.getSource();
+                        var dest = ctx.getDestination();
+
+                        Long commentId = source.getId();
+
+                        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                        Long currentUserId = ((User) auth.getPrincipal()).getId();
+
+                        dest.setUpVotes(upVoteReplyCommentRepository.countByReplyCommentId(commentId));
+                        dest.setHasCurrentUserUpVotedThisReplyComment(
+                                upVoteReplyCommentRepository.existsByUserIdAndReplyCommentId(currentUserId, commentId)
+                        );
+
+                        return dest;
+                    });
 
 
             return modelMapper;

@@ -12,5 +12,9 @@ import lombok.Setter;
 public class AddOrUpdateReplyCommentRequest {
     @NotBlank(message = "Comment must have a text")
     private String text;
+
+    @NotNull(message = "Request must have a comment id")
+    private Long commentId;
+
     private Long replyCommentId;
 }

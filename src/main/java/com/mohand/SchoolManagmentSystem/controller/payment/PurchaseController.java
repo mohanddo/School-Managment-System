@@ -1,9 +1,7 @@
 package com.mohand.SchoolManagmentSystem.controller.payment;
 
 import com.mohand.SchoolManagmentSystem.model.user.Student;
-import com.mohand.SchoolManagmentSystem.response.payment.WebhookResponse;
 import com.mohand.SchoolManagmentSystem.service.payment.IPurchaseService;
-import com.mohand.SchoolManagmentSystem.service.payment.PurchaseService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +9,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @RequiredArgsConstructor
@@ -39,6 +36,7 @@ public class PurchaseController {
 
     @PostMapping("/webhook")
     public ResponseEntity<String> handleLiveEventsFromChargilyPay(HttpServletRequest request) {
+        System.out.println("Webhook received");
         purchaseService.handleWebhook(request);
         return ResponseEntity.ok("Webhook received");
     }

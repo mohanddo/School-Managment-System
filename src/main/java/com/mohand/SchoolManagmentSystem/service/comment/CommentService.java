@@ -1,5 +1,6 @@
 package com.mohand.SchoolManagmentSystem.service.comment;
 
+import com.mohand.SchoolManagmentSystem.exception.ConflictException;
 import com.mohand.SchoolManagmentSystem.exception.ResourceNotFoundException;
 import com.mohand.SchoolManagmentSystem.model.chapter.Resource;
 import com.mohand.SchoolManagmentSystem.model.comment.Comment;
@@ -56,11 +57,6 @@ public class CommentService implements ICommentService {
     @Override
     @Transactional
     public void upVoteComment(UpVoteCommentRequest request, User user) {
-
-        if (upVoteCommentRepository.deleteByCommentIdAndUserId(request.getCommentId(), user.getId()) > 0) {
-            return;
-        }
-
         if (!courseService.existsByIdAndStudentId(request.getCourseId(), user.getId())
                 && !courseService.existsByIdAndTeacherId(request.getCourseId(), user.getId())) {
             throw new ResourceNotFoundException("Course not found");
@@ -68,7 +64,19 @@ public class CommentService implements ICommentService {
 
         Comment comment = findByIdAndResourceIdAndChapterIdAndCourseId(request.getCommentId(), request.getResourceId(), request.getChapterId(), request.getCourseId());
 
+        if (upVoteCommentRepository.existsByCommentIdAndUserId(comment.getId(), user.getId())) {
+            throw new ConflictException("Comment already upVoted");
+        }
+
         upVoteCommentRepository.save(new UpVoteComment(comment, user));
+    }
+
+    @Override
+    @Transactional
+    public void removeUpVoteComment(Long commentId, User user) {
+        if (upVoteCommentRepository.deleteByCommentIdAndUserId(commentId, user.getId()) < 1) {
+            throw new ResourceNotFoundException("up vote not found");
+        }
     }
 
     @Override

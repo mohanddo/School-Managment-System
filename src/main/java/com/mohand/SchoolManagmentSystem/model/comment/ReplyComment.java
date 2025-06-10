@@ -5,7 +5,9 @@ import com.mohand.SchoolManagmentSystem.model.user.Teacher;
 import com.mohand.SchoolManagmentSystem.model.user.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.AssertTrue;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.Check;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -13,6 +15,8 @@ import java.util.List;
 
 @NoArgsConstructor
 @Entity
+@Getter
+@Setter
 public class ReplyComment {
 
     public ReplyComment(String text, User user, Comment comment) {
