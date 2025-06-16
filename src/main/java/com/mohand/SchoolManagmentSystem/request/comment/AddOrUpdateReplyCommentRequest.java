@@ -13,6 +13,15 @@ public class AddOrUpdateReplyCommentRequest {
     @NotBlank(message = "Comment must have a text")
     private String text;
 
+    @NotNull(message = "Request must have a course id")
+    private Long courseId;
+
+    @NotNull(message = "Request must have a chapter id")
+    private Long chapterId;
+
+    @NotNull(message = "Request must have a resource id")
+    private Long resourceId;
+
     @NotNull(message = "Request must have a comment id")
     private Long commentId;
 

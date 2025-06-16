@@ -17,4 +17,5 @@ public class ReplyComment {
     private UserPreview user;
     private Long upVotes;
     private Boolean hasCurrentUserUpVotedThisReplyComment;
+    private Boolean userOwnsThisReplyComment;
 }

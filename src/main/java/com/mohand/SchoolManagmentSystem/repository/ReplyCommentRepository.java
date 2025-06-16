@@ -11,6 +11,7 @@ import java.util.Optional;
 public interface ReplyCommentRepository extends JpaRepository<ReplyComment, Long> {
 
     Optional<ReplyComment> findByIdAndUserId(Long replyCommentId, Long userId);
+    boolean existsByIdAndUserId(Long replyCommentId, Long userId);
     int deleteByIdAndUserId(Long replyCommentId, Long userId);
 
     @Query("""

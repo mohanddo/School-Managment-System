@@ -2,6 +2,7 @@ package com.mohand.SchoolManagmentSystem.service.comment;
 
 import com.mohand.SchoolManagmentSystem.exception.ConflictException;
 import com.mohand.SchoolManagmentSystem.exception.ResourceNotFoundException;
+import com.mohand.SchoolManagmentSystem.model.chapter.Resource;
 import com.mohand.SchoolManagmentSystem.model.comment.Comment;
 import com.mohand.SchoolManagmentSystem.model.comment.ReplyComment;
 import com.mohand.SchoolManagmentSystem.model.comment.UpVoteReplyComment;
@@ -26,9 +27,16 @@ public class ReplyCommentService implements IReplyCommentService {
 
     @Override
     public void addOrUpdateReplyComment(AddOrUpdateReplyCommentRequest request, User user) {
+
+        if (!courseService.existsByIdAndStudentId(request.getCourseId(), user.getId())
+                && !courseService.existsByIdAndTeacherId(request.getCourseId(), user.getId())) {
+            throw new ResourceNotFoundException("Course not found");
+        }
+
+        Comment comment = commentService.findByIdAndResourceIdAndChapterIdAndCourseId(request.getCommentId(), request.getResourceId(), request.getChapterId(), request.getCourseId());
+
         ReplyComment replyComment;
         if (request.getReplyCommentId() == null) {
-            Comment comment = commentService.findByIdAndUserId(request.getCommentId(), user.getId());
             replyComment = new ReplyComment(request.getText(), user, comment);
         } else {
             replyComment = findByIdAndUserId(request.getReplyCommentId(), user.getId());

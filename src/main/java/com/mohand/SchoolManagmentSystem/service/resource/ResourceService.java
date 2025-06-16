@@ -127,7 +127,7 @@ public class ResourceService implements IResourceService {
     }
 
     @Override
-    public int addVideosToChapterResponse(com.mohand.SchoolManagmentSystem.response.chapter.Chapter chapter, Long studentId, Long courseId) {
+    public int  addVideosToChapterResponse(com.mohand.SchoolManagmentSystem.response.chapter.Chapter chapter, Long studentId, Long courseId) {
         List<com.mohand.SchoolManagmentSystem.response.chapter.Video> videos = getAllVideosByChapterId(chapter.getId())
                 .stream()
                 .map(video -> {

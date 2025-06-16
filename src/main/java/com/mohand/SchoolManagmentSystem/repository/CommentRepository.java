@@ -13,6 +13,8 @@ import java.util.Optional;
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     Optional<Comment> findByIdAndUserId(Long commentId, Long userId);
+    boolean existsByIdAndUserId(Long commentId, Long userId);
+
     int deleteByIdAndUserId(Long commentId, Long userId);
 
     @Query("""

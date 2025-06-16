@@ -18,4 +18,5 @@ public class Comment {
     private Long upVotes;
     private List<ReplyComment> replyComments;
     private Boolean hasCurrentUserUpVotedThisComment;
+    private Boolean userOwnsThisComment;
 }

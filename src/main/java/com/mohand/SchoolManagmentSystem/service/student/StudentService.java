@@ -70,10 +70,13 @@ public class StudentService implements IStudentService {
         Student student = (Student) authentication.getPrincipal();
         com.mohand.SchoolManagmentSystem.response.authentication.Student studentResponse = modelMapper
                 .map(student, com.mohand.SchoolManagmentSystem.response.authentication.Student.class);
+
         addCoursesToStudentResponse(studentResponse);
+
         for(StudentCourse studentCourse: studentResponse.getCourses()) {
             resourceService.addChapterToCourseResponse(studentCourse, student.getId());
         }
+
         return studentResponse;
     }
 
@@ -116,6 +119,8 @@ public class StudentService implements IStudentService {
             course.setFavourite(false);
             course.setEnrolled(false);
             course.setAnnouncements(null);
+            TeacherPreview teacherPreview = modelMapper.map(cartItem.getCourse().getTeacher(), TeacherPreview.class);
+            course.setTeacher(teacherPreview);
             courses.add(course);
         }
 
@@ -134,6 +139,8 @@ public class StudentService implements IStudentService {
             course.setEnrolled(false);
             course.setAnnouncements(null);
             course.setInCart(false);
+            TeacherPreview teacherPreview = modelMapper.map(favoriteCourse.getCourse().getTeacher(), TeacherPreview.class);
+            course.setTeacher(teacherPreview);
             courses.add(course);
         }
 
@@ -156,6 +163,8 @@ public class StudentService implements IStudentService {
             coursePreview.setProgressPercentage(
                     courseService.countProgressPercentageByCourseIdAndStudentId(coursePreview.getId(), studentResponse.getId())
             );
+            TeacherPreview teacherPreview = modelMapper.map(course.getTeacher(), TeacherPreview.class);
+            coursePreview.setTeacher(teacherPreview);
             courses.add(coursePreview);
         }
 

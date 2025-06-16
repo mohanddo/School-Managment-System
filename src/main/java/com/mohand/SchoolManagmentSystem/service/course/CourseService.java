@@ -300,7 +300,8 @@ public class CourseService implements ICourseService {
         if (resourceService.countByCourseId(courseId) == 0) {
             return 0;
         }
-        return (finishedResourceRepository.countFinishedResourceByCourseIdAndStudentId(courseId, studentId) / resourceService.countByCourseId(courseId)) * 100;
+
+        return (int) ((float) finishedResourceRepository.countFinishedResourceByCourseIdAndStudentId(courseId, studentId) / resourceService.countByCourseId(courseId) * 100) ;
     }
 
 }
