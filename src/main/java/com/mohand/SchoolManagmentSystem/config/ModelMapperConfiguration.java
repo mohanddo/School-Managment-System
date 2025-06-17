@@ -1,5 +1,6 @@
 package com.mohand.SchoolManagmentSystem.config;
 
+import com.mohand.SchoolManagmentSystem.model.chapter.Video;
 import com.mohand.SchoolManagmentSystem.model.comment.Comment;
 import com.mohand.SchoolManagmentSystem.model.comment.ReplyComment;
 import com.mohand.SchoolManagmentSystem.model.course.CourseReview;
@@ -41,6 +42,7 @@ public class ModelMapperConfiguration {
         private final UpVoteCommentRepository upVoteCommentRepository;
         private final CommentRepository commentRepository;
     private final ReplyCommentRepository replyCommentRepository;
+    private final VideoProgressRepository videoProgressRepository;
 
     private Converter<String, String> urlToSignedUrl;
     private Converter<Long, String> userIdToReadToken;
@@ -112,6 +114,7 @@ public class ModelMapperConfiguration {
         registerUserMappings(modelMapper);
         registerAuthMappings(modelMapper);
         registerCommentMappings(modelMapper);
+        registerVideoMappings(modelMapper);
 
         return modelMapper;
     }
@@ -211,6 +214,25 @@ public class ModelMapperConfiguration {
                         dest.setHasCurrentUserUpVotedThisReplyComment(
                                 upVoteReplyCommentRepository.existsByUserIdAndReplyCommentId(currentUserId, replyId));
                         dest.setUserOwnsThisReplyComment(replyCommentRepository.existsByIdAndUserId(replyId, currentUserId));
+                    }
+                    return dest;
+                });
+    }
+
+    private void registerVideoMappings(ModelMapper modelMapper) {
+        modelMapper.createTypeMap(Video.class, com.mohand.SchoolManagmentSystem.response.chapter.Video.class)
+                .addMappings(mapper -> mapper.skip(com.mohand.SchoolManagmentSystem.response.chapter.Video::setVideoProgress))
+                .setPostConverter(ctx -> {
+                    Video source = ctx.getSource();
+                    var dest = ctx.getDestination();
+
+                    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                    Object principal = auth.getPrincipal();
+
+                    if (principal instanceof Student student) {
+                        videoProgressRepository.findByStudentAndVideo(student, source).ifPresentOrElse((videoProgress) -> {
+                            dest.setVideoProgress(videoProgress.getProgress());
+                        }, () -> dest.setVideoProgress(0));
                     }
                     return dest;
                 });

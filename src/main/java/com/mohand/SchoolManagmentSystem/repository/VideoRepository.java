@@ -24,6 +24,16 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
                               @Param("courseId") Long courseId,
                               @Param("teacherId") Long teacherId);
 
+    @Query("""
+    SELECT v FROM Video v\s
+    WHERE v.id = :videoId\s
+    AND v.chapter.id = :chapterId\s
+    AND v.chapter.course.id = :courseId\s
+""")
+    Optional<Video> findByIdAndChapterIdAndCourseId(@Param("videoId") Long videoId,
+                                                                @Param("chapterId") Long chapterId,
+                                                                @Param("courseId") Long courseId);
+
     List<Video> findAllByChapterId(Long chapterId);
 
 }

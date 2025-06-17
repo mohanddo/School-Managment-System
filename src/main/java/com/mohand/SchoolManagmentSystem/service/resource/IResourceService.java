@@ -5,10 +5,7 @@ import com.mohand.SchoolManagmentSystem.model.chapter.Resource;
 import com.mohand.SchoolManagmentSystem.model.chapter.Video;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
 import com.mohand.SchoolManagmentSystem.model.user.Teacher;
-import com.mohand.SchoolManagmentSystem.request.chapter.AddDocumentRequest;
-import com.mohand.SchoolManagmentSystem.request.chapter.AddVideoRequest;
-import com.mohand.SchoolManagmentSystem.request.chapter.UpdateDocumentRequest;
-import com.mohand.SchoolManagmentSystem.request.chapter.UpdateVideoRequest;
+import com.mohand.SchoolManagmentSystem.request.chapter.*;
 import com.mohand.SchoolManagmentSystem.response.chapter.Chapter;
 import org.springframework.data.repository.query.Param;
 
@@ -41,10 +38,13 @@ public interface IResourceService {
     List<Video> getAllVideosByChapterId(Long chapterId);
     List<Document> getAllDocumentsByChapterId(Long chapterId);
 
+    Video findVideoByIdAndChapterIdAndCourseId(Long resourceId, Long chapterId, Long courseId);
+
     int countByCourseId(Long courseId);
 
     int addVideosToChapterResponse(Chapter chapter, Long studentId, Long courseId);
     int addDocumentsToChapterResponse(Chapter chapter, Long studentId, Long courseId);
 
     void addChapterToCourseResponse(com.mohand.SchoolManagmentSystem.response.course.Course courseResponse, Long studentId);
+    void updateVideoProgress(Student student, UpdateVideoProgressRequest request);
 }

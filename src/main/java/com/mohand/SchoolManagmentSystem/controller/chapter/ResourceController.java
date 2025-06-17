@@ -61,4 +61,11 @@ public class ResourceController {
         return ResponseEntity.ok("Success");
     }
 
+    @PutMapping("/updateVideoProgress")
+    public ResponseEntity<String> updateDocument(@Valid @RequestBody UpdateVideoProgressRequest request, Authentication authentication) {
+        Student student = (Student) ( authentication.getPrincipal() );
+        resourceService.updateVideoProgress(student, request);
+        return ResponseEntity.ok("Success");
+    }
+
 }

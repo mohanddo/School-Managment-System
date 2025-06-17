@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mohand.SchoolManagmentSystem.enums.Role;
 import com.mohand.SchoolManagmentSystem.model.*;
 import com.mohand.SchoolManagmentSystem.model.chapter.FinishedResource;
+import com.mohand.SchoolManagmentSystem.model.chapter.VideoProgress;
 import com.mohand.SchoolManagmentSystem.model.comment.Comment;
 import com.mohand.SchoolManagmentSystem.model.comment.UpVoteComment;
 import com.mohand.SchoolManagmentSystem.model.course.Course;
@@ -64,6 +65,10 @@ public class Student extends User {
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<TeacherStudent> teachers;
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<VideoProgress> videosProgress;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -7,10 +7,7 @@ import com.mohand.SchoolManagmentSystem.model.chapter.*;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
 import com.mohand.SchoolManagmentSystem.model.user.Teacher;
 import com.mohand.SchoolManagmentSystem.repository.*;
-import com.mohand.SchoolManagmentSystem.request.chapter.AddDocumentRequest;
-import com.mohand.SchoolManagmentSystem.request.chapter.AddVideoRequest;
-import com.mohand.SchoolManagmentSystem.request.chapter.UpdateDocumentRequest;
-import com.mohand.SchoolManagmentSystem.request.chapter.UpdateVideoRequest;
+import com.mohand.SchoolManagmentSystem.request.chapter.*;
 import com.mohand.SchoolManagmentSystem.service.azure.AzureBlobService;
 import com.mohand.SchoolManagmentSystem.service.chapter.ChapterService;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +30,7 @@ public class ResourceService implements IResourceService {
     private final FinishedResourceRepository finishedResourceRepository;
     private final AzureBlobService azureBlobService;
     private final ModelMapper modelMapper;
+    private final VideoProgressRepository videoProgressRepository;
 
     @Override
     public void addVideo(AddVideoRequest request, Teacher teacher) {
@@ -122,6 +121,11 @@ public class ResourceService implements IResourceService {
     }
 
     @Override
+    public Video findVideoByIdAndChapterIdAndCourseId(Long resourceId, Long chapterId, Long courseId) {
+        return videoRepository.findByIdAndChapterIdAndCourseId(resourceId, chapterId, courseId).orElseThrow(() -> new ResourceNotFoundException("Video not found"));
+    }
+
+    @Override
     public int countByCourseId(Long courseId) {
         return resourceRepository.countByCourseId(courseId);
     }
@@ -187,5 +191,25 @@ public class ResourceService implements IResourceService {
         })).toList();
 
         courseResponse.setChapters(chapters);
+    }
+
+    public void updateVideoProgress(Student student, UpdateVideoProgressRequest request) {
+        if (!courseRepository.isStudentEnrolledInCourse(student.getId(), request.getCourseId()))
+            throw new ResourceNotFoundException("Course not found");
+
+        Video video = findVideoByIdAndChapterIdAndCourseId(request.getVideoId(), request.getChapterId(), request.getCourseId());
+
+
+        if (request.getProgress() > video.getDuration()) {
+            throw new IllegalArgumentException("Progress cannot exceed video duration");
+        }
+
+        Optional<VideoProgress> optionalProgress = videoProgressRepository.findByStudentAndVideo(student, video);
+
+        VideoProgress progress = optionalProgress.orElse(new VideoProgress(student, video));
+        progress.setProgress(request.getProgress());
+
+        videoProgressRepository.save(progress);
+
     }
 }

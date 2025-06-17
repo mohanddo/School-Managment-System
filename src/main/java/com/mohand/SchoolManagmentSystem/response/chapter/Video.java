@@ -7,4 +7,5 @@ import lombok.Setter;
 @Setter
 public class Video extends Resource {
     private Integer duration;
+    private Integer videoProgress;
 }
