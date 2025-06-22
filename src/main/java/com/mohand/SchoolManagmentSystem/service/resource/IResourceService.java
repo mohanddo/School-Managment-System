@@ -6,6 +6,7 @@ import com.mohand.SchoolManagmentSystem.model.chapter.Video;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
 import com.mohand.SchoolManagmentSystem.model.user.Teacher;
 import com.mohand.SchoolManagmentSystem.request.chapter.*;
+import com.mohand.SchoolManagmentSystem.request.course.UpdateActiveResourceRequest;
 import com.mohand.SchoolManagmentSystem.response.chapter.Chapter;
 import org.springframework.data.repository.query.Param;
 
@@ -47,4 +48,6 @@ public interface IResourceService {
 
     void addChapterToCourseResponse(com.mohand.SchoolManagmentSystem.response.course.Course courseResponse, Long studentId);
     void updateVideoProgress(Student student, UpdateVideoProgressRequest request);
+
+    void updateActiveResource(UpdateActiveResourceRequest request, Student student);
 }

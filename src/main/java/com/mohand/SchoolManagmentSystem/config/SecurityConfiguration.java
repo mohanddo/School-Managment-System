@@ -78,6 +78,7 @@ public class SecurityConfiguration {
                                         "/api/v1/purchase/cart",
                                         "/api/v1/purchase/course/**",
                                         "/api/v1/resource/updateVideoProgress",
+                                        "/api/v1/resource/updateActiveResource",
                                         "/api/v1/student/**")
                                 .hasAuthority(Role.ROLE_STUDENT.getValue()).
 

@@ -4,10 +4,12 @@ import com.mohand.SchoolManagmentSystem.exception.ConflictException;
 import com.mohand.SchoolManagmentSystem.exception.NotFoundException;
 import com.mohand.SchoolManagmentSystem.exception.ResourceNotFoundException;
 import com.mohand.SchoolManagmentSystem.model.chapter.*;
+import com.mohand.SchoolManagmentSystem.model.course.CurrentResource;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
 import com.mohand.SchoolManagmentSystem.model.user.Teacher;
 import com.mohand.SchoolManagmentSystem.repository.*;
 import com.mohand.SchoolManagmentSystem.request.chapter.*;
+import com.mohand.SchoolManagmentSystem.request.course.UpdateActiveResourceRequest;
 import com.mohand.SchoolManagmentSystem.service.azure.AzureBlobService;
 import com.mohand.SchoolManagmentSystem.service.chapter.ChapterService;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,7 @@ public class ResourceService implements IResourceService {
     private final AzureBlobService azureBlobService;
     private final ModelMapper modelMapper;
     private final VideoProgressRepository videoProgressRepository;
+    private final CurrentResourceRepository currentResourceRepository;
 
     @Override
     public void addVideo(AddVideoRequest request, Teacher teacher) {
@@ -212,4 +215,20 @@ public class ResourceService implements IResourceService {
         videoProgressRepository.save(progress);
 
     }
+
+    public void updateActiveResource(UpdateActiveResourceRequest request, Student student) {
+        if (!courseRepository.isStudentEnrolledInCourse(student.getId(), request.getCourseId())) {
+            throw new ResourceNotFoundException("Course not found");
+        }
+
+        Resource resource = findByIdAndChapterIdAndCourseId(request.getResourceId(), request.getChapterId(), request.getCourseId());
+
+        Optional<CurrentResource> optionalCurrentResource = currentResourceRepository.findByStudentIdAndResourceIdAndCourseId(student.getId(), request.getResourceId(), request.getCourseId());
+
+        CurrentResource currentResource = optionalCurrentResource.orElse(new CurrentResource(student, courseRepository.findById(request.getCourseId()).get(), resource));
+
+
+        currentResourceRepository.save(currentResource);
+    }
+
 }

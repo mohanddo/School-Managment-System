@@ -1,6 +1,6 @@
 package com.mohand.SchoolManagmentSystem.response.course;
 
-import com.mohand.SchoolManagmentSystem.response.chapter.Chapter;
+import com.mohand.SchoolManagmentSystem.response.chapter.Resource;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,4 +16,5 @@ public class StudentCourse extends Course {
     private Boolean enrolled;
     private Boolean inCart;
     private int progressPercentage;
+    private Resource activeResource;
 }

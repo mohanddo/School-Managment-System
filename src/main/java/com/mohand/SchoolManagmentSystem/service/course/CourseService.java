@@ -12,6 +12,7 @@ import com.mohand.SchoolManagmentSystem.repository.*;
 import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnouncementCommentRequest;
 import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnouncementRequest;
 import com.mohand.SchoolManagmentSystem.request.course.CreateOrUpdateCourseReviewRequest;
+import com.mohand.SchoolManagmentSystem.request.course.UpdateActiveResourceRequest;
 import com.mohand.SchoolManagmentSystem.request.course.UpdateCourseRequest;
 import com.mohand.SchoolManagmentSystem.response.course.Course;
 import com.mohand.SchoolManagmentSystem.response.user.TeacherPreview;

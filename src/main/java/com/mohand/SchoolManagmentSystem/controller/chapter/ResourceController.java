@@ -3,6 +3,7 @@ package com.mohand.SchoolManagmentSystem.controller.chapter;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
 import com.mohand.SchoolManagmentSystem.model.user.Teacher;
 import com.mohand.SchoolManagmentSystem.request.chapter.*;
+import com.mohand.SchoolManagmentSystem.request.course.UpdateActiveResourceRequest;
 import com.mohand.SchoolManagmentSystem.service.chapter.IChapterService;
 import com.mohand.SchoolManagmentSystem.service.resource.IResourceService;
 import jakarta.validation.Valid;
@@ -62,9 +63,16 @@ public class ResourceController {
     }
 
     @PutMapping("/updateVideoProgress")
-    public ResponseEntity<String> updateDocument(@Valid @RequestBody UpdateVideoProgressRequest request, Authentication authentication) {
+    public ResponseEntity<String> updateVideoProgress(@Valid @RequestBody UpdateVideoProgressRequest request, Authentication authentication) {
         Student student = (Student) ( authentication.getPrincipal() );
         resourceService.updateVideoProgress(student, request);
+        return ResponseEntity.ok("Success");
+    }
+
+    @PutMapping("/updateActiveResource")
+    public ResponseEntity<String> updateActiveResource(@Valid @RequestBody UpdateActiveResourceRequest request, Authentication authentication) {
+        Student student = (Student) ( authentication.getPrincipal() );
+        resourceService.updateActiveResource(request, student);
         return ResponseEntity.ok("Success");
     }
 

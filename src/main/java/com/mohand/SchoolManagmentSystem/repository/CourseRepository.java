@@ -23,4 +23,6 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     List<Course> findAllCoursesByStudentId(@Param("studentId") Long studentId);
 
     int countStudentsById(Long courseId);
+
+
 }

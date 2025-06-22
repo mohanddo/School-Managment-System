@@ -4,11 +4,13 @@ import com.mohand.SchoolManagmentSystem.model.chapter.Video;
 import com.mohand.SchoolManagmentSystem.model.comment.Comment;
 import com.mohand.SchoolManagmentSystem.model.comment.ReplyComment;
 import com.mohand.SchoolManagmentSystem.model.course.CourseReview;
+import com.mohand.SchoolManagmentSystem.model.course.CurrentResource;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
 import com.mohand.SchoolManagmentSystem.model.user.Teacher;
 import com.mohand.SchoolManagmentSystem.model.user.User;
 import com.mohand.SchoolManagmentSystem.repository.*;
 import com.mohand.SchoolManagmentSystem.request.payment.CreateProductRequest;
+import com.mohand.SchoolManagmentSystem.response.chapter.Resource;
 import com.mohand.SchoolManagmentSystem.response.course.Course;
 import com.mohand.SchoolManagmentSystem.response.course.StudentCourse;
 import com.mohand.SchoolManagmentSystem.response.course.TeacherCourse;
@@ -31,7 +33,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ModelMapperConfiguration {
 
-        @Value("${azure.storage.endpoint}")
+    @Value("${azure.storage.endpoint}")
         private String azureStorageEndpoint;
 
         private final AzureBlobService azureBlobService;
@@ -43,6 +45,8 @@ public class ModelMapperConfiguration {
         private final CommentRepository commentRepository;
     private final ReplyCommentRepository replyCommentRepository;
     private final VideoProgressRepository videoProgressRepository;
+    private final CurrentResourceRepository currentResourceRepository;
+
 
     private Converter<String, String> urlToSignedUrl;
     private Converter<Long, String> userIdToReadToken;
@@ -53,8 +57,7 @@ public class ModelMapperConfiguration {
     private Converter<String, String[]> courseImageUrlToArray;
     private Converter<String, String> containerNameToBaseUrl;
     private Converter<String, String> containerNameToSas;
-
-
+    private Converter<Long, com.mohand.SchoolManagmentSystem.response.chapter.Resource> studentIdAndCourseIdToResource;
 
 
     public double calculateRating(Long courseId) {
@@ -67,7 +70,7 @@ public class ModelMapperConfiguration {
         }
     }
 
-    private void createConverters() {
+    private void createConverters(ModelMapper modelMapper) {
         Converter<String, String> urlToSignedUrl = ctx -> ctx.getSource() != null ? azureBlobService.signBlobUrl(ctx.getSource()) : null;
 
         Converter<Long, String> userIdToReadToken = ctx -> ctx.getSource() != null
@@ -89,6 +92,19 @@ public class ModelMapperConfiguration {
         Converter<String, String> containerNameToBaseUrl = ctx -> azureStorageEndpoint + "/" + ctx.getSource();
         Converter<String, String> containerNameToSas = ctx -> azureBlobService.generateSASTokenForContainer(ctx.getSource());
 
+        Converter<Long, Resource> studentIdAndCourseIdToResource = (ctx) -> {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            Object principal = auth.getPrincipal();
+
+            if (principal instanceof Student student) {
+                CurrentResource currentResource = currentResourceRepository.findByStudentIdAndCourseId(student.getId(), ctx.getSource());
+                if (currentResource != null) {
+                    return modelMapper.map(currentResource.getResource(), Resource.class);
+                }
+            }
+            return null;
+        };
+
         // Register converters to instance variables or reuse them in other methods
         this.urlToSignedUrl = urlToSignedUrl;
         this.userIdToReadToken = userIdToReadToken;
@@ -99,6 +115,7 @@ public class ModelMapperConfiguration {
         this.courseImageUrlToArray = courseImageUrlToArray;
         this.containerNameToBaseUrl = containerNameToBaseUrl;
         this.containerNameToSas = containerNameToSas;
+        this.studentIdAndCourseIdToResource = studentIdAndCourseIdToResource;
     }
 
 
@@ -107,7 +124,7 @@ public class ModelMapperConfiguration {
         ModelMapper modelMapper = new ModelMapper();
 
         // Create converters
-        createConverters();
+        createConverters(modelMapper);
 
         // Register grouped mappings
         registerCourseMappings(modelMapper);
@@ -132,6 +149,7 @@ public class ModelMapperConfiguration {
             mapper.using(urlToSignedUrl).map(com.mohand.SchoolManagmentSystem.model.course.Course::getIntroductionVideoUrl, Course::setIntroductionVideoUrl);
             mapper.using(courseIdToStudentCount).map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, Course::setNumberOfStudents);
             mapper.using(courseIdToRating).map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, Course::setRating);
+            mapper.using(studentIdAndCourseIdToResource).map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, StudentCourse::setActiveResource);
         });
 
         modelMapper.typeMap(com.mohand.SchoolManagmentSystem.model.course.Course.class, TeacherCourse.class).addMappings(mapper -> {
@@ -230,9 +248,7 @@ public class ModelMapperConfiguration {
                     Object principal = auth.getPrincipal();
 
                     if (principal instanceof Student student) {
-                        videoProgressRepository.findByStudentAndVideo(student, source).ifPresentOrElse((videoProgress) -> {
-                            dest.setVideoProgress(videoProgress.getProgress());
-                        }, () -> dest.setVideoProgress(0));
+                        videoProgressRepository.findByStudentAndVideo(student, source).ifPresentOrElse((videoProgress) -> dest.setVideoProgress(videoProgress.getProgress()), () -> dest.setVideoProgress(0));
                     }
                     return dest;
                 });

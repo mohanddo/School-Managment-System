@@ -1,6 +1,7 @@
 package com.mohand.SchoolManagmentSystem.model.chapter;
 
 import com.mohand.SchoolManagmentSystem.model.comment.Comment;
+import com.mohand.SchoolManagmentSystem.model.course.CurrentResource;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -49,6 +50,8 @@ public abstract class Resource {
     @OneToMany(mappedBy = "resource", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FinishedResource> finishedResources;
 
+    @OneToMany(mappedBy = "resource", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CurrentResource> userCourses;
 
     @OneToMany(mappedBy = "resource", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments;

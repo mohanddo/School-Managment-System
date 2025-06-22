@@ -5,12 +5,7 @@ import com.mohand.SchoolManagmentSystem.enums.Role;
 import com.mohand.SchoolManagmentSystem.model.*;
 import com.mohand.SchoolManagmentSystem.model.chapter.FinishedResource;
 import com.mohand.SchoolManagmentSystem.model.chapter.VideoProgress;
-import com.mohand.SchoolManagmentSystem.model.comment.Comment;
-import com.mohand.SchoolManagmentSystem.model.comment.UpVoteComment;
-import com.mohand.SchoolManagmentSystem.model.course.Course;
-import com.mohand.SchoolManagmentSystem.model.course.CourseReview;
-import com.mohand.SchoolManagmentSystem.model.course.FavoriteCourse;
-import com.mohand.SchoolManagmentSystem.model.course.TeacherStudent;
+import com.mohand.SchoolManagmentSystem.model.course.*;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -65,6 +60,10 @@ public class Student extends User {
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<TeacherStudent> teachers;
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CurrentResource> courseResources;
+
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
