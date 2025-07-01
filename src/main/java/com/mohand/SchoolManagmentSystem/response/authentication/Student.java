@@ -13,8 +13,8 @@ import java.util.List;
 @Setter
 public class Student extends User {
 
-    public Student(long id, String firstName, String lastName, String email, boolean hasProfilePic, String sasTokenForReadingProfilePic, String sasTokenForWritingProfilePic) {
-        super(id, firstName, lastName, email, hasProfilePic, sasTokenForReadingProfilePic, sasTokenForWritingProfilePic);
+    public Student(long id, String firstName, String lastName, String email, boolean hasProfilePic, String sasTokenForReadingProfilePic, String sasTokenForWritingProfilePic, String role) {
+        super(id, firstName, lastName, email, hasProfilePic, sasTokenForReadingProfilePic, sasTokenForWritingProfilePic, role);
     }
 
     private List<StudentCourse> courses;

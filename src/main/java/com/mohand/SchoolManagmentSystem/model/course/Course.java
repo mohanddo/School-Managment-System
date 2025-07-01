@@ -48,15 +48,16 @@ public class Course {
     private String introductionVideoUrl;
 
     @Column(nullable = false)
-    private Integer numberOfReviews;
+    private int numberOfReviews;
 
     @Column(nullable = false)
     @Min(message = "Price must be greater than 0", value = 0)
-    private Integer price;
+    private int price;
 
     @Min(0)
     @Max(100)
-    private Integer discountPercentage;
+    @Column(nullable = false)
+    private int discountPercentage;
 
     @Future(message = "Discount expiration date must be in the future")
     private LocalDate discountExpirationDate;
@@ -85,6 +86,7 @@ public class Course {
     private List<CourseReview> courseReviews;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("position ASC")
     private List<Chapter> chapters;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)

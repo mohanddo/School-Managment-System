@@ -26,11 +26,16 @@ public class Chapter {
     @Column(nullable = false)
     private LocalDateTime dateOfCreation;
 
-    public Chapter(String title, Course course) {
+    public Chapter(String title, Course course, int position) {
         this.title = title;
         this.dateOfCreation = LocalDateTime.now();
         this.course = course;
+        this.position = position;
     }
+
+    @Column(nullable = false)
+    private int position;
+
 
     @ManyToOne
     @JoinColumn(name = "course_id")

@@ -1,5 +1,7 @@
 package com.mohand.SchoolManagmentSystem.service.course;
 
+import com.mohand.SchoolManagmentSystem.enums.PricingModel;
+import com.mohand.SchoolManagmentSystem.exception.BadRequestException;
 import com.mohand.SchoolManagmentSystem.exception.ConflictException;
 import com.mohand.SchoolManagmentSystem.exception.NotFoundException;
 import com.mohand.SchoolManagmentSystem.exception.ResourceNotFoundException;
@@ -18,6 +20,7 @@ import com.mohand.SchoolManagmentSystem.response.course.Course;
 import com.mohand.SchoolManagmentSystem.response.user.TeacherPreview;
 import com.mohand.SchoolManagmentSystem.service.chapter.ChapterService;
 import com.mohand.SchoolManagmentSystem.service.resource.ResourceService;
+import jakarta.validation.constraints.AssertTrue;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Lazy;
@@ -48,17 +51,26 @@ public class CourseService implements ICourseService {
 
         courseRepository.findByIdAndTeacherId(request.getCourseId(), teacher.getId()).ifPresentOrElse((course) -> {
 
+
+            if(course.getPricingModel() == PricingModel.FREE && request.getPrice() != 0) {
+                throw new BadRequestException("For free courses, the price must be 0. Either set price to 0 or select a different pricing model.");
+            }
+
+            if(course.getPricingModel() != PricingModel.FREE && request.getPrice() == 0) {
+                throw new BadRequestException("To mark this as a paid course, please set a price greater than 0 or change to FREE pricing model.");
+            }
+
             course.setTitle(request.getTitle());
             course.setDescription(request.getDescription());
             course.setImageUrl(request.getImageUrl());
             course.setIntroductionVideoUrl(request.getIntroductionVideoUrl());
 
-            course.setPricingModel(request.getPricingModelEnum());
+
             course.setCategory(request.getCategoryEnum());
             course.setPrice(request.getPrice());
 
             course.setDiscountPercentage(request.getDiscountPercentage());
-            course.setDiscountExpirationDate(request.getDiscountExpirationDate());
+            course.setDiscountExpirationDate(request.getDiscountPercentage() == 0 ? null : request.getDiscountExpirationDate());
 
                     courseRepository.save(course);
                 }, () -> {

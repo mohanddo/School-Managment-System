@@ -29,4 +29,6 @@ public class User {
     protected String sasTokenForReadingProfilePic;
 
     protected String sasTokenForWritingProfilePic;
+
+    protected String role;
 }

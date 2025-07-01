@@ -2,26 +2,34 @@ package com.mohand.SchoolManagmentSystem.controller.authentication;
 
 import com.mohand.SchoolManagmentSystem.request.authentication.LogInUserRequest;
 import com.mohand.SchoolManagmentSystem.request.authentication.VerifyUserRequest;
+import com.mohand.SchoolManagmentSystem.response.authentication.User;
 import com.mohand.SchoolManagmentSystem.service.authentication.AuthenticationService;
+import com.mohand.SchoolManagmentSystem.service.azure.AzureBlobService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("${api.prefix}/auth")
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
+    private final ModelMapper modelMapper;
+    private final AzureBlobService azureBlobService;
 
-    public AuthenticationController(AuthenticationService authenticationService){
+    @Value("${azure.storage.endpoint}")
+    private String azureStorageEndpoint;
+
+    public AuthenticationController(AuthenticationService authenticationService, ModelMapper modelMapper, AzureBlobService azureBlobService){
         this.authenticationService = authenticationService;
+        this.modelMapper = modelMapper;
+        this.azureBlobService = azureBlobService;
     }
 
 
@@ -67,6 +75,14 @@ public class AuthenticationController {
         authenticationService.verifyUser(request, response);
         return ResponseEntity.ok("Verification successful");
     }
-}
 
+    @GetMapping("/me")
+    public ResponseEntity<User> getUser(Authentication authentication) {
+        com.mohand.SchoolManagmentSystem.model.user.User user = (com.mohand.SchoolManagmentSystem.model.user.User) authentication.getPrincipal();
+        User userResponse = modelMapper.map(user, User.class);
+        userResponse.setSasTokenForReadingProfilePic(azureBlobService.generateSasTokenForBlob(azureStorageEndpoint + "/profilepics/" + user.getId()));
+        userResponse.setSasTokenForWritingProfilePic(azureBlobService.generateSasTokenForBlob(azureStorageEndpoint + "/profilepics/" + user.getId(), true));
+        return ResponseEntity.ok(userResponse);
+    }
+}
 

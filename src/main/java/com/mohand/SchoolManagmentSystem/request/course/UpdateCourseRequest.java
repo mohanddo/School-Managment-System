@@ -1,14 +1,12 @@
 package com.mohand.SchoolManagmentSystem.request.course;
 
 import com.mohand.SchoolManagmentSystem.enums.CourseCategory;
-import com.mohand.SchoolManagmentSystem.enums.PricingModel;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.Locale;
 
 @Getter
 @Setter
@@ -23,9 +21,6 @@ public class UpdateCourseRequest {
 
     @NotBlank(message = "Course must have a description")
     private String description;
-
-    @NotBlank(message = "Course must have a pricing model")
-    private String pricingModel;
 
     @NotBlank(message = "Course must have a category")
     private String category;
@@ -43,31 +38,17 @@ public class UpdateCourseRequest {
     private String imageUrl;
     private String introductionVideoUrl;
 
-    public PricingModel getPricingModelEnum() {
-        return PricingModel.validatePricingModel(pricingModel);
-    }
+
 
     public CourseCategory getCategoryEnum() {
         return CourseCategory.validateCategory(category);
     }
 
-    @AssertTrue(message = "For free courses, the price must be 0. Either set price to 0 or select a different pricing model.")
-    public boolean isFreeCourseValid() {
-        return getPricingModelEnum() != PricingModel.FREE || price == 0;
-    }
-
-    @AssertTrue(message = "To mark this as a paid course, please set a price greater than 0 or change to FREE pricing model.")
-    public boolean isPaidCourseValid() {
-        return getPricingModelEnum() == PricingModel.FREE || price > 0;
-    }
 
     @AssertTrue(message = "Price must be greater than 0")
     public boolean isPriceValid() {
         return price >= 0;
     }
 
-    @AssertTrue(message = "Courses with a discount percentage equal to 0 can't have a discount expiration date")
-    public boolean isDiscountValid() {
-        return discountPercentage != 0 || discountExpirationDate == null;
-    }
+
 }

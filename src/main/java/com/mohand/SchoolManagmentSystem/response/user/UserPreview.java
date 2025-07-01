@@ -11,4 +11,5 @@ public class UserPreview {
     protected String lastName;
     protected Boolean hasProfilePic;
     protected String sasTokenForReadingProfilePic;
+    protected String role;
 }

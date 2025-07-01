@@ -64,6 +64,8 @@ public class SecurityConfiguration {
                                 .requestMatchers("/api/v1/course/create", "/api/v1/course/delete/**", "/api/v1/course/update",
                                         "/api/v1/course/announcement/createOrUpdate", "/api/v1/course/announcement/delete/**",
                                         "/api/v1/chapter/addOrUpdate",
+                                        "/api/v1/chapter/reorderChapters",
+                                        "/api/v1/chapter/deleteChapter/**",
                                         "/api/v1/resource/addVideo", "/api/v1/resource/addDocument",
                                         "/api/v1/resource/updateVideo", "/api/v1/resource/updateDocument", "/api/v1/teacher/**")
                                 .hasAuthority(Role.ROLE_TEACHER.getValue())

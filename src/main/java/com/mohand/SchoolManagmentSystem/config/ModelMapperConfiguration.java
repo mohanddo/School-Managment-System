@@ -28,6 +28,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
+import java.util.Optional;
 
 @Configuration
 @RequiredArgsConstructor
@@ -58,6 +59,7 @@ public class ModelMapperConfiguration {
     private Converter<String, String> containerNameToBaseUrl;
     private Converter<String, String> containerNameToSas;
     private Converter<Long, com.mohand.SchoolManagmentSystem.response.chapter.Resource> studentIdAndCourseIdToResource;
+    private Converter<Long, com.mohand.SchoolManagmentSystem.response.course.CourseReview> studentIdAndCourseIdToReview;
 
 
     public double calculateRating(Long courseId) {
@@ -105,6 +107,19 @@ public class ModelMapperConfiguration {
             return null;
         };
 
+        Converter<Long, com.mohand.SchoolManagmentSystem.response.course.CourseReview> studentIdAndCourseIdToReview = (ctx) -> {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            Object principal = auth.getPrincipal();
+
+            if (principal instanceof Student student) {
+                Optional<CourseReview> courseReview = courseReviewRepository.findByStudentIdAndCourseId(student.getId(), ctx.getSource());
+                if (courseReview.isPresent()) {
+                    return modelMapper.map(courseReview.get(), com.mohand.SchoolManagmentSystem.response.course.CourseReview.class);
+                }
+            }
+            return null;
+        };
+
         // Register converters to instance variables or reuse them in other methods
         this.urlToSignedUrl = urlToSignedUrl;
         this.userIdToReadToken = userIdToReadToken;
@@ -116,6 +131,7 @@ public class ModelMapperConfiguration {
         this.containerNameToBaseUrl = containerNameToBaseUrl;
         this.containerNameToSas = containerNameToSas;
         this.studentIdAndCourseIdToResource = studentIdAndCourseIdToResource;
+        this.studentIdAndCourseIdToReview = studentIdAndCourseIdToReview;
     }
 
 
@@ -150,6 +166,7 @@ public class ModelMapperConfiguration {
             mapper.using(courseIdToStudentCount).map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, Course::setNumberOfStudents);
             mapper.using(courseIdToRating).map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, Course::setRating);
             mapper.using(studentIdAndCourseIdToResource).map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, StudentCourse::setActiveResource);
+            mapper.using(studentIdAndCourseIdToReview).map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, StudentCourse::setStudentReview);
         });
 
         modelMapper.typeMap(com.mohand.SchoolManagmentSystem.model.course.Course.class, TeacherCourse.class).addMappings(mapper -> {
