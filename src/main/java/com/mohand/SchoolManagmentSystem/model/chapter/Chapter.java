@@ -42,5 +42,6 @@ public class Chapter {
     private Course course;
 
     @OneToMany(mappedBy = "chapter", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("position ASC")
     private List<Resource> resources;
 }

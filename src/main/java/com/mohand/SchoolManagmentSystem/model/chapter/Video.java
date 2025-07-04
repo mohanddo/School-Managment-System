@@ -19,8 +19,8 @@ import java.util.List;
 public class Video extends Resource {
 
 
-    public Video(String title, String downloadUrl, Chapter chapter, Integer duration, Boolean isFree) {
-        super(title, downloadUrl, chapter, isFree);
+    public Video(String title, String downloadUrl, Chapter chapter, Integer duration, Boolean isFree, int position) {
+        super(title, downloadUrl, chapter, isFree, position);
         this.duration = duration;
     }
 

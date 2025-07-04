@@ -43,11 +43,14 @@ public interface IResourceService {
 
     int countByCourseId(Long courseId);
 
-    int addVideosToChapterResponse(Chapter chapter, Long studentId, Long courseId);
-    int addDocumentsToChapterResponse(Chapter chapter, Long studentId, Long courseId);
+    void addResourcesToChapterResponse(com.mohand.SchoolManagmentSystem.response.chapter.Chapter chapter, Long studentId, Long courseId);
 
     void addChapterToCourseResponse(com.mohand.SchoolManagmentSystem.response.course.Course courseResponse, Long studentId);
     void updateVideoProgress(Student student, UpdateVideoProgressRequest request);
 
     void updateActiveResource(UpdateActiveResourceRequest request, Student student);
+
+    void reorderResources(ReorderResourcesRequest request, Teacher teacher);
+
+    void deleteResource(Long courseId, Long chapterId, Long resourceId, Teacher teacher);
 }

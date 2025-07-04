@@ -46,10 +46,12 @@ public class AzureBlobService {
         BlobSasPermission permissions = new BlobSasPermission()
                 .setReadPermission(true)
                 .setWritePermission(true)
-                .setDeletePermission(true);
+                .setDeletePermission(true).
+                setAddPermission(true).
+                setCreatePermission(true);
 
         // Set expiry time for the SAS token
-        OffsetDateTime expiryTime = OffsetDateTime.now().plusSeconds(jwtExpirationTime / 1000);
+        OffsetDateTime expiryTime = OffsetDateTime.now().plusSeconds(jwtExpirationTime);
 
         // Generate the SAS token
         BlobServiceSasSignatureValues sasValues = new BlobServiceSasSignatureValues(expiryTime, permissions)
@@ -57,7 +59,7 @@ public class AzureBlobService {
                 .setStartTime(OffsetDateTime.now());
 
         String encodedSasToken = containerClient.generateSas(sasValues);
-        return URLDecoder.decode(encodedSasToken, StandardCharsets.UTF_8);
+        return encodedSasToken;
     }
 
     public String signBlobUrl(String blobUrl) {

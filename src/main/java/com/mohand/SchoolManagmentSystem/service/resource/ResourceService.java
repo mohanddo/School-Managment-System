@@ -4,6 +4,7 @@ import com.mohand.SchoolManagmentSystem.exception.ConflictException;
 import com.mohand.SchoolManagmentSystem.exception.NotFoundException;
 import com.mohand.SchoolManagmentSystem.exception.ResourceNotFoundException;
 import com.mohand.SchoolManagmentSystem.model.chapter.*;
+import com.mohand.SchoolManagmentSystem.model.course.Course;
 import com.mohand.SchoolManagmentSystem.model.course.CurrentResource;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
 import com.mohand.SchoolManagmentSystem.model.user.Teacher;
@@ -38,14 +39,18 @@ public class ResourceService implements IResourceService {
     @Override
     public void addVideo(AddVideoRequest request, Teacher teacher) {
         Chapter chapter = chapterService.findByIdAndCourseIdAndTeacherId(request.getChapterId(), request.getCourseId(), teacher.getId());
-        Video video = new Video(request.getTitle(), request.getDownloadUrl(), chapter, request.getDuration(), request.isFree());
+        Integer maxPosition = resourceRepository.findMaxPositionByChapter(request.getCourseId(), request.getChapterId());
+        int newPosition = (maxPosition != null ? maxPosition : 0) + 1;
+        Video video = new Video(request.getTitle(), request.getDownloadUrl(), chapter, request.getDuration(), request.isFree(), newPosition);
         videoRepository.save(video);
     }
 
     @Override
     public void addDocument(AddDocumentRequest request, Teacher teacher) {
         Chapter chapter = chapterService.findByIdAndCourseIdAndTeacherId(request.getChapterId(), request.getCourseId(), teacher.getId());
-        Document document = new Document(request.getTitle(), request.getDownloadUrl(), chapter, request.isFree());
+        Integer maxPosition = resourceRepository.findMaxPositionByChapter(request.getCourseId(), request.getChapterId());
+        int newPosition = (maxPosition != null ? maxPosition : 0) + 1;
+        Document document = new Document(request.getTitle(), request.getDownloadUrl(), chapter, request.isFree(), newPosition);
         documentRepository.save(document);
     }
 
@@ -123,6 +128,11 @@ public class ResourceService implements IResourceService {
         return documentRepository.findAllByChapterId(chapterId);
     }
 
+
+    public List<Resource> getAllResourcesByChapterId(Long chapterId) {
+        return resourceRepository.findAllByChapterId(chapterId);
+    }
+
     @Override
     public Video findVideoByIdAndChapterIdAndCourseId(Long resourceId, Long chapterId, Long courseId) {
         return videoRepository.findByIdAndChapterIdAndCourseId(resourceId, chapterId, courseId).orElseThrow(() -> new ResourceNotFoundException("Video not found"));
@@ -134,47 +144,28 @@ public class ResourceService implements IResourceService {
     }
 
     @Override
-    public int  addVideosToChapterResponse(com.mohand.SchoolManagmentSystem.response.chapter.Chapter chapter, Long studentId, Long courseId) {
-        List<com.mohand.SchoolManagmentSystem.response.chapter.Video> videos = getAllVideosByChapterId(chapter.getId())
+    public void addResourcesToChapterResponse(com.mohand.SchoolManagmentSystem.response.chapter.Chapter chapter, Long studentId, Long courseId) {
+        List<com.mohand.SchoolManagmentSystem.response.chapter.Resource> resources = getAllResourcesByChapterId(chapter.getId())
                 .stream()
-                .map(video -> {
-                    com.mohand.SchoolManagmentSystem.response.chapter.Video videoResponse = modelMapper.map(video, com.mohand.SchoolManagmentSystem.response.chapter.Video.class);
+                .map(resource -> {
+                    com.mohand.SchoolManagmentSystem.response.chapter.Resource resourceResponse = modelMapper.map(resource, com.mohand.SchoolManagmentSystem.response.chapter.Resource.class);
 
                     boolean hasAccessToResource = (studentId != null && courseRepository.isStudentEnrolledInCourse(studentId, courseId))
-                            || video.isFree();
+                            || resource.isFree();
 
                     if (hasAccessToResource) {
-                        videoResponse.setDownloadUrl(azureBlobService.signBlobUrl(video.getDownloadUrl()));
+                        resourceResponse.setDownloadUrl(azureBlobService.signBlobUrl(resource.getDownloadUrl()));
                         if (studentId != null) {
-                            videoResponse.setIsFinished(finishedResourceRepository.existsByResourceIdAndStudentId(videoResponse.getId(), studentId));
+                            resourceResponse.setIsFinished(finishedResourceRepository.existsByResourceIdAndStudentId(resourceResponse.getId(), studentId));
+                            if(resource instanceof Video video) {
+                                videoProgressRepository.findByStudentIdAndVideoId(studentId, video.getId()).ifPresentOrElse((videoProgress) -> resourceResponse.setVideoProgress(videoProgress.getProgress()), () -> resourceResponse.setVideoProgress(0));
+                                System.out.println();
+                            }
                         }
                     }
-                    return videoResponse;
+                    return resourceResponse;
                 }).toList();
-        chapter.setVideos(videos);
-        return videos.size();
-    }
-
-    @Override
-    public int addDocumentsToChapterResponse(com.mohand.SchoolManagmentSystem.response.chapter.Chapter chapter, Long studentId, Long courseId) {
-        List<com.mohand.SchoolManagmentSystem.response.chapter.Document> documents = getAllDocumentsByChapterId(chapter.getId())
-                .stream()
-                .map(document -> {
-                    com.mohand.SchoolManagmentSystem.response.chapter.Document documentResponse = modelMapper.map(document, com.mohand.SchoolManagmentSystem.response.chapter.Document.class);
-
-                    boolean hasAccessToResource = (studentId != null && courseRepository.isStudentEnrolledInCourse(studentId, courseId))
-                            || document.isFree();
-
-                    if (hasAccessToResource) {
-                        documentResponse.setDownloadUrl(azureBlobService.signBlobUrl(document.getDownloadUrl()));
-                        if (studentId != null) {
-                            documentResponse.setIsFinished(finishedResourceRepository.existsByResourceIdAndStudentId(documentResponse.getId(), studentId));
-                        }
-                    }
-                    return documentResponse;
-                }).toList();
-        chapter.setDocuments(documents);
-        return documents.size();
+        chapter.setResources(resources);
     }
 
     @Override
@@ -183,18 +174,18 @@ public class ResourceService implements IResourceService {
         List<com.mohand.SchoolManagmentSystem.response.chapter.Chapter> chapters = courseResponse.getChapters().stream().map((chapter -> {
             com.mohand.SchoolManagmentSystem.response.chapter.Chapter chapterResponse = modelMapper.map(chapter, com.mohand.SchoolManagmentSystem.response.chapter.Chapter.class);
 
-            int numberOfVideosInChapter = addVideosToChapterResponse(chapter, studentId, courseResponse.getId());
+            addResourcesToChapterResponse(chapter, studentId, courseResponse.getId());
 
-            int numberOfDocumentsInChapter = addDocumentsToChapterResponse(chapter, studentId, courseResponse.getId());
-
-            courseResponse.setNumberOfDocuments(courseResponse.getNumberOfDocuments() + numberOfDocumentsInChapter);
-            courseResponse.setNumberOfVideos(courseResponse.getNumberOfVideos() + numberOfVideosInChapter);
+            courseResponse.setNumberOfDocuments(courseResponse.getNumberOfDocuments() + documentRepository.countAllByChapterId(chapter.getId()));
+            courseResponse.setNumberOfVideos(courseResponse.getNumberOfVideos() + videoRepository.countAllByChapterId(chapter.getId()));
 
             return chapterResponse;
         })).toList();
 
         courseResponse.setChapters(chapters);
     }
+
+
 
     public void updateVideoProgress(Student student, UpdateVideoProgressRequest request) {
         if (!courseRepository.isStudentEnrolledInCourse(student.getId(), request.getCourseId()))
@@ -207,7 +198,7 @@ public class ResourceService implements IResourceService {
             throw new IllegalArgumentException("Progress cannot exceed video duration");
         }
 
-        Optional<VideoProgress> optionalProgress = videoProgressRepository.findByStudentAndVideo(student, video);
+        Optional<VideoProgress> optionalProgress = videoProgressRepository.findByStudentIdAndVideoId(student.getId(), video.getId());
 
         VideoProgress progress = optionalProgress.orElse(new VideoProgress(student, video));
         progress.setProgress(request.getProgress());
@@ -229,6 +220,42 @@ public class ResourceService implements IResourceService {
 
 
         currentResourceRepository.save(currentResource);
+    }
+
+    @Override
+    @Transactional
+    public void reorderResources(ReorderResourcesRequest request, Teacher teacher) {
+        for (int i = 0; i < request.getOrderedResourceIds().size(); i++) {
+            Resource resource = resourceRepository.
+                    findByIdAndChapterIdAndCourseIdAndTeacherId(request.getOrderedResourceIds().get(i), request.getChapterId() ,request.getCourseId(), teacher.getId())
+                    .orElseThrow(() -> new NotFoundException("resource not found"));
+            resource.setPosition(i);
+            resourceRepository.save(resource);
+        }
+    }
+
+    @Override
+    public void deleteResource(Long courseId, Long chapterId, Long resourceId, Teacher teacher) {
+
+        Resource resourceToDelete = resourceRepository.
+                findByIdAndChapterIdAndCourseIdAndTeacherId(resourceId, chapterId, courseId, teacher.getId())
+                .orElseThrow(() -> new NotFoundException("resource not found"));
+
+        int deletedPosition = resourceToDelete.getPosition();
+        Course course = resourceToDelete.getChapter().getCourse();
+        Chapter chapter = resourceToDelete.getChapter();
+
+
+        resourceRepository.delete(resourceToDelete);
+
+        List<Resource> resourcesToShift = resourceRepository
+                .findByCourseAndChapterAndPositionGreaterThanOrderByPositionAsc(course, chapter, deletedPosition);
+
+        for (Resource r : resourcesToShift) {
+            r.setPosition(r.getPosition() - 1);
+        }
+
+        resourceRepository.saveAll(resourcesToShift);
     }
 
 }

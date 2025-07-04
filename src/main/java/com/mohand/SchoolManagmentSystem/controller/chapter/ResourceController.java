@@ -76,4 +76,17 @@ public class ResourceController {
         return ResponseEntity.ok("Success");
     }
 
+    @PutMapping("/reorderResources")
+    public ResponseEntity<String> reorderResources(@Valid @RequestBody ReorderResourcesRequest request, Authentication authentication){
+        Teacher teacher = (Teacher) ( authentication.getPrincipal() );
+        resourceService.reorderResources(request, teacher);
+        return ResponseEntity.ok("Success");
+    }
+
+    @DeleteMapping("/deleteResource/{courseId}/{chapterId}/{resourceId}")
+    public ResponseEntity<String> deleteResource(@PathVariable Long courseId, @PathVariable Long chapterId, @PathVariable Long resourceId, Authentication authentication){
+        Teacher teacher = (Teacher) ( authentication.getPrincipal() );
+        resourceService.deleteResource(courseId, chapterId, resourceId, teacher);
+        return ResponseEntity.ok("Success");
+    }
 }

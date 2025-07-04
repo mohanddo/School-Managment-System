@@ -35,5 +35,6 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
                                                                 @Param("courseId") Long courseId);
 
     List<Video> findAllByChapterId(Long chapterId);
+    int countAllByChapterId(Long chapterId);
 
 }

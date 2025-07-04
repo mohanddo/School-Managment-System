@@ -21,6 +21,7 @@ import com.mohand.SchoolManagmentSystem.service.azure.AzureBlobService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeMap;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -147,7 +148,7 @@ public class ModelMapperConfiguration {
         registerUserMappings(modelMapper);
         registerAuthMappings(modelMapper);
         registerCommentMappings(modelMapper);
-        registerVideoMappings(modelMapper);
+        registerChapterMappings(modelMapper);
 
         return modelMapper;
     }
@@ -165,7 +166,7 @@ public class ModelMapperConfiguration {
             mapper.using(urlToSignedUrl).map(com.mohand.SchoolManagmentSystem.model.course.Course::getIntroductionVideoUrl, Course::setIntroductionVideoUrl);
             mapper.using(courseIdToStudentCount).map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, Course::setNumberOfStudents);
             mapper.using(courseIdToRating).map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, Course::setRating);
-            mapper.using(studentIdAndCourseIdToResource).map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, StudentCourse::setActiveResource);
+//            mapper.using(studentIdAndCourseIdToResource).map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, StudentCourse::setActiveResource);
             mapper.using(studentIdAndCourseIdToReview).map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, StudentCourse::setStudentReview);
         });
 
@@ -254,21 +255,23 @@ public class ModelMapperConfiguration {
                 });
     }
 
-    private void registerVideoMappings(ModelMapper modelMapper) {
-        modelMapper.createTypeMap(Video.class, com.mohand.SchoolManagmentSystem.response.chapter.Video.class)
-                .addMappings(mapper -> mapper.skip(com.mohand.SchoolManagmentSystem.response.chapter.Video::setVideoProgress))
-                .setPostConverter(ctx -> {
-                    Video source = ctx.getSource();
-                    var dest = ctx.getDestination();
+    private void registerChapterMappings(ModelMapper modelMapper) {
 
-                    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-                    Object principal = auth.getPrincipal();
+        TypeMap<
+                        com.mohand.SchoolManagmentSystem.model.chapter.Video,
+                        Resource
+                        > typeMap = modelMapper.createTypeMap(
+                com.mohand.SchoolManagmentSystem.model.chapter.Video.class,
+                com.mohand.SchoolManagmentSystem.response.chapter.Resource.class
+        );
 
-                    if (principal instanceof Student student) {
-                        videoProgressRepository.findByStudentAndVideo(student, source).ifPresentOrElse((videoProgress) -> dest.setVideoProgress(videoProgress.getProgress()), () -> dest.setVideoProgress(0));
-                    }
-                    return dest;
-                });
+        typeMap.addMappings(mapper -> {
+            mapper.skip(Resource::setVideoProgress);
+        });
+
+        modelMapper.createTypeMap(com.mohand.SchoolManagmentSystem.model.chapter.Chapter.class, com.mohand.SchoolManagmentSystem.response.chapter.Chapter.class)
+                .addMappings(mapper ->
+                        mapper.skip(com.mohand.SchoolManagmentSystem.response.chapter.Chapter::setResources));
     }
 }
 

@@ -16,18 +16,22 @@ import java.util.List;
 @Setter
 @Getter
 @Inheritance(strategy = InheritanceType.JOINED)
-public abstract class Resource {
+public class Resource {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    public Resource(String title, String downloadUrl, Chapter chapter, Boolean isFree) {
+    public Resource(String title, String downloadUrl, Chapter chapter, Boolean isFree, int position) {
         this.title = title;
         this.downloadUrl = downloadUrl;
         this.chapter = chapter;
         this.dateOfCreation = LocalDateTime.now();
         this.free = isFree;
+        this.position = position;
     }
+
+    @Column(nullable = false)
+    private int position;
 
     @NotBlank
     @Column(nullable = false)

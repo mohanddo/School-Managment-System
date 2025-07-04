@@ -23,4 +23,5 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
                                                                 @Param("teacherId") Long teacherId);
 
     List<Document> findAllByChapterId(Long chapterId);
+    int countAllByChapterId(Long chapterId);
 }

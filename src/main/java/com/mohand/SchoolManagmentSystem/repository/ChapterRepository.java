@@ -30,6 +30,7 @@ public interface ChapterRepository extends JpaRepository<Chapter, Long> {
                                                                      @Param("teacherId") Long teacherId);
 
     List<Chapter> findByCourseAndPositionGreaterThanOrderByPositionAsc(Course course, Integer position);
+
     @Query("""
 
             SELECT c\s

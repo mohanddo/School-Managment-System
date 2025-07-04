@@ -13,6 +13,5 @@ public class Chapter {
     private Long id;
     private String title;
     private LocalDateTime dateOfCreation;
-    private List<Video> videos;
-    private List<Document> documents;
+    private List<Resource> resources;
 }
