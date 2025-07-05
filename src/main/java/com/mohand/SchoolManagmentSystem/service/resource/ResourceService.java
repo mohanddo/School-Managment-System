@@ -15,6 +15,8 @@ import com.mohand.SchoolManagmentSystem.service.azure.AzureBlobService;
 import com.mohand.SchoolManagmentSystem.service.chapter.ChapterService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,20 +57,14 @@ public class ResourceService implements IResourceService {
     }
 
     @Override
-    public void updateVideo(UpdateVideoRequest request, Teacher teacher) {
-        Video video = findVideoByIdAndChapterIdAndCourseIdAndTeacherId(request.getVideoId(), request.getChapterId(), request.getCourseId(), teacher.getId());
-        video.setDuration(request.getDuration());
-        video.setTitle(request.getTitle());
-        video.setFree(request.isFree());
-        videoRepository.save(video);
-    }
-
-    @Override
-    public void updateDocument(UpdateDocumentRequest request, Teacher teacher) {
-        Document document = findDocumentByIdAndChapterIdAndCourseIdAndTeacherId(request.getDocumentId(), request.getChapterId(), request.getCourseId(), teacher.getId());
-        document.setTitle(request.getTitle());
-        document.setFree(request.isFree());
-        documentRepository.save(document);
+    public void updateResource(UpdateResourceRequest request, Teacher teacher) {
+        Resource resource = findResourceByIdAndChapterIdAndCourseIdAndTeacherId(request.getResourceId(), request.getChapterId(), request.getCourseId(), teacher.getId());
+        resource.setTitle(request.getTitle());
+        resource.setFree(request.isFree());
+        if(resource instanceof Video video && request.getDuration() != null) {
+            video.setDuration(request.getDuration());
+        }
+        resourceRepository.save(resource);
     }
 
     @Override
@@ -139,27 +135,35 @@ public class ResourceService implements IResourceService {
     }
 
     @Override
+    public Resource findResourceByIdAndChapterIdAndCourseIdAndTeacherId(Long resourceId, Long chapterId, Long courseId, Long teacherId) {
+        return resourceRepository.findByIdAndChapterIdAndCourseIdAndTeacherId(resourceId, chapterId, courseId, teacherId).orElseThrow(() -> new ResourceNotFoundException("Video not found"));
+    }
+
+    @Override
     public int countByCourseId(Long courseId) {
         return resourceRepository.countByCourseId(courseId);
     }
 
     @Override
-    public void addResourcesToChapterResponse(com.mohand.SchoolManagmentSystem.response.chapter.Chapter chapter, Long studentId, Long courseId) {
+    public void addResourcesToChapterResponse(com.mohand.SchoolManagmentSystem.response.chapter.Chapter chapter, Long courseId) {
         List<com.mohand.SchoolManagmentSystem.response.chapter.Resource> resources = getAllResourcesByChapterId(chapter.getId())
                 .stream()
                 .map(resource -> {
                     com.mohand.SchoolManagmentSystem.response.chapter.Resource resourceResponse = modelMapper.map(resource, com.mohand.SchoolManagmentSystem.response.chapter.Resource.class);
 
-                    boolean hasAccessToResource = (studentId != null && courseRepository.isStudentEnrolledInCourse(studentId, courseId))
-                            || resource.isFree();
+                    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                    Object principal = auth.getPrincipal();
+
+                    boolean hasAccessToResource = resource.isFree();
+                    hasAccessToResource = hasAccessToResource || (principal instanceof Student student && courseRepository.isStudentEnrolledInCourse(student.getId(), courseId));
+                    hasAccessToResource = hasAccessToResource || (principal instanceof Teacher teacher && courseRepository.existsByIdAndTeacherId(courseId, teacher.getId()));
 
                     if (hasAccessToResource) {
                         resourceResponse.setDownloadUrl(azureBlobService.signBlobUrl(resource.getDownloadUrl()));
-                        if (studentId != null) {
-                            resourceResponse.setIsFinished(finishedResourceRepository.existsByResourceIdAndStudentId(resourceResponse.getId(), studentId));
+                        if (principal instanceof Student student) {
+                            resourceResponse.setIsFinished(finishedResourceRepository.existsByResourceIdAndStudentId(resourceResponse.getId(), student.getId()));
                             if(resource instanceof Video video) {
-                                videoProgressRepository.findByStudentIdAndVideoId(studentId, video.getId()).ifPresentOrElse((videoProgress) -> resourceResponse.setVideoProgress(videoProgress.getProgress()), () -> resourceResponse.setVideoProgress(0));
-                                System.out.println();
+                                videoProgressRepository.findByStudentIdAndVideoId(student.getId(), video.getId()).ifPresentOrElse((videoProgress) -> resourceResponse.setVideoProgress(videoProgress.getProgress()), () -> resourceResponse.setVideoProgress(0));
                             }
                         }
                     }
@@ -169,12 +173,12 @@ public class ResourceService implements IResourceService {
     }
 
     @Override
-    public void addChapterToCourseResponse(com.mohand.SchoolManagmentSystem.response.course.Course courseResponse, Long studentId) {
+    public void addChapterToCourseResponse(com.mohand.SchoolManagmentSystem.response.course.Course courseResponse) {
 
         List<com.mohand.SchoolManagmentSystem.response.chapter.Chapter> chapters = courseResponse.getChapters().stream().map((chapter -> {
             com.mohand.SchoolManagmentSystem.response.chapter.Chapter chapterResponse = modelMapper.map(chapter, com.mohand.SchoolManagmentSystem.response.chapter.Chapter.class);
 
-            addResourcesToChapterResponse(chapter, studentId, courseResponse.getId());
+            addResourcesToChapterResponse(chapter, courseResponse.getId());
 
             courseResponse.setNumberOfDocuments(courseResponse.getNumberOfDocuments() + documentRepository.countAllByChapterId(chapter.getId()));
             courseResponse.setNumberOfVideos(courseResponse.getNumberOfVideos() + videoRepository.countAllByChapterId(chapter.getId()));

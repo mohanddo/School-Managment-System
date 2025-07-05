@@ -89,7 +89,7 @@ public class CourseService implements ICourseService {
             TeacherPreview teacherPreview = modelMapper.map(course.getTeacher(), TeacherPreview.class);
             courseResponse.setTeacher(teacherPreview);
 
-            resourceService.addChapterToCourseResponse(courseResponse, null);
+            resourceService.addChapterToCourseResponse(courseResponse);
             return courseResponse;
         }).toList();
     }
@@ -102,7 +102,7 @@ public class CourseService implements ICourseService {
         TeacherPreview teacherPreview = modelMapper.map(course.getTeacher(), TeacherPreview.class);
         courseResponse.setTeacher(teacherPreview);
 
-        resourceService.addChapterToCourseResponse(courseResponse, null);
+        resourceService.addChapterToCourseResponse(courseResponse);
         return courseResponse;
     }
 

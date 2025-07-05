@@ -74,7 +74,7 @@ public class StudentService implements IStudentService {
         addCoursesToStudentResponse(studentResponse);
 
         for(StudentCourse studentCourse: studentResponse.getCourses()) {
-            resourceService.addChapterToCourseResponse(studentCourse, student.getId());
+            resourceService.addChapterToCourseResponse(studentCourse);
         }
 
         return studentResponse;
@@ -202,7 +202,7 @@ public class StudentService implements IStudentService {
                 studentCourse.setEnrolled(false);
                 studentCourse.setAnnouncements(null);
             }
-            resourceService.addChapterToCourseResponse(studentCourse, student.getId());
+            resourceService.addChapterToCourseResponse(studentCourse);
             return studentCourse;
         }).toList();
     }
@@ -227,7 +227,7 @@ public class StudentService implements IStudentService {
             studentCourse.setEnrolled(false);
             studentCourse.setAnnouncements(null);
         }
-        resourceService.addChapterToCourseResponse(studentCourse, studentId);
+        resourceService.addChapterToCourseResponse(studentCourse);
         return studentCourse;
     }
 

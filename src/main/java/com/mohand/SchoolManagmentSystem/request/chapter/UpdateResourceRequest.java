@@ -9,14 +9,13 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class UpdateVideoRequest {
-    @NotBlank(message = "Video must a title")
+public class UpdateResourceRequest {
+    @NotBlank(message = "Resource must a title")
     private String title;
 
     @NotNull(message = "You must specify if the video is free or not")
     private boolean isFree;
 
-    @NotNull(message = "Video must have a duration in seconds")
     private Integer duration;
 
     @NotNull(message = "Request must have a course id")
@@ -25,6 +24,6 @@ public class UpdateVideoRequest {
     @NotNull(message = "Request must have a chapter id")
     private Long chapterId;
 
-    @NotNull(message = "Request must have a video id")
-    private Long videoId;
+    @NotNull(message = "Request must have a resource id")
+    private Long resourceId;
 }

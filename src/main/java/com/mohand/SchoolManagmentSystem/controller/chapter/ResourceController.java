@@ -4,7 +4,6 @@ import com.mohand.SchoolManagmentSystem.model.user.Student;
 import com.mohand.SchoolManagmentSystem.model.user.Teacher;
 import com.mohand.SchoolManagmentSystem.request.chapter.*;
 import com.mohand.SchoolManagmentSystem.request.course.UpdateActiveResourceRequest;
-import com.mohand.SchoolManagmentSystem.service.chapter.IChapterService;
 import com.mohand.SchoolManagmentSystem.service.resource.IResourceService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,17 +33,10 @@ public class ResourceController {
         return ResponseEntity.ok("Success");
     }
 
-    @PutMapping("/updateVideo")
-    public ResponseEntity<String> updateVideo(@Valid @RequestBody UpdateVideoRequest request, Authentication authentication) {
+    @PutMapping("/updateResource")
+    public ResponseEntity<String> updateDocument(@Valid @RequestBody UpdateResourceRequest request, Authentication authentication) {
         Teacher teacher = (Teacher) ( authentication.getPrincipal() );
-        resourceService.updateVideo(request, teacher);
-        return ResponseEntity.ok("Success");
-    }
-
-    @PutMapping("/updateDocument")
-    public ResponseEntity<String> updateDocument(@Valid @RequestBody UpdateDocumentRequest request, Authentication authentication) {
-        Teacher teacher = (Teacher) ( authentication.getPrincipal() );
-        resourceService.updateDocument(request, teacher);
+        resourceService.updateResource(request, teacher);
         return ResponseEntity.ok("Success");
     }
 

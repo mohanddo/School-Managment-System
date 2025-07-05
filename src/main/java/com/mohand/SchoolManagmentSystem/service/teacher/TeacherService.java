@@ -6,6 +6,7 @@ import com.mohand.SchoolManagmentSystem.model.user.Teacher;
 import com.mohand.SchoolManagmentSystem.repository.TeacherRepository;
 import com.mohand.SchoolManagmentSystem.request.course.CreateCourseRequest;
 import com.mohand.SchoolManagmentSystem.request.user.UpdateTeacherRequest;
+import com.mohand.SchoolManagmentSystem.response.course.Announcement;
 import com.mohand.SchoolManagmentSystem.response.course.TeacherCourse;
 import com.mohand.SchoolManagmentSystem.response.user.TeacherPreview;
 import com.mohand.SchoolManagmentSystem.service.course.CourseService;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -61,11 +63,15 @@ public class TeacherService implements ITeacherService {
         List<Course> courses = courseService.getAllCoursesByTeacherId(teacher.getId());
         List<TeacherCourse> teacherCourseList = courses.stream().map(course -> {
             TeacherCourse teacherCourse = modelMapper.map(course, TeacherCourse.class);
-            resourceService.addChapterToCourseResponse(teacherCourse, null);
-            if (!courseService.existsByIdAndTeacherId(course.getId(), teacher.getId())) {
-                teacherCourse.setAnnouncements(null);
+            TeacherPreview teacherPreview = modelMapper.map(course.getTeacher(), TeacherPreview.class);
+            teacherCourse.setTeacher(teacherPreview);
+            if (courseService.existsByIdAndTeacherId(course.getId(), teacher.getId())) {
+                List<Announcement> announcements = course.getAnnouncements().stream()
+                        .map(a -> modelMapper.map(a, Announcement.class))
+                        .collect(Collectors.toList());
+                teacherCourse.setAnnouncements(announcements);
             }
-            resourceService.addChapterToCourseResponse(teacherCourse, null);
+            resourceService.addChapterToCourseResponse(teacherCourse);
             return teacherCourse;
         }).toList();
 
@@ -81,11 +87,14 @@ public class TeacherService implements ITeacherService {
             TeacherPreview teacherPreview = modelMapper.map(course.getTeacher(), TeacherPreview.class);
             teacherCourse.setTeacher(teacherPreview);
 
-            teacherCourse.setOwnsCourse(courseService.existsByIdAndTeacherId(course.getId(), teacher.getId()));
-            if (!courseService.existsByIdAndTeacherId(course.getId(), teacher.getId())) {
-                teacherCourse.setAnnouncements(null);
+            if (courseService.existsByIdAndTeacherId(course.getId(), teacher.getId())) {
+                List<Announcement> announcements = course.getAnnouncements().stream()
+                        .map(a -> modelMapper.map(a, Announcement.class))
+                        .collect(Collectors.toList());
+                teacherCourse.setAnnouncements(announcements);
             }
-            resourceService.addChapterToCourseResponse(teacherCourse, null);
+
+            resourceService.addChapterToCourseResponse(teacherCourse);
             return teacherCourse;
         }).toList();
     }
@@ -98,11 +107,14 @@ public class TeacherService implements ITeacherService {
         TeacherPreview teacherPreview = modelMapper.map(course.getTeacher(), TeacherPreview.class);
         teacherResponse.setTeacher(teacherPreview);
 
-        teacherResponse.setOwnsCourse(courseService.existsByIdAndTeacherId(course.getId(),teacherId));
-        if (!courseService.existsByIdAndTeacherId(course.getId(), teacherId)) {
-            teacherResponse.setAnnouncements(null);
+
+        if (courseService.existsByIdAndTeacherId(course.getId(), teacherId)) {
+            List<Announcement> announcements = course.getAnnouncements().stream()
+                    .map(a -> modelMapper.map(a, Announcement.class))
+                    .collect(Collectors.toList());
+            teacherResponse.setAnnouncements(announcements);
         }
-        resourceService.addChapterToCourseResponse(teacherResponse, null);
+        resourceService.addChapterToCourseResponse(teacherResponse);
         return teacherResponse;
     }
 
