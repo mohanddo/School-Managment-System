@@ -9,10 +9,10 @@ import com.mohand.SchoolManagmentSystem.model.course.TeacherStudent;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
 import com.mohand.SchoolManagmentSystem.repository.*;
 import com.mohand.SchoolManagmentSystem.request.user.UpdateStudentRequest;
+import com.mohand.SchoolManagmentSystem.response.course.Announcement;
 import com.mohand.SchoolManagmentSystem.response.course.StudentCourse;
 import com.mohand.SchoolManagmentSystem.response.user.TeacherPreview;
 import com.mohand.SchoolManagmentSystem.service.course.CourseService;
-import com.mohand.SchoolManagmentSystem.service.resource.ResourceService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.core.Authentication;
@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +33,6 @@ public class StudentService implements IStudentService {
     private final CourseService courseService;
     private final ModelMapper modelMapper;
     private final TeacherStudentRepository teacherStudentRepository;
-    private final ResourceService resourceService;
 
     @Override
     public Student getByEmail(String email) {
@@ -72,10 +72,6 @@ public class StudentService implements IStudentService {
                 .map(student, com.mohand.SchoolManagmentSystem.response.authentication.Student.class);
 
         addCoursesToStudentResponse(studentResponse);
-
-        for(StudentCourse studentCourse: studentResponse.getCourses()) {
-            resourceService.addChapterToCourseResponse(studentCourse);
-        }
 
         return studentResponse;
     }
@@ -118,7 +114,6 @@ public class StudentService implements IStudentService {
             course.setInCart(true);
             course.setFavourite(false);
             course.setEnrolled(false);
-            course.setAnnouncements(null);
             TeacherPreview teacherPreview = modelMapper.map(cartItem.getCourse().getTeacher(), TeacherPreview.class);
             course.setTeacher(teacherPreview);
             courses.add(course);
@@ -137,7 +132,6 @@ public class StudentService implements IStudentService {
             StudentCourse course = modelMapper.map(favoriteCourse.getCourse(), StudentCourse.class);
             course.setFavourite(true);
             course.setEnrolled(false);
-            course.setAnnouncements(null);
             course.setInCart(false);
             TeacherPreview teacherPreview = modelMapper.map(favoriteCourse.getCourse().getTeacher(), TeacherPreview.class);
             course.setTeacher(teacherPreview);
@@ -153,6 +147,10 @@ public class StudentService implements IStudentService {
                     coursePreview.setProgressPercentage(
                             courseService.countProgressPercentageByCourseIdAndStudentId(coursePreview.getId(), studentResponse.getId())
                     );
+                    List<Announcement> announcements = course.getAnnouncements().stream()
+                            .map(a -> modelMapper.map(a, Announcement.class))
+                            .collect(Collectors.toList());
+                    coursePreview.setAnnouncements(announcements);
                     continue outer;
                 }
             }
@@ -163,6 +161,10 @@ public class StudentService implements IStudentService {
             coursePreview.setProgressPercentage(
                     courseService.countProgressPercentageByCourseIdAndStudentId(coursePreview.getId(), studentResponse.getId())
             );
+            List<Announcement> announcements = course.getAnnouncements().stream()
+                    .map(a -> modelMapper.map(a, Announcement.class))
+                    .collect(Collectors.toList());
+            coursePreview.setAnnouncements(announcements);
             TeacherPreview teacherPreview = modelMapper.map(course.getTeacher(), TeacherPreview.class);
             coursePreview.setTeacher(teacherPreview);
             courses.add(coursePreview);
@@ -198,11 +200,13 @@ public class StudentService implements IStudentService {
                 studentCourse.setProgressPercentage(
                         courseService.countProgressPercentageByCourseIdAndStudentId(course.getId(), student.getId())
                 );
+                List<Announcement> announcements = course.getAnnouncements().stream()
+                        .map(a -> modelMapper.map(a, Announcement.class))
+                        .collect(Collectors.toList());
+                studentCourse.setAnnouncements(announcements);
             } else {
                 studentCourse.setEnrolled(false);
-                studentCourse.setAnnouncements(null);
             }
-            resourceService.addChapterToCourseResponse(studentCourse);
             return studentCourse;
         }).toList();
     }
@@ -223,11 +227,13 @@ public class StudentService implements IStudentService {
             studentCourse.setProgressPercentage(
                     courseService.countProgressPercentageByCourseIdAndStudentId(course.getId(), studentId)
             );
+            List<Announcement> announcements = course.getAnnouncements().stream()
+                    .map(a -> modelMapper.map(a, Announcement.class))
+                    .collect(Collectors.toList());
+            studentCourse.setAnnouncements(announcements);
         } else {
             studentCourse.setEnrolled(false);
-            studentCourse.setAnnouncements(null);
         }
-        resourceService.addChapterToCourseResponse(studentCourse);
         return studentCourse;
     }
 

@@ -35,6 +35,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ModelMapperConfiguration {
 
+    private final DocumentRepository documentRepository;
+    private final VideoRepository videoRepository;
+    private final ResourceRepository resourceRepository;
     @Value("${azure.storage.endpoint}")
         private String azureStorageEndpoint;
 
@@ -47,6 +50,9 @@ public class ModelMapperConfiguration {
         private final CommentRepository commentRepository;
     private final ReplyCommentRepository replyCommentRepository;
     private final CurrentResourceRepository currentResourceRepository;
+    private final VideoProgressRepository videoProgressRepository;
+    private final FinishedResourceRepository finishedResourceRepository;
+
 
 
     private Converter<String, String> urlToSignedUrl;
@@ -61,6 +67,8 @@ public class ModelMapperConfiguration {
     private Converter<Long, com.mohand.SchoolManagmentSystem.response.chapter.Resource> studentIdAndCourseIdToResource;
     private Converter<Long, com.mohand.SchoolManagmentSystem.response.course.CourseReview> studentIdAndCourseIdToReview;
     private  Converter<Long, Boolean> teacherIdAndCourseIdToOwnsCourse;
+    private Converter<Long, Integer> courseIdToNumberOfDocuments;
+    private Converter<Long, Integer> courseIdToNumberOfVideos;
 
 
     public double calculateRating(Long courseId) {
@@ -135,6 +143,11 @@ public class ModelMapperConfiguration {
             return null;
         };
 
+        Converter<Long, Integer> courseIdToNumberOfDocuments = (ctx) ->
+            documentRepository.countAllByCourseId(ctx.getSource());
+
+        Converter<Long, Integer> courseIdToNumberOfVideos = (ctx) ->
+                videoRepository.countAllByCourseId(ctx.getSource());
 
 
         // Register converters to instance variables or reuse them in other methods
@@ -150,6 +163,8 @@ public class ModelMapperConfiguration {
         this.studentIdAndCourseIdToResource = studentIdAndCourseIdToResource;
         this.studentIdAndCourseIdToReview = studentIdAndCourseIdToReview;
         this.teacherIdAndCourseIdToOwnsCourse = teacherIdAndCourseIdToOwnsCourse;
+        this.courseIdToNumberOfDocuments = courseIdToNumberOfDocuments;
+        this.courseIdToNumberOfVideos = courseIdToNumberOfVideos;
     }
 
 
@@ -171,28 +186,35 @@ public class ModelMapperConfiguration {
     }
 
     private void registerCourseMappings(ModelMapper modelMapper) {
-        modelMapper.typeMap(com.mohand.SchoolManagmentSystem.model.course.Course.class, Course.class).addMappings(mapper -> {
-            mapper.using(urlToSignedUrl).map(com.mohand.SchoolManagmentSystem.model.course.Course::getImageUrl, Course::setImageUrl);
-            mapper.using(urlToSignedUrl).map(com.mohand.SchoolManagmentSystem.model.course.Course::getIntroductionVideoUrl, Course::setIntroductionVideoUrl);
-            mapper.using(courseIdToStudentCount).map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, Course::setNumberOfStudents);
-            mapper.using(courseIdToRating).map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, Course::setRating);
-        });
+        TypeMap<com.mohand.SchoolManagmentSystem.model.course.Course, Course> baseMap =
+                modelMapper.createTypeMap(com.mohand.SchoolManagmentSystem.model.course.Course.class, Course.class)
+                        .addMappings(mapper -> {
+                            mapper.using(urlToSignedUrl).map(com.mohand.SchoolManagmentSystem.model.course.Course::getImageUrl, Course::setImageUrl);
+                            mapper.using(urlToSignedUrl).map(com.mohand.SchoolManagmentSystem.model.course.Course::getIntroductionVideoUrl, Course::setIntroductionVideoUrl);
+                            mapper.using(courseIdToStudentCount).map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, Course::setNumberOfStudents);
+                            mapper.using(courseIdToRating).map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, Course::setRating);
+                            mapper.using(courseIdToNumberOfDocuments).map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, Course::setNumberOfDocuments);
+                            mapper.using(courseIdToNumberOfVideos).map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, Course::setNumberOfVideos);
 
+                        });
+
+        baseMap.include(
+                com.mohand.SchoolManagmentSystem.model.course.Course.class,
+                StudentCourse.class
+        );
+
+        baseMap.include(
+                com.mohand.SchoolManagmentSystem.model.course.Course.class,
+                TeacherCourse.class
+        );
 
         modelMapper.typeMap(com.mohand.SchoolManagmentSystem.model.course.Course.class, StudentCourse.class).addMappings(mapper -> {
-            mapper.using(urlToSignedUrl).map(com.mohand.SchoolManagmentSystem.model.course.Course::getImageUrl, Course::setImageUrl);
-            mapper.using(urlToSignedUrl).map(com.mohand.SchoolManagmentSystem.model.course.Course::getIntroductionVideoUrl, Course::setIntroductionVideoUrl);
-            mapper.using(courseIdToStudentCount).map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, Course::setNumberOfStudents);
-            mapper.using(courseIdToRating).map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, Course::setRating);
             mapper.using(studentIdAndCourseIdToResource).map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, StudentCourse::setActiveResource);
             mapper.using(studentIdAndCourseIdToReview).map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, StudentCourse::setStudentReview);
+            mapper.skip(StudentCourse::setAnnouncements);
         });
 
         modelMapper.typeMap(com.mohand.SchoolManagmentSystem.model.course.Course.class, TeacherCourse.class).addMappings(mapper -> {
-            mapper.using(urlToSignedUrl).map(com.mohand.SchoolManagmentSystem.model.course.Course::getImageUrl, Course::setImageUrl);
-            mapper.using(urlToSignedUrl).map(com.mohand.SchoolManagmentSystem.model.course.Course::getIntroductionVideoUrl, Course::setIntroductionVideoUrl);
-            mapper.using(courseIdToStudentCount).map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, Course::setNumberOfStudents);
-            mapper.using(courseIdToRating).map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, Course::setRating);
             mapper.using(teacherIdAndCourseIdToOwnsCourse).map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, TeacherCourse::setOwnsCourse);
             mapper.skip(TeacherCourse::setAnnouncements);
         });
@@ -278,22 +300,44 @@ public class ModelMapperConfiguration {
     }
 
     private void registerChapterMappings(ModelMapper modelMapper) {
-
-        TypeMap<
-                        com.mohand.SchoolManagmentSystem.model.chapter.Video,
-                        Resource
-                        > typeMap = modelMapper.createTypeMap(
-                com.mohand.SchoolManagmentSystem.model.chapter.Video.class,
-                com.mohand.SchoolManagmentSystem.response.chapter.Resource.class
-        );
-
-        typeMap.addMappings(mapper -> {
-            mapper.skip(Resource::setVideoProgress);
+        modelMapper.createTypeMap(com.mohand.SchoolManagmentSystem.model.chapter.Document.class, Resource.class).setPostConverter(ctx -> {
+            com.mohand.SchoolManagmentSystem.model.chapter.Resource resource = ctx.getSource();
+            var resourceResponse = ctx.getDestination();
+            return convertResourceToResourceResponse(resource, resourceResponse);
         });
 
-        modelMapper.createTypeMap(com.mohand.SchoolManagmentSystem.model.chapter.Chapter.class, com.mohand.SchoolManagmentSystem.response.chapter.Chapter.class)
-                .addMappings(mapper ->
-                        mapper.skip(com.mohand.SchoolManagmentSystem.response.chapter.Chapter::setResources));
+        modelMapper.createTypeMap(com.mohand.SchoolManagmentSystem.model.chapter.Video.class, Resource.class).
+                addMappings(mapper -> mapper.skip(Resource::setVideoProgress))
+                .setPostConverter(ctx -> {
+                    com.mohand.SchoolManagmentSystem.model.chapter.Resource resource = ctx.getSource();
+                    var resourceResponse = ctx.getDestination();
+                    return convertResourceToResourceResponse(resource, resourceResponse);
+        });
+    }
+
+    private boolean hasAccessToResource(com.mohand.SchoolManagmentSystem.model.chapter.Resource resource, Object principal) {
+        boolean hasAccessToResource = resource.isFree();
+        hasAccessToResource = hasAccessToResource || (principal instanceof Student student && courseRepository.isStudentEnrolledInCourse(student.getId(), resourceRepository.findCourseId(resource.getId())));
+        hasAccessToResource = hasAccessToResource || (principal instanceof Teacher teacher && courseRepository.existsByIdAndTeacherId(resourceRepository.findCourseId(resource.getId()), teacher.getId()));
+        return hasAccessToResource;
+    }
+
+    private Resource convertResourceToResourceResponse(com.mohand.SchoolManagmentSystem.model.chapter.Resource resource, Resource resourceResponse) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = auth.getPrincipal();
+
+        boolean hasAccessToResource = hasAccessToResource(resource, principal);
+
+        if (hasAccessToResource) {
+            resourceResponse.setDownloadUrl(azureBlobService.signBlobUrl(resource.getDownloadUrl()));
+            if (principal instanceof Student student) {
+                resourceResponse.setIsFinished(finishedResourceRepository.existsByResourceIdAndStudentId(resourceResponse.getId(), student.getId()));
+                if(resource instanceof Video) {
+                    videoProgressRepository.findByStudentIdAndVideoId(student.getId(), resource.getId()).ifPresentOrElse((videoProgress) -> resourceResponse.setVideoProgress(videoProgress.getProgress()), () -> resourceResponse.setVideoProgress(0));
+                }
+            }
+        }
+        return resourceResponse;
     }
 }
 

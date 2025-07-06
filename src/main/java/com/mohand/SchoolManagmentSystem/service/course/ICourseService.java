@@ -1,12 +1,10 @@
 package com.mohand.SchoolManagmentSystem.service.course;
 
-import com.mohand.SchoolManagmentSystem.exception.ResourceNotFoundException;
 import com.mohand.SchoolManagmentSystem.model.user.Student;
 import com.mohand.SchoolManagmentSystem.model.user.Teacher;
 import com.mohand.SchoolManagmentSystem.model.user.User;
 import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnouncementCommentRequest;
 import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnouncementRequest;
-import com.mohand.SchoolManagmentSystem.request.course.CreateCourseRequest;
 import com.mohand.SchoolManagmentSystem.request.course.CreateOrUpdateCourseReviewRequest;
 import com.mohand.SchoolManagmentSystem.request.course.UpdateCourseRequest;
 import com.mohand.SchoolManagmentSystem.response.course.Course;
@@ -18,7 +16,7 @@ public interface ICourseService {
     void update(UpdateCourseRequest request, Teacher teacher);
 
     List<Course> getAll();
-    Course getCourseResponseById(Long id);;
+    Course getCourseResponseById(Long id);
     List<com.mohand.SchoolManagmentSystem.model.course.Course> findAll();
     com.mohand.SchoolManagmentSystem.model.course.Course getById(Long id);
 

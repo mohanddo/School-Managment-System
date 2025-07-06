@@ -37,4 +37,9 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
     List<Video> findAllByChapterId(Long chapterId);
     int countAllByChapterId(Long chapterId);
 
+    @Query("""
+    SELECT count(v) FROM Video v\s
+    WHERE v.chapter.course.id = :courseId\s
+""")
+    int countAllByCourseId(@Param("courseId") Long courseId);
 }

@@ -144,53 +144,6 @@ public class ResourceService implements IResourceService {
         return resourceRepository.countByCourseId(courseId);
     }
 
-    @Override
-    public void addResourcesToChapterResponse(com.mohand.SchoolManagmentSystem.response.chapter.Chapter chapter, Long courseId) {
-        List<com.mohand.SchoolManagmentSystem.response.chapter.Resource> resources = getAllResourcesByChapterId(chapter.getId())
-                .stream()
-                .map(resource -> {
-                    com.mohand.SchoolManagmentSystem.response.chapter.Resource resourceResponse = modelMapper.map(resource, com.mohand.SchoolManagmentSystem.response.chapter.Resource.class);
-
-                    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-                    Object principal = auth.getPrincipal();
-
-                    boolean hasAccessToResource = resource.isFree();
-                    hasAccessToResource = hasAccessToResource || (principal instanceof Student student && courseRepository.isStudentEnrolledInCourse(student.getId(), courseId));
-                    hasAccessToResource = hasAccessToResource || (principal instanceof Teacher teacher && courseRepository.existsByIdAndTeacherId(courseId, teacher.getId()));
-
-                    if (hasAccessToResource) {
-                        resourceResponse.setDownloadUrl(azureBlobService.signBlobUrl(resource.getDownloadUrl()));
-                        if (principal instanceof Student student) {
-                            resourceResponse.setIsFinished(finishedResourceRepository.existsByResourceIdAndStudentId(resourceResponse.getId(), student.getId()));
-                            if(resource instanceof Video video) {
-                                videoProgressRepository.findByStudentIdAndVideoId(student.getId(), video.getId()).ifPresentOrElse((videoProgress) -> resourceResponse.setVideoProgress(videoProgress.getProgress()), () -> resourceResponse.setVideoProgress(0));
-                            }
-                        }
-                    }
-                    return resourceResponse;
-                }).toList();
-        chapter.setResources(resources);
-    }
-
-    @Override
-    public void addChapterToCourseResponse(com.mohand.SchoolManagmentSystem.response.course.Course courseResponse) {
-
-        List<com.mohand.SchoolManagmentSystem.response.chapter.Chapter> chapters = courseResponse.getChapters().stream().map((chapter -> {
-            com.mohand.SchoolManagmentSystem.response.chapter.Chapter chapterResponse = modelMapper.map(chapter, com.mohand.SchoolManagmentSystem.response.chapter.Chapter.class);
-
-            addResourcesToChapterResponse(chapter, courseResponse.getId());
-
-            courseResponse.setNumberOfDocuments(courseResponse.getNumberOfDocuments() + documentRepository.countAllByChapterId(chapter.getId()));
-            courseResponse.setNumberOfVideos(courseResponse.getNumberOfVideos() + videoRepository.countAllByChapterId(chapter.getId()));
-
-            return chapterResponse;
-        })).toList();
-
-        courseResponse.setChapters(chapters);
-    }
-
-
-
     public void updateVideoProgress(Student student, UpdateVideoProgressRequest request) {
         if (!courseRepository.isStudentEnrolledInCourse(student.getId(), request.getCourseId()))
             throw new ResourceNotFoundException("Course not found");

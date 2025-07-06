@@ -11,7 +11,6 @@ import com.mohand.SchoolManagmentSystem.response.course.TeacherCourse;
 import com.mohand.SchoolManagmentSystem.response.user.TeacherPreview;
 import com.mohand.SchoolManagmentSystem.service.course.CourseService;
 import com.mohand.SchoolManagmentSystem.service.payment.ChargilyPayService;
-import com.mohand.SchoolManagmentSystem.service.resource.ResourceService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.core.Authentication;
@@ -29,7 +28,7 @@ public class TeacherService implements ITeacherService {
     private final CourseService courseService;
     private final ModelMapper modelMapper;
     private final ChargilyPayService chargilyPayService;
-    private final ResourceService resourceService;
+
 
     @Override
     public Teacher readById(Long id) {
@@ -71,7 +70,7 @@ public class TeacherService implements ITeacherService {
                         .collect(Collectors.toList());
                 teacherCourse.setAnnouncements(announcements);
             }
-            resourceService.addChapterToCourseResponse(teacherCourse);
+
             return teacherCourse;
         }).toList();
 
@@ -94,7 +93,7 @@ public class TeacherService implements ITeacherService {
                 teacherCourse.setAnnouncements(announcements);
             }
 
-            resourceService.addChapterToCourseResponse(teacherCourse);
+
             return teacherCourse;
         }).toList();
     }
@@ -114,7 +113,7 @@ public class TeacherService implements ITeacherService {
                     .collect(Collectors.toList());
             teacherResponse.setAnnouncements(announcements);
         }
-        resourceService.addChapterToCourseResponse(teacherResponse);
+
         return teacherResponse;
     }
 

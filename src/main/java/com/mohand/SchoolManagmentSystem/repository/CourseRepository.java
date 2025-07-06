@@ -5,11 +5,14 @@ import com.mohand.SchoolManagmentSystem.model.user.Student;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public interface CourseRepository extends JpaRepository<Course, Long> {
+
     boolean existsByIdAndTeacherId(Long courseId, Long teacherId);
     List<Course> findAllByTeacherId(Long teacherId);
     Optional<Course> findByIdAndTeacherId(Long courseId, Long teacherId);
@@ -23,6 +26,4 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     List<Course> findAllCoursesByStudentId(@Param("studentId") Long studentId);
 
     int countStudentsById(Long courseId);
-
-
 }

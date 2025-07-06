@@ -24,4 +24,10 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
 
     List<Document> findAllByChapterId(Long chapterId);
     int countAllByChapterId(Long chapterId);
+
+    @Query("""
+    SELECT count(d) FROM Document d\s
+    WHERE d.chapter.course.id = :courseId\s
+""")
+    int countAllByCourseId(@Param("courseId") Long courseId);
 }

@@ -44,9 +44,6 @@ public interface IResourceService {
 
     int countByCourseId(Long courseId);
 
-    void addResourcesToChapterResponse(com.mohand.SchoolManagmentSystem.response.chapter.Chapter chapter, Long courseId);
-
-    void addChapterToCourseResponse(com.mohand.SchoolManagmentSystem.response.course.Course courseResponse);
     void updateVideoProgress(Student student, UpdateVideoProgressRequest request);
 
     void updateActiveResource(UpdateActiveResourceRequest request, Student student);

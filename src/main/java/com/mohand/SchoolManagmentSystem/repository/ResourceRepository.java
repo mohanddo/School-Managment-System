@@ -53,4 +53,11 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
                                                                                   @Param("position") Integer position);
 
     List<Resource> findAllByChapterId(Long chapterId);
+
+    @Query("""
+    SELECT r.chapter.course.id
+    FROM Resource r
+    WHERE r.id = :resourceId
+""")
+    Long findCourseId(@Param("resourceId") Long resourceId);
 }

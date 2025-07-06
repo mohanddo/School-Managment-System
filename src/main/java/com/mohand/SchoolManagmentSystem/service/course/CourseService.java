@@ -14,19 +14,17 @@ import com.mohand.SchoolManagmentSystem.repository.*;
 import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnouncementCommentRequest;
 import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnouncementRequest;
 import com.mohand.SchoolManagmentSystem.request.course.CreateOrUpdateCourseReviewRequest;
-import com.mohand.SchoolManagmentSystem.request.course.UpdateActiveResourceRequest;
 import com.mohand.SchoolManagmentSystem.request.course.UpdateCourseRequest;
 import com.mohand.SchoolManagmentSystem.response.course.Course;
 import com.mohand.SchoolManagmentSystem.response.user.TeacherPreview;
-import com.mohand.SchoolManagmentSystem.service.chapter.ChapterService;
 import com.mohand.SchoolManagmentSystem.service.resource.ResourceService;
-import jakarta.validation.constraints.AssertTrue;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -89,7 +87,7 @@ public class CourseService implements ICourseService {
             TeacherPreview teacherPreview = modelMapper.map(course.getTeacher(), TeacherPreview.class);
             courseResponse.setTeacher(teacherPreview);
 
-            resourceService.addChapterToCourseResponse(courseResponse);
+
             return courseResponse;
         }).toList();
     }
@@ -102,7 +100,7 @@ public class CourseService implements ICourseService {
         TeacherPreview teacherPreview = modelMapper.map(course.getTeacher(), TeacherPreview.class);
         courseResponse.setTeacher(teacherPreview);
 
-        resourceService.addChapterToCourseResponse(courseResponse);
+
         return courseResponse;
     }
 
@@ -316,5 +314,25 @@ public class CourseService implements ICourseService {
 
         return (int) ((float) finishedResourceRepository.countFinishedResourceByCourseIdAndStudentId(courseId, studentId) / resourceService.countByCourseId(courseId) * 100) ;
     }
+
+    private void clearDiscountIfExpired(com.mohand.SchoolManagmentSystem.model.course.Course course) {
+        if (course.getDiscountExpirationDate() != null && course.getDiscountExpirationDate().isBefore(LocalDate.now())) {
+            course.setDiscountPercentage(0);
+            course.setDiscountExpirationDate(null);
+            courseRepository.save(course);
+        }
+    }
+
+    private void clearDiscountIfExpired(List<com.mohand.SchoolManagmentSystem.model.course.Course> courses) {
+        courses.forEach(course -> {
+            if (course.getDiscountExpirationDate() != null && course.getDiscountExpirationDate().isBefore(LocalDate.now())) {
+                course.setDiscountPercentage(0);
+                course.setDiscountExpirationDate(null);
+                courseRepository.save(course);
+            }
+        });
+    }
+
+
 
 }
