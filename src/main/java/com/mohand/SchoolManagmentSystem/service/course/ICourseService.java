@@ -43,8 +43,5 @@ public interface ICourseService {
     List<com.mohand.SchoolManagmentSystem.model.course.Course> getAllCoursesByStudentId(Long studentId);
     List<com.mohand.SchoolManagmentSystem.model.course.Course> getAllCoursesByTeacherId(Long teacherId);
 
-    void save(com.mohand.SchoolManagmentSystem.model.course.Course course);
-
-
-    int countProgressPercentageByCourseIdAndStudentId(Long courseId, Long studentId);
+    com.mohand.SchoolManagmentSystem.model.course.Course save(com.mohand.SchoolManagmentSystem.model.course.Course course);
 }

@@ -70,6 +70,9 @@ public class Course {
     @Column(nullable = false)
     private String priceId;
 
+    @NotBlank
+    @Column(nullable = false)
+    private String productId;
 
     @ManyToOne
     @JoinColumn(name = "teacher_id")

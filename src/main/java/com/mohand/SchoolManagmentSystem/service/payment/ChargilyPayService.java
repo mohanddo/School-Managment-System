@@ -10,8 +10,6 @@ import com.mohand.SchoolManagmentSystem.request.payment.CreatePriceRequest;
 import com.mohand.SchoolManagmentSystem.request.payment.CreateProductRequest;
 import com.mohand.SchoolManagmentSystem.response.payment.CreatePriceResponse;
 import com.mohand.SchoolManagmentSystem.response.payment.CreateProductResponse;
-import com.mohand.SchoolManagmentSystem.util.Util;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -60,7 +58,6 @@ public class ChargilyPayService {
             HttpResponse<String> createCheckoutResponse = client.send(createCheckout, HttpResponse.BodyHandlers.ofString());
             System.out.println(createCheckoutResponse);
             System.out.println(createCheckoutResponse.body());
-            System.out.println(createCheckoutResponse.headers());
 
             if (createCheckoutResponse.statusCode() != 200) {
                 throw new RuntimeException("Failed to create checkout");
@@ -75,8 +72,8 @@ public class ChargilyPayService {
         }
     }
 
-    private CreatePriceResponse createPrice(String productId, Integer amount) throws IOException, InterruptedException {
-        CreatePriceRequest price = new CreatePriceRequest(amount, productId);
+    public void createPrice(String productId, Course course) throws IOException, InterruptedException {
+        CreatePriceRequest price = new CreatePriceRequest(course.getPrice(), productId);
         String createPriceRequestBody = objectMapper.writeValueAsString(price);
 
         HttpRequest createPrice = HttpRequest.newBuilder()
@@ -92,12 +89,13 @@ public class ChargilyPayService {
             throw new RuntimeException("Failed to create price");
         }
 
-        return objectMapper.readValue(
+         course.setPriceId(objectMapper.readValue(
                 createPriceResponseBody.body(), CreatePriceResponse.class
-        );
+        ).getId());
     }
 
-    public String createProduct(Course course)  {
+
+    public void createProduct(Course course)  {
         try {
             CreateProductRequest product = modelMapper.map(course, CreateProductRequest.class);
             String createProductRequestBody = objectMapper.writeValueAsString(product);
@@ -111,17 +109,19 @@ public class ChargilyPayService {
                     .build();
 
             HttpResponse<String> createProductResponseBody = client.send(createProduct, HttpResponse.BodyHandlers.ofString());
-            System.out.println(createProductResponseBody.body());
-            System.out.println(createProductResponseBody.statusCode());
-            System.out.println(createProductResponseBody.headers());
+
             if (createProductResponseBody.statusCode() == 200) {
                 CreateProductResponse createProductResponse = objectMapper.readValue(
                         createProductResponseBody.body(), CreateProductResponse.class
                 );
-                CreatePriceResponse createPriceResponse = createPrice(createProductResponse.getId(), course.getPrice());
-                return createPriceResponse.getId();
+                course.setProductId(createProductResponse.getId());
+                createPrice(createProductResponse.getId(), course);
+
             } else {
+                System.out.println(createProductResponseBody.body());
+                System.out.println(createProductResponseBody.headers());
                 throw new RuntimeException("Failed to create product");
+
             }
 
         } catch (Exception e) {

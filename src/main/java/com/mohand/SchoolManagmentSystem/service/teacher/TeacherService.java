@@ -140,16 +140,16 @@ public class TeacherService implements ITeacherService {
     }
 
     @Transactional
-    public void create(CreateCourseRequest request, Teacher teacher) {
+    public Long create(CreateCourseRequest request, Teacher teacher) {
 
         com.mohand.SchoolManagmentSystem.model.course.Course course = com.mohand.SchoolManagmentSystem.model.course.Course.builder(request.getTitle(), request.getDescription(), request.getPrice(), request.getPricingModelEnum(), request.getCategoryEnum(), teacher, request.getImageUrl(), request.getIntroductionVideoUrl())
                 .build();
 
-        String priceId = chargilyPayService.createProduct(course);
-        course.setPriceId(priceId);
+        chargilyPayService.createProduct(course);
 
         teacher.setNumberOfCourses(teacher.getNumberOfCourses() + 1);
-        courseService.save(course);
+        Course savedCourse = courseService.save(course);
         teacherRepository.save(teacher);
+        return savedCourse.getId();
     }
 }

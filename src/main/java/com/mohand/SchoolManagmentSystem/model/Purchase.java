@@ -15,12 +15,17 @@ public class Purchase {
     private Long id;
 
     private Double amount;
-    private String phoneNumber;
     private LocalDateTime dateOfCreation;
 
     @ManyToOne
     @JoinColumn(name = "student_id")
     private Student student;
+
+    public Purchase(Double amount, LocalDateTime dateOfCreation, Student student) {
+        this.amount = amount;
+        this.dateOfCreation = dateOfCreation;
+        this.student = student;
+    }
 
     @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PurchaseItem> purchaseItems;

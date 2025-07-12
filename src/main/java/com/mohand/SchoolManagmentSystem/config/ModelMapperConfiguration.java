@@ -11,6 +11,7 @@ import com.mohand.SchoolManagmentSystem.model.user.User;
 import com.mohand.SchoolManagmentSystem.repository.*;
 import com.mohand.SchoolManagmentSystem.request.payment.CreateProductRequest;
 import com.mohand.SchoolManagmentSystem.response.chapter.Resource;
+import com.mohand.SchoolManagmentSystem.response.course.Announcement;
 import com.mohand.SchoolManagmentSystem.response.course.Course;
 import com.mohand.SchoolManagmentSystem.response.course.StudentCourse;
 import com.mohand.SchoolManagmentSystem.response.course.TeacherCourse;
@@ -30,6 +31,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Configuration
 @RequiredArgsConstructor
@@ -52,6 +54,8 @@ public class ModelMapperConfiguration {
     private final CurrentResourceRepository currentResourceRepository;
     private final VideoProgressRepository videoProgressRepository;
     private final FinishedResourceRepository finishedResourceRepository;
+    private final CartItemRepository cartItemRepository;
+    private final FavoriteCourseRepository favoriteCourseRepository;
 
 
 
@@ -149,7 +153,6 @@ public class ModelMapperConfiguration {
         Converter<Long, Integer> courseIdToNumberOfVideos = (ctx) ->
                 videoRepository.countAllByCourseId(ctx.getSource());
 
-
         // Register converters to instance variables or reuse them in other methods
         this.urlToSignedUrl = urlToSignedUrl;
         this.userIdToReadToken = userIdToReadToken;
@@ -198,21 +201,57 @@ public class ModelMapperConfiguration {
 
                         });
 
-        baseMap.include(
-                com.mohand.SchoolManagmentSystem.model.course.Course.class,
-                StudentCourse.class
-        );
+
 
         baseMap.include(
                 com.mohand.SchoolManagmentSystem.model.course.Course.class,
                 TeacherCourse.class
         );
 
-        modelMapper.typeMap(com.mohand.SchoolManagmentSystem.model.course.Course.class, StudentCourse.class).addMappings(mapper -> {
-            mapper.using(studentIdAndCourseIdToResource).map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, StudentCourse::setActiveResource);
-            mapper.using(studentIdAndCourseIdToReview).map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, StudentCourse::setStudentReview);
-            mapper.skip(StudentCourse::setAnnouncements);
-        });
+        baseMap.include(com.mohand.SchoolManagmentSystem.model.course.Course.class, StudentCourse.class);
+
+        modelMapper.getTypeMap(com.mohand.SchoolManagmentSystem.model.course.Course.class, StudentCourse.class)
+                .addMappings(mapper -> {
+                    mapper.using(studentIdAndCourseIdToResource)
+                            .map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, (dest, value) -> dest.setActiveResource((Resource) value));
+
+                    mapper.using(studentIdAndCourseIdToReview)
+                            .map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, (dest, value) -> dest.setStudentReview((com.mohand.SchoolManagmentSystem.response.course.CourseReview) value));
+
+                    mapper.skip(StudentCourse::setAnnouncements);
+                })
+                .setPostConverter(ctx -> {
+                    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                    Object principal = auth.getPrincipal();
+                    com.mohand.SchoolManagmentSystem.model.course.Course course = ctx.getSource();
+                    StudentCourse studentCourse = ctx.getDestination();
+
+                    if (principal instanceof Student student) {
+                        boolean isStudentEnrolledInCourse = courseRepository.isStudentEnrolledInCourse(student.getId(), course.getId());
+                        studentCourse.setInCart(cartItemRepository.existsByStudentIdAndCourseId(student.getId(), course.getId()));
+                        studentCourse.setFavourite(favoriteCourseRepository.existsByStudentIdAndCourseId(student.getId(), course.getId()));
+                        studentCourse.setEnrolled(isStudentEnrolledInCourse);
+
+                        if(isStudentEnrolledInCourse) {
+                            List<Announcement> announcements = course.getAnnouncements().stream()
+                                    .map(a -> modelMapper.map(a, Announcement.class))
+                                    .collect(Collectors.toList());
+                            studentCourse.setAnnouncements(announcements);
+
+                            int progressPercentage;
+                            if (resourceRepository.countByCourseId(course.getId()) == 0) {
+                                progressPercentage = 0;
+                            } else {
+                                progressPercentage = (int) ((float) finishedResourceRepository.countFinishedResourceByCourseIdAndStudentId(course.getId(), student.getId()) / resourceRepository.countByCourseId(course.getId()) * 100);
+                            }
+                            studentCourse.setProgressPercentage(progressPercentage);
+                        }
+
+                    }
+
+                    return studentCourse;
+                });
+
 
         modelMapper.typeMap(com.mohand.SchoolManagmentSystem.model.course.Course.class, TeacherCourse.class).addMappings(mapper -> {
             mapper.using(teacherIdAndCourseIdToOwnsCourse).map(com.mohand.SchoolManagmentSystem.model.course.Course::getId, TeacherCourse::setOwnsCourse);

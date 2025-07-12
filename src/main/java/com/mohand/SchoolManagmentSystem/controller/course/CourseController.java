@@ -70,9 +70,8 @@ public class CourseController {
 
 
     @PostMapping("/create")
-    private ResponseEntity<String> createCourse(@Valid @RequestBody CreateCourseRequest request, Authentication authentication) {
-        teacherService.create(request, (Teacher) ( authentication.getPrincipal() ));
-        return ResponseEntity.ok("Course created successfully");
+    private ResponseEntity<Long> createCourse(@Valid @RequestBody CreateCourseRequest request, Authentication authentication) {
+        return ResponseEntity.ok(teacherService.create(request, (Teacher) ( authentication.getPrincipal() )));
     }
 
     @PutMapping("/update")

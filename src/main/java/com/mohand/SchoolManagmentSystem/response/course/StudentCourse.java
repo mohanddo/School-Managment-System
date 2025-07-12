@@ -15,7 +15,7 @@ public class StudentCourse extends Course {
     private Boolean favourite;
     private Boolean enrolled;
     private Boolean inCart;
-    private int progressPercentage;
+    private Integer progressPercentage;
     private Resource activeResource;
     private CourseReview studentReview;
 }

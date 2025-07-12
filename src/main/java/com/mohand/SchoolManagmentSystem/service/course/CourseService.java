@@ -16,14 +16,16 @@ import com.mohand.SchoolManagmentSystem.request.announcement.CreateOrUpdateAnnou
 import com.mohand.SchoolManagmentSystem.request.course.CreateOrUpdateCourseReviewRequest;
 import com.mohand.SchoolManagmentSystem.request.course.UpdateCourseRequest;
 import com.mohand.SchoolManagmentSystem.response.course.Course;
+import com.mohand.SchoolManagmentSystem.response.payment.CreatePriceResponse;
 import com.mohand.SchoolManagmentSystem.response.user.TeacherPreview;
-import com.mohand.SchoolManagmentSystem.service.resource.ResourceService;
+import com.mohand.SchoolManagmentSystem.service.payment.ChargilyPayService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -38,8 +40,7 @@ public class CourseService implements ICourseService {
     private final AnnouncementRepository announcementRepository;
     private final AnnouncementCommentRepository announcementCommentRepository;
     private final CartItemRepository cartItemRepository;
-    private final FinishedResourceRepository finishedResourceRepository;
-    private final ResourceService resourceService;
+    private final ChargilyPayService chargilyPayService;
     private final ModelMapper modelMapper;
 
 
@@ -70,7 +71,17 @@ public class CourseService implements ICourseService {
             course.setDiscountPercentage(request.getDiscountPercentage());
             course.setDiscountExpirationDate(request.getDiscountPercentage() == 0 ? null : request.getDiscountExpirationDate());
 
-                    courseRepository.save(course);
+            try {
+                chargilyPayService.createPrice(course.getProductId(), course);
+            } catch (IOException e) {
+                e.getMessage();
+                throw new RuntimeException(e);
+            } catch (InterruptedException e) {
+                e.getMessage();
+                throw new RuntimeException(e);
+            }
+
+            courseRepository.save(course);
                 }, () -> {
                     throw new ResourceNotFoundException("Course not found");
                 }
@@ -82,6 +93,7 @@ public class CourseService implements ICourseService {
     public List<Course> getAll() {
         List<com.mohand.SchoolManagmentSystem.model.course.Course> allCourses = courseRepository.findAll();
         return allCourses.stream().map(course ->  {
+            clearDiscountIfExpired(course);
             Course courseResponse = modelMapper.map(course, Course.class);
 
             TeacherPreview teacherPreview = modelMapper.map(course.getTeacher(), TeacherPreview.class);
@@ -95,6 +107,7 @@ public class CourseService implements ICourseService {
     @Override
     public Course getCourseResponseById(Long id) {
         com.mohand.SchoolManagmentSystem.model.course.Course course = getById(id);
+        clearDiscountIfExpired(course);
         Course courseResponse = modelMapper.map(course, Course.class);
 
         TeacherPreview teacherPreview = modelMapper.map(course.getTeacher(), TeacherPreview.class);
@@ -285,34 +298,28 @@ public class CourseService implements ICourseService {
 
     @Override
     public com.mohand.SchoolManagmentSystem.model.course.Course findByIdAndTeacherId(Long id, Long teacherId) {
-        return courseRepository.findByIdAndTeacherId(id, teacherId).orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+        com.mohand.SchoolManagmentSystem.model.course.Course course = courseRepository.findByIdAndTeacherId(id, teacherId).orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+        clearDiscountIfExpired(course);
+        return course;
     }
 
     @Override
     public List<com.mohand.SchoolManagmentSystem.model.course.Course> getAllCoursesByStudentId(Long studentId) {
-        return courseRepository.findAllCoursesByStudentId(studentId);
+        List<com.mohand.SchoolManagmentSystem.model.course.Course> courses = courseRepository.findAllCoursesByStudentId(studentId);
+        clearDiscountIfExpired(courses);
+        return courses;
     }
 
     @Override
     public List<com.mohand.SchoolManagmentSystem.model.course.Course> getAllCoursesByTeacherId(Long teacherId) {
-        return courseRepository.findAllByTeacherId(teacherId);
+        List<com.mohand.SchoolManagmentSystem.model.course.Course> courses = courseRepository.findAllByTeacherId(teacherId);
+        clearDiscountIfExpired(courses);
+        return courses;
     }
 
     @Override
-    public void save(com.mohand.SchoolManagmentSystem.model.course.Course course) {
-        courseRepository.save(course);
-    }
-
-    @Override
-    public int countProgressPercentageByCourseIdAndStudentId(Long courseId, Long studentId) {
-        if (!existsByIdAndStudentId(courseId, studentId))
-            throw new ResourceNotFoundException("Course not found");
-
-        if (resourceService.countByCourseId(courseId) == 0) {
-            return 0;
-        }
-
-        return (int) ((float) finishedResourceRepository.countFinishedResourceByCourseIdAndStudentId(courseId, studentId) / resourceService.countByCourseId(courseId) * 100) ;
+    public com.mohand.SchoolManagmentSystem.model.course.Course save(com.mohand.SchoolManagmentSystem.model.course.Course course) {
+        return courseRepository.save(course);
     }
 
     private void clearDiscountIfExpired(com.mohand.SchoolManagmentSystem.model.course.Course course) {

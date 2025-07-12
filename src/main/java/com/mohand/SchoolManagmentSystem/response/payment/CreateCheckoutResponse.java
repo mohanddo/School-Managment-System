@@ -11,7 +11,7 @@ public class CreateCheckoutResponse {
     private String id;
     private String entity;
     private Integer fees;
-    private Integer amount;
+    private Double amount;
     private String local;
     private String status;
     private HashMap<String, Object> metadata;
