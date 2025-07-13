@@ -27,7 +27,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build WAR with Gradle
-        run: /gradlew clean bootWar -x test
+        run: ./gradlew clean bootWar -x test
 
       - name: Upload WAR artifact
         uses: actions/upload-artifact@v4
