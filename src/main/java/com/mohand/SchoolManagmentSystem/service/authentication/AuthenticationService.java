@@ -98,6 +98,7 @@ public class AuthenticationService {
     }
 
     protected void setJwtCookie(HttpServletResponse response, String jwtToken) {
+        System.out.println("Same site: " + sameSite);
         String cookie = ResponseCookie.from("token", jwtToken)
                 .httpOnly(true)
                 .secure(Boolean.parseBoolean(sendCookieOverHttps))
