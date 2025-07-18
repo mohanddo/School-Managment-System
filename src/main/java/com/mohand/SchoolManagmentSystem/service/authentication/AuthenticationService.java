@@ -45,6 +45,9 @@ public class AuthenticationService {
     @Value("${send.cookie.over.https}")
     private String sendCookieOverHttps;
 
+    @Value("${same.site}")
+    private String sameSite;
+
     public void authenticate(LogInUserRequest request, HttpServletResponse response) {
         User user = userService.getByEmail(request.email());
 
@@ -98,7 +101,7 @@ public class AuthenticationService {
         String cookie = ResponseCookie.from("token", jwtToken)
                 .httpOnly(true)
                 .secure(Boolean.parseBoolean(sendCookieOverHttps))
-                .sameSite("Strict")
+                .sameSite(sameSite)
                 .path("/")
                 .maxAge(Duration.ofSeconds(jwtExpirationTime / 1000))
                 .build().toString();
@@ -110,7 +113,7 @@ public class AuthenticationService {
         String cookie = ResponseCookie.from("isLogged", "true")
                 .httpOnly(false)
                 .secure(Boolean.parseBoolean(sendCookieOverHttps))
-                .sameSite("Strict")
+                .sameSite(sameSite)
                 .path("/")
                 .maxAge(Duration.ofSeconds(jwtExpirationTime / 1000 ))
                 .build().toString();

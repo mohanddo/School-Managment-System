@@ -26,6 +26,9 @@ public class AuthenticationController {
     @Value("${azure.storage.endpoint}")
     private String azureStorageEndpoint;
 
+    @Value("${same.site}")
+    private String sameSite;
+
     public AuthenticationController(AuthenticationService authenticationService, ModelMapper modelMapper, AzureBlobService azureBlobService){
         this.authenticationService = authenticationService;
         this.modelMapper = modelMapper;
@@ -41,7 +44,7 @@ public class AuthenticationController {
         String jwtCookie = ResponseCookie.from("token", "")
                 .httpOnly(true)
                 .secure(Boolean.parseBoolean(sendCookieOverHttps))
-                .sameSite("Strict")
+                .sameSite(sameSite)
                 .path("/")
                 .maxAge(0)
                 .build().toString();
@@ -49,7 +52,7 @@ public class AuthenticationController {
         String isLoggedCookie = ResponseCookie.from("isLogged", "")
                 .httpOnly(false)
                 .secure(Boolean.parseBoolean(sendCookieOverHttps))
-                .sameSite("Strict")
+                .sameSite(sameSite)
                 .path("/")
                 .maxAge(0)
                 .build().toString();
