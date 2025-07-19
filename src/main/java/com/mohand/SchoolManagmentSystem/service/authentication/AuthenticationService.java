@@ -48,6 +48,9 @@ public class AuthenticationService {
     @Value("${same.site}")
     private String sameSite;
 
+    @Value("${domain.name}")
+    private String domainName;
+
     public void authenticate(LogInUserRequest request, HttpServletResponse response) {
         User user = userService.getByEmail(request.email());
 
@@ -105,6 +108,7 @@ public class AuthenticationService {
                 .sameSite(sameSite)
                 .path("/")
                 .maxAge(Duration.ofSeconds(jwtExpirationTime / 1000))
+                .domain(domainName)
                 .build().toString();
 
         response.addHeader("Set-Cookie", cookie);
@@ -117,6 +121,7 @@ public class AuthenticationService {
                 .sameSite(sameSite)
                 .path("/")
                 .maxAge(Duration.ofSeconds(jwtExpirationTime / 1000 ))
+                .domain(domainName)
                 .build().toString();
 
         response.addHeader("Set-Cookie", cookie);

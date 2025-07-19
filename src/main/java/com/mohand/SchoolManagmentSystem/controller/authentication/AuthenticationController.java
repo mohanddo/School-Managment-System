@@ -29,6 +29,9 @@ public class AuthenticationController {
     @Value("${same.site}")
     private String sameSite;
 
+    @Value("${domain.name}")
+    private String domainName;
+
     public AuthenticationController(AuthenticationService authenticationService, ModelMapper modelMapper, AzureBlobService azureBlobService){
         this.authenticationService = authenticationService;
         this.modelMapper = modelMapper;
@@ -47,6 +50,7 @@ public class AuthenticationController {
                 .sameSite(sameSite)
                 .path("/")
                 .maxAge(0)
+                .domain(domainName)
                 .build().toString();
 
         String isLoggedCookie = ResponseCookie.from("isLogged", "")
@@ -55,6 +59,7 @@ public class AuthenticationController {
                 .sameSite(sameSite)
                 .path("/")
                 .maxAge(0)
+                .domain(domainName)
                 .build().toString();
 
         response.addHeader("Set-Cookie", isLoggedCookie);
